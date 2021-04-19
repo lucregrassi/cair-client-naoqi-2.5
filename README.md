@@ -1,6 +1,6 @@
 # CARESSES client application
 This repository contains the CARESSES application, available for the SoftBank robots Pepper and Nao.
-Open the application folder in Choregraphe, install deploy it on the robot and launch it using one of the triggering sentences:
+Open the application folder in Choregraphe, deploy it on the robot and launch it using one of the trigger sentences:
 ```
 "Let's talk" or "Connect to the Cloud"
 ```
