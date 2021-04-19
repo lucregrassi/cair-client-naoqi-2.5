@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Python Script" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="278" y="101"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[sys.path.append("/data/home/red-hot-chili-pepper/.local/share/PackageManager/apps/caresses/otherlibs/")
+import qi
+import sys
+from naoqi import ALProxy
+import requests
+import argparse
+import time
+import os
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.tts = ALProxy("ALTextToSpeech")
+        self.isAlive = True
+
+        self.sASR = ALProxy("ASR2")
+        self.sMemory = ALProxy("ALMemory")
+        self.speech_reco_event = "Audio/RecognizedWords"
+        self.al = ALProxy("ALAutonomousLife")
+        #self.al.setState("disabled")
+        self.sMotion = ALProxy("ALMotion")
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+
+        self.configuration = {"bodyLanguageMode": "contextual"}
+        #self.fromAutonomousLifeToAwake()
+        self.setAutonomousAbilities(True, True, True, True, True)
+
+    def fromAutonomousLifeToAwake(self):
+        # If enabled, disable Autonomous life
+        if self.al.getState() in ["solitary", "interactive"]:
+            self.al.setState("disabled")
+
+        # If "sleeping", wake up Pepper
+        if not self.sMotion.robotIsWakeUp():
+            self.sMotion.wakeUp()
+
+    def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
+        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
+        self.al.setAutonomousAbilityEnabled("BackgroundMovement", background)
+        self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
+        self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
+        self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        # Location of the API (the server it is running on)
+        azure_server = "13.95.222.73"
+        cineca = "131.175.198.134"
+        BASE = "http://" + cineca + ":5000/"
+
+        client_id = -1
+        if os.path.exists("credentials.txt"):
+            with open("credentials.txt", 'r') as f:
+                client_id = f.readline()
+            self.animated_speech.say("I missed you client " + str(client_id) +  " What would you like to talk about?", self.configuration)
+
+        if client_id == -1:
+            response = requests.put(BASE + "caresses/0/0", verify=False)
+            client_id = response.json()['id']
+            with open("credentials.txt", 'w') as credentials:
+                credentials.write(str(client_id))
+            self.animated_speech.say("Your client ID is " + str(client_id) + "Let's talk!", self.configuration)
+
+        while self.isAlive:
+            self.sASR.startReco("English", False, True)
+            self.setAutonomousAbilities(True, True, True, True, True)
+
+            start_time_silence = time.time() + 1800
+
+            sentence = ""
+            reco_speech = self.sMemory.getData(self.speech_reco_event)
+            print(reco_speech)
+            stop = False
+
+            while True:
+                while not reco_speech:
+                    if sentence and time.time() - start_time_silence > 0.1:
+                        self.sASR.stopReco()
+                        self.setAutonomousAbilities(False, True, True, True, True)
+                        stop = True
+                        break
+                    reco_speech = self.sMemory.getData(self.speech_reco_event)
+                    print reco_speech
+                sys.stdout.flush()
+                if stop:
+                    break
+                if sentence == "":
+                    sep = ""
+                else:
+                    sep = " "
+
+                if reco_speech:
+                    sentence = sentence + sep + reco_speech[0][0]
+                start_time_silence = time.time()
+                self.sMemory.insertData(self.speech_reco_event, [])
+                reco_speech = self.sMemory.getData(self.speech_reco_event)
+
+                if "stop talking" in sentence.lower() or "close the application" in sentence.lower():
+                    self.isAlive = False
+                    self.animated_speech.say("Ok, thank you for talking with me!", self.configuration)
+                    self.sMemory.insertData(self.speech_reco_event, [])
+                    self.onInput_onStop()
+
+            sentence = sentence.replace(" ", "_")
+            # print sentence
+            self.sMemory.insertData(self.speech_reco_event, [])
+            response = requests.get(BASE + "caresses/" + str(client_id) + "/" + sentence, verify=False)
+            # print("Response time: ", response.elapsed.total_seconds())
+            print response.json()['sentence']
+            self.animated_speech.say(str(response.json()['sentence']), self.configuration)
+
+    def onInput_onStop(self):
+        self.al.setState("interactive")
+        self.onStopped()
+        self.onUnload()
+        sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
