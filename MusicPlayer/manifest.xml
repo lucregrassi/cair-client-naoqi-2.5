@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package uuid="musicplayer" version="0.0.0">
+ <names>
+  <name lang="en_US">MusicPlayer</name>
+ </names>
+ <supportedLanguages>
+  <language>en_US</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path="behavior_1">
+   <userRequestable/>
+   <nature>interactive</nature>
+   <names>
+    <name lang="en_US">play-music</name>
+   </names>
+   <triggerSentences>
+    <sentence lang="en_US">Play music</sentence>
+   </triggerSentences>
+   <loadingResponses>
+    <sentence lang="en_US">Ok, let's play some music</sentence>
+   </loadingResponses>
+   <permissions/>
+  </behaviorContent>
+ </contents>
+</package>
