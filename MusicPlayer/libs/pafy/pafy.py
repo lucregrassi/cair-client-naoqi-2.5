@@ -37,7 +37,7 @@ else:
     from urllib2 import HTTPError
 
 import g
-from util import call_gdata
+from .util import call_gdata
 
 Pafy = None
 

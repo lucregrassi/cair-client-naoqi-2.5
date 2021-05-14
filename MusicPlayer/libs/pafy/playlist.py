@@ -4,7 +4,7 @@ import json
 import itertools
 
 import g
-from pafy import new, get_categoryname, call_gdata, fetch_decode
+from .pafy import new, get_categoryname, call_gdata, fetch_decode
 
 
 if sys.version_info[:2] >= (3, 0):

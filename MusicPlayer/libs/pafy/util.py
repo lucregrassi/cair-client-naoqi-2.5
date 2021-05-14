@@ -17,7 +17,8 @@ import g
 mswin = os.name == "nt"
 #not_utf8_environment = mswin or (sys.stdout.encoding and
 #                                 "UTF-8" not in sys.stdout.encoding)
-not_utf8_environment = False
+
+not_utf8_environment = mswin
 
 class GdataError(Exception):
     """Gdata query failed."""
@@ -53,8 +54,7 @@ def utf8_replace(txt):
     :returns: Unicode text without any characters unsupported by locale
     :rtype: str
     """
-    #sse = sys.stdout.encoding
-    sse = 'utf-8'
+    sse = sys.stdout.encoding
     txt = txt.encode(sse, "replace").decode(sse)
     return txt
 

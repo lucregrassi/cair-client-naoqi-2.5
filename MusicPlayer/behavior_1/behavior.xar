@@ -7,10 +7,11 @@ import urllib2
 import re
 import os
 import ssl
-from naoqi import ALProxy
 import pafy
+# from naoqi import ALProxy
 from pydub import AudioSegment
 from pydub.playback import play
+
 
 class MyClass(GeneratedClass):
     def __init__(self):
@@ -27,7 +28,7 @@ class MyClass(GeneratedClass):
         # path = os.path.realpath(__file__)
 
         #text = self.sMemory.getData("CARESSES/song_title")
-        text = "Girls like us"
+        text = "Robbie Williams"
         search_keyword = text.replace(" ", "+") + "+lyrics"
 
         if os.path.exists("/data/home/nao/.local/share/PackageManager/apps/musicplayer/song.m4a"):

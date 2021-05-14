@@ -6,20 +6,6 @@
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>
-        <File name="__init__" src="libs/pafy/__init__.py" />
-        <File name="__init__" src="libs/pafy/__init__.pyc" />
-        <File name="backend_internal" src="libs/pafy/backend_internal.py" />
-        <File name="backend_internal" src="libs/pafy/backend_internal.pyc" />
-        <File name="backend_shared" src="libs/pafy/backend_shared.py" />
-        <File name="backend_shared" src="libs/pafy/backend_shared.pyc" />
-        <File name="backend_youtube_dl" src="libs/pafy/backend_youtube_dl.py" />
-        <File name="backend_youtube_dl" src="libs/pafy/backend_youtube_dl.pyc" />
-        <File name="channel" src="libs/pafy/channel.py" />
-        <File name="g" src="libs/pafy/g.py" />
-        <File name="jsinterp" src="libs/pafy/jsinterp.py" />
-        <File name="pafy" src="libs/pafy/pafy.py" />
-        <File name="playlist" src="libs/pafy/playlist.py" />
-        <File name="util" src="libs/pafy/util.py" />
         <File name="__init__" src="libs/pydub/__init__.py" />
         <File name="__init__" src="libs/pydub/__init__.pyc" />
         <File name="audio_segment" src="libs/pydub/audio_segment.py" />
@@ -111,6 +97,17 @@
         <File name="utils" src="libs/youtube_dl/utils.pyc" />
         <File name="version" src="libs/youtube_dl/version.py" />
         <File name="version" src="libs/youtube_dl/version.pyc" />
+        <File name="__init__" src="libs/youtube_dl/extractor/__init__.py" />
+        <File name="__init__" src="libs/pafy/__init__.py" />
+        <File name="backend_internal" src="libs/pafy/backend_internal.py" />
+        <File name="backend_shared" src="libs/pafy/backend_shared.py" />
+        <File name="backend_youtube_dl" src="libs/pafy/backend_youtube_dl.py" />
+        <File name="channel" src="libs/pafy/channel.py" />
+        <File name="g" src="libs/pafy/g.py" />
+        <File name="jsinterp" src="libs/pafy/jsinterp.py" />
+        <File name="pafy" src="libs/pafy/pafy.py" />
+        <File name="playlist" src="libs/pafy/playlist.py" />
+        <File name="util" src="libs/pafy/util.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

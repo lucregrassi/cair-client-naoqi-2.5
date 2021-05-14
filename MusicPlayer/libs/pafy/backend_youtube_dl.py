@@ -12,7 +12,7 @@ else:
 
 import youtube_dl
 
-from . import g
+import g
 from .backend_shared import BasePafy, BaseStream, remux, get_status_string, get_size_done
 
 dbg = logging.debug

@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Package name="CARESSES_Pepper" format_version="4">
+<Package name="CARESSES_App" format_version="4">
     <Manifest src="manifest.xml" />
     <BehaviorDescriptions>
         <BehaviorDescription name="behavior" src="chit-chatting" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>
-        <File name="__init__" src="otherlibs/flask/__init__.py" />
-        <File name="__main__" src="otherlibs/flask/__main__.py" />
-        <File name="_compat" src="otherlibs/flask/_compat.py" />
-        <File name="app" src="otherlibs/flask/app.py" />
-        <File name="blueprints" src="otherlibs/flask/blueprints.py" />
-        <File name="cli" src="otherlibs/flask/cli.py" />
-        <File name="config" src="otherlibs/flask/config.py" />
-        <File name="ctx" src="otherlibs/flask/ctx.py" />
-        <File name="debughelpers" src="otherlibs/flask/debughelpers.py" />
-        <File name="globals" src="otherlibs/flask/globals.py" />
-        <File name="helpers" src="otherlibs/flask/helpers.py" />
-        <File name="logging" src="otherlibs/flask/logging.py" />
-        <File name="sessions" src="otherlibs/flask/sessions.py" />
-        <File name="signals" src="otherlibs/flask/signals.py" />
-        <File name="templating" src="otherlibs/flask/templating.py" />
-        <File name="testing" src="otherlibs/flask/testing.py" />
-        <File name="views" src="otherlibs/flask/views.py" />
-        <File name="wrappers" src="otherlibs/flask/wrappers.py" />
-        <File name="__init__" src="otherlibs/flask/json/__init__.py" />
-        <File name="tag" src="otherlibs/flask/json/tag.py" />
-        <File name="entry_points" src="otherlibs/Flask-1.1.2.dist-info/entry_points.txt" />
-        <File name="INSTALLER" src="otherlibs/Flask-1.1.2.dist-info/INSTALLER" />
-        <File name="LICENSE" src="otherlibs/Flask-1.1.2.dist-info/LICENSE.rst" />
-        <File name="METADATA" src="otherlibs/Flask-1.1.2.dist-info/METADATA" />
-        <File name="RECORD" src="otherlibs/Flask-1.1.2.dist-info/RECORD" />
-        <File name="REQUESTED" src="otherlibs/Flask-1.1.2.dist-info/REQUESTED" />
-        <File name="top_level" src="otherlibs/Flask-1.1.2.dist-info/top_level.txt" />
-        <File name="WHEEL" src="otherlibs/Flask-1.1.2.dist-info/WHEEL" />
+        <File name="INSTALLER" src="libs/Flask-1.1.2.dist-info/INSTALLER" />
+        <File name="LICENSE" src="libs/Flask-1.1.2.dist-info/LICENSE.rst" />
+        <File name="METADATA" src="libs/Flask-1.1.2.dist-info/METADATA" />
+        <File name="RECORD" src="libs/Flask-1.1.2.dist-info/RECORD" />
+        <File name="REQUESTED" src="libs/Flask-1.1.2.dist-info/REQUESTED" />
+        <File name="WHEEL" src="libs/Flask-1.1.2.dist-info/WHEEL" />
+        <File name="entry_points" src="libs/Flask-1.1.2.dist-info/entry_points.txt" />
+        <File name="top_level" src="libs/Flask-1.1.2.dist-info/top_level.txt" />
+        <File name="__init__" src="libs/flask/__init__.py" />
+        <File name="__main__" src="libs/flask/__main__.py" />
+        <File name="_compat" src="libs/flask/_compat.py" />
+        <File name="app" src="libs/flask/app.py" />
+        <File name="blueprints" src="libs/flask/blueprints.py" />
+        <File name="cli" src="libs/flask/cli.py" />
+        <File name="config" src="libs/flask/config.py" />
+        <File name="ctx" src="libs/flask/ctx.py" />
+        <File name="debughelpers" src="libs/flask/debughelpers.py" />
+        <File name="globals" src="libs/flask/globals.py" />
+        <File name="helpers" src="libs/flask/helpers.py" />
+        <File name="__init__" src="libs/flask/json/__init__.py" />
+        <File name="tag" src="libs/flask/json/tag.py" />
+        <File name="logging" src="libs/flask/logging.py" />
+        <File name="sessions" src="libs/flask/sessions.py" />
+        <File name="signals" src="libs/flask/signals.py" />
+        <File name="templating" src="libs/flask/templating.py" />
+        <File name="testing" src="libs/flask/testing.py" />
+        <File name="views" src="libs/flask/views.py" />
+        <File name="wrappers" src="libs/flask/wrappers.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

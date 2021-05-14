@@ -19,7 +19,8 @@ else:
 
 early_py_version = sys.version_info[:2] < (2, 7)
 
-from . import __version__, g
+from . import __version__
+import g
 from .pafy import call_gdata
 from .playlist import get_playlist2
 from .util import xenc

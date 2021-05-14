@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.1.1" uuid="caresses">
+<package uuid="caresses" version="0.1.1">
  <names>
   <name lang="en_US">caresses_app</name>
  </names>
@@ -12,6 +12,9 @@
  <contents>
   <behaviorContent path="chit-chatting">
    <nature>interactive</nature>
+   <names>
+    <name lang="en_US">chit-chatting</name>
+   </names>
    <triggerSentences>
     <sentence lang="en_US">Connect to the cloud</sentence>
     <sentence lang="en_US">Let's talk</sentence>
@@ -27,7 +30,7 @@
   </behaviorContent>
  </contents>
  <requirements>
-  <naoqiRequirement maxVersion="2.8" minVersion="2.5"/>
+  <naoqiRequirement minVersion="2.5" maxVersion="2.8"/>
   <robotRequirement model="JULIETTE"/>
  </requirements>
 </package>

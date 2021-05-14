@@ -20,7 +20,7 @@ else:
 
 early_py_version = sys.version_info[:2] < (2, 7)
 
-from . import g
+import g
 from .pafy import fetch_decode, dbg, get_categoryname
 from .backend_shared import BasePafy, BaseStream
 from .jsinterp import JSInterpreter
