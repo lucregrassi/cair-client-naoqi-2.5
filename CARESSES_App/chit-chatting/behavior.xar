@@ -13,7 +13,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         self.tts = ALProxy("ALTextToSpeech")
         self.isAlive = True
-
+        self.tts.setParameter("speed", 60)
         self.sASR = ALProxy("ASR2")
         self.sMemory = ALProxy("ALMemory")
         self.speech_reco_event = "Audio/RecognizedWords"
@@ -53,10 +53,10 @@ class MyClass(GeneratedClass):
 
         if client_id == -1:
             response = requests.put(BASE + "caresses/0/0", verify=False)
-            client_id = response.json()['id']
+            client_id = str(response.json()['id'])
             with open("/data/home/nao/.local/share/PackageManager/apps/caresses/credentials.txt", 'w') as credentials:
                 credentials.write(str(client_id))
-            self.animated_speech.say("Your client ID is " + str(client_id) + "Let's talk!", self.configuration)
+            self.animated_speech.say("Your client ID is " + client_id + "Let's talk!", self.configuration)
 
         while self.isAlive:
             self.sASR.startReco("English", False, True)
@@ -135,7 +135,7 @@ class MyClass(GeneratedClass):
                         while self.behavior_manager.isBehaviorRunning("move/behavior_1"):
                             pass
                     elif action =="weather":
-                        city = re.findall("city=(\w+)", plan)[0]
+                        city = re.findall("city=(.*)", plan)[0]
                         self.logger.info(str(city))
                         self.sMemory.insertData("CARESSES/weather_city", str(city))
                         self.logger.info(str(self.sMemory.getData("CARESSES/weather_city")))
@@ -150,6 +150,26 @@ class MyClass(GeneratedClass):
                         self.behavior_manager.runBehavior("wikisearch/behavior_1")
                         while self.behavior_manager.isBehaviorRunning("wikisearch/behavior_1"):
                             pass
+                    elif action == "translate":
+                        language = re.findall("language=(\w+)", plan)[0]
+                        self.logger.info(str(language))
+                        self.sMemory.insertData("CARESSES/translate_lan", str(language))
+                        what = re.findall("what=(.*)", plan)[0]
+                        self.logger.info(str(what))
+                        self.sMemory.insertData("CARESSES/translate_text", str(what))
+
+                        self.behavior_manager.runBehavior("translate/behavior_1")
+                        while self.behavior_manager.isBehaviorRunning("translate/behavior_1"):
+                            pass
+                    elif action == "dictionary":
+                        what = re.findall("what=(.*)", plan)[0]
+                        self.logger.info(str(what))
+                        self.sMemory.insertData("CARESSES/dictionary", str(what))
+
+                        self.behavior_manager.runBehavior("dictionary/behavior_1")
+                        while self.behavior_manager.isBehaviorRunning("dictionary/behavior_1"):
+                            pass
+                # Uncomment when testing the whole system - continues dialogue after action.
                 #if reply:
                 #     self.animated_speech.say(str(reply), self.configuration)
 
