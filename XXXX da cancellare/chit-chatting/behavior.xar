@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Dialogue Manager" id="3" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="222" y="68"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[sys.path.append("/data/home/nao/.local/share/PackageManager/apps/caresses/libs/")
+import qi
+import sys
+from naoqi import ALProxy
+import requests
+import argparse
+import time
+import os
+import re
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.isAlive = True
+        self.sASR = ALProxy("ASR2")
+        self.memory = ALProxy("ALMemory")
+        self.speech_reco_event = "Audio/RecognizedWords"
+        self.al = ALProxy("ALAutonomousLife")
+        self.sMotion = ALProxy("ALMotion")
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.voice_speed = "\\RSPD=85\\"
+        self.configuration = {"bodyLanguageMode": "contextual"}
+        self.setAutonomousAbilities(True, True, True, True, True)
+        self.behavior_manager = ALProxy("ALBehaviorManager")
+
+    def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
+        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
+        self.al.setAutonomousAbilityEnabled("BackgroundMovement", background)
+        self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
+        self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
+        self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        # Location of the API (the server it is running on)
+        azure_server = "13.95.222.73"
+        cineca = "131.175.198.134"
+        BASE = "http://" + cineca + ":5000/"
+
+        client_id = -1
+        if os.path.exists("/data/home/nao/.local/share/PackageManager/apps/caresses/credentials.txt"):
+            with open("/data/home/nao/.local/share/PackageManager/apps/caresses/credentials.txt", 'r') as f:
+                client_id = f.readline()
+            self.animated_speech.say(self.voice_speed + "I missed you client " + str(client_id) +  ". What would you like to talk about?", self.configuration)
+
+        if client_id == -1:
+            response = requests.put(BASE + "caresses/0/0", verify=False)
+            client_id = str(response.json()['id'])
+            with open("/data/home/nao/.local/share/PackageManager/apps/caresses/credentials.txt", 'w') as credentials:
+                credentials.write(str(client_id))
+            self.animated_speech.say(self.voice_speed + "Your client ID is " + client_id + ". Let's talk!", self.configuration)
+
+        while self.isAlive:
+            self.sASR.startReco("English", False, True)
+            self.setAutonomousAbilities(True, True, True, True, True)
+
+            start_time_silence = time.time() + 1800
+
+            sentence = ""
+            reco_speech = self.memory.getData(self.speech_reco_event)
+            self.logger.info(str(reco_speech))
+            stop = False
+
+            while True:
+                while not reco_speech:
+                    if sentence and time.time() - start_time_silence > 0.1:
+                        self.sASR.stopReco()
+                        self.setAutonomousAbilities(False, True, True, True, True)
+                        stop = True
+                        break
+                    reco_speech = self.memory.getData(self.speech_reco_event)
+                    print reco_speech
+                sys.stdout.flush()
+                if stop:
+                    break
+                if sentence == "":
+                    sep = ""
+                else:
+                    sep = " "
+
+                if reco_speech:
+                    sentence = sentence + sep + reco_speech[0][0]
+                start_time_silence = time.time()
+                self.memory.insertData(self.speech_reco_event, [])
+                reco_speech = self.memory.getData(self.speech_reco_event)
+
+                if "stop talking" in sentence.lower() or "close the application" in sentence.lower():
+                    self.isAlive = False
+                    self.animated_speech.say(self.voice_speed + "Ok, thank you for talking with me!", self.configuration)
+                    self.memory.insertData(self.speech_reco_event, [])
+                    self.onInput_onStop()
+
+            sentence = sentence.replace(" ", "_")
+            print sentence
+            self.logger.info(str(sentence))
+            self.memory.insertData(self.speech_reco_event, [])
+            response = requests.get(BASE + "caresses/" + str(client_id) + "/" + sentence, verify=False)
+            # print("Response time: ", response.elapsed.total_seconds())
+            intent_reply = response.json()['intent_reply']
+            plan = response.json()['plan']
+            reply = response.json()['reply']
+            if not plan:
+                reply = intent_reply + " " + reply
+                self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
+            else:
+                self.logger.info(str(plan))
+                if intent_reply:
+                    self.animated_speech.say(self.voice_speed + str(intent_reply), self.configuration)
+
+                plan_items = plan.split("#")[1:]
+                for item in plan_items:
+                    action = re.findall("action=(\w+)", plan)[0]
+                    self.logger.info(str(action))
+                    if action =="weather":
+                        city = re.findall("city=(.*)", plan)[0]
+                        self.logger.info(str(city))
+                        self.memory.insertData("CARESSES/weather_city", str(city))
+                        self.logger.info(str(self.memory.getData("CARESSES/weather_city")))
+                        self.behavior_manager.runBehavior("weather/behavior_1")
+                        while self.behavior_manager.isBehaviorRunning("weather/behavior_1"):
+                            pass
+                    elif action == "wikisearch":
+                        what = re.findall("what=(.*)", plan)[0]
+                        self.logger.info(str(what))
+                        self.memory.insertData("CARESSES/wikisearch", str(what))
+                        self.logger.info(str(self.memory.getData("CARESSES/wikisearch")))
+                        self.behavior_manager.runBehavior("wordtools/wikisearch")
+                        while self.behavior_manager.isBehaviorRunning("wordtools/wikisearch"):
+                            pass
+                    elif action == "translate":
+                        language = re.findall("language=(\w+)", plan)[0]
+                        self.logger.info(str(language))
+                        self.memory.insertData("CARESSES/translate_lan", str(language))
+                        what = re.findall("what=(.*)", plan)[0]
+                        self.logger.info(str(what))
+                        self.memory.insertData("CARESSES/translate_text", str(what))
+                        self.behavior_manager.runBehavior("wordtools/translator")
+                        while self.behavior_manager.isBehaviorRunning("wordtools/translator"):
+                            pass
+                    elif action == "dictionary":
+                        what = re.findall("what=(.*)", plan)[0]
+                        self.logger.info(str(what))
+                        self.memory.insertData("CARESSES/dictionary", str(what))
+                        self.behavior_manager.runBehavior("wordtools/dictionary")
+                        while self.behavior_manager.isBehaviorRunning("wordtools/dictionary"):
+                            pass
+                    elif action == "go":
+                        where = re.findall("where=(\w+)", plan)[0]
+                        self.logger.info(str(where))
+                        self.memory.insertData("CARESSES/go", str(where))
+                        self.logger.info(str(self.memory.getData("CARESSES/go")))
+                        self.behavior_manager.runBehavior("movement/go")
+                        while self.behavior_manager.isBehaviorRunning("movement/go"):
+                            pass
+                    elif action == "move":
+                        where = re.findall("where=(\w+)", plan)[0]
+                        self.logger.info(str(where))
+                        self.memory.insertData("CARESSES/move", str(where))
+                        self.logger.info(str(self.memory.getData("CARESSES/move")))
+                        self.behavior_manager.runBehavior("movement/move")
+                        while self.behavior_manager.isBehaviorRunning("movement/move"):
+                            pass
+                    elif action == "setposition":
+                        where = re.findall("where=(.*)", plan)[0]
+                        self.logger.info(str(where))
+                        self.memory.insertData("CARESSES/set_position", str(where))
+                        self.logger.info(str(self.memory.getData("CARESSES/set_position")))
+                        self.behavior_manager.runBehavior("movement/set_position")
+                        while self.behavior_manager.isBehaviorRunning("movement/set_position"):
+                            pass
+                    elif action == "moveto":
+                        where = re.findall("where=(.*)", plan)[0]
+                        self.logger.info(str(where))
+                        self.memory.insertData("CARESSES/move_to", str(where))
+                        self.logger.info(str(self.memory.getData("CARESSES/move_to")))
+                        self.behavior_manager.runBehavior("movement/move_to")
+                        while self.behavior_manager.isBehaviorRunning("movement/move_to"):
+                            pass
+                    elif action == "learnplace":
+                        where = re.findall("where=(.*)", plan)[0]
+                        self.logger.info(str(where))
+                        self.memory.insertData("CARESSES/learn_place", str(where))
+                        self.logger.info(str(self.memory.getData("CARESSES/learn_place")))
+                        self.behavior_manager.runBehavior("movement/learn_place")
+                        while self.behavior_manager.isBehaviorRunning("movement/learn_place"):
+                            pass
+                    elif action == "followme":
+                        self.logger.info("hello1")
+                        self.behaviour_manager.runBehavior("follow-me/.")
+                        self.logger.info("hello2")
+                        while self.behavior_manager.isBehaviorRunning("follow-me/."):
+                            pass
+                    elif action == "playmusic":
+                        title = re.findall("title=(.*)", plan)[0]
+                        self.logger.info(str(title))
+                        self.memory.insertData("CARESSES/song_title", str(title))
+                        self.logger.info(str(self.memory.getData("CARESSES/song_title")))
+                        self.behavior_manager.runBehavior("playmusic/behavior_1")
+                        while self.behavior_manager.isBehaviorRunning("playmusic/behavior_1"):
+                            pass
+                # Uncomment when testing the whole system - continues dialogue after action.
+                if reply:
+                    self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
+
+
+    def onInput_onStop(self):
+        self.al.setState("interactive")
+        self.onStopped()
+        self.onUnload()
+        sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="3" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

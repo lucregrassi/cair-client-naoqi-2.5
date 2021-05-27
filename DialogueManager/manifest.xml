@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package uuid="dialoguemanager-39f22b" version="0.0.0">
+ <names>
+  <name lang="en_US">DialogueManager</name>
+ </names>
+ <supportedLanguages>
+  <language>en_US</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path="chit-chatting">
+   <nature>interactive</nature>
+   <triggerSentences>
+    <sentence lang="en_US">Let's talk</sentence>
+    <sentence lang="en_US">Connect to the cloud</sentence>
+   </triggerSentences>
+   <loadingResponses>
+    <sentence lang="en_US">Ok, I am connecting to the CARESSES cloud!</sentence>
+   </loadingResponses>
+   <autonomous/>
+   <permissions/>
+  </behaviorContent>
+ </contents>
+</package>
