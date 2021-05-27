@@ -16,22 +16,22 @@ All the other applications are integrated with the main one and allow the robots
 
 ## WordTools
 This application contains three behaviours:
-* *Wikisearch*: it looks for something on Wikipedia
+* *Wikisearch*: it looks for something on Wikipedia.
 * *Translator*: it translates a word or a sentence from English to one of the following languages: Arabic, Brazilian, Chinese, Czech, Danish, Dutch, English,
-Finnish, French, German, Greek, Italian, Japanese, Korean, Norwegian, Polish, Portuguese, Russian, Spanish, Swedish, Turkish*.
+Finnish, French, German, Greek, Italian, Japanese, Korean, Norwegian, Polish, Portuguese, Russian, Spanish, Swedish, Turkish.
+_Note: the destination language must be installed on the robot._
 * *Dictionary*: it searches for the definition of a word in the dictionary.
-
-*_Note: the destination language must be installed on the robot._
 
 ## Movement
 This application contains four behaviours:
-* *Go*: it makes the robot move in the asked direction and stops it when the head sensor is touched
-* *Move*: it makes the robot perform a small movement in the asked direction (forward, back, left, right)
-* *Set position*: it allows the robot to learn its position in the map of the house
-* *Move to*: it makes the robot move to the desired place in the map*.
-* *Learn place*: it allows the robot to store the current position in the map. Note: it is necessary to set its position at least once before asking it to learn the position of a new place.
+* *Go*: it makes the robot move in the asked direction and stops it when the head sensor is touched.
+* *Move*: it makes the robot perform a small movement in the requested direction (forward, back, left, right).
+* *Set position*: it allows the robot to learn its position with respect to the world frame.
+* *Move to*: it makes the robot move to the desired place in the world (e.g., the house).
+_Note: it is necessary to set its position at least once before asking it to move somewhere._
+* *Learn place*: it allows the robot to store the current position in the map of the environment (with respect to the world frame). 
+_Note: it is necessary to set its position at least once before asking it to learn the position of a new place._
 
-*_Note: it is necessary to set its position at least once before asking it to move somewhere._
 
 ## Weather
 This application contains one behaviour:
