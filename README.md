@@ -18,9 +18,9 @@ All the other applications are integrated with the main one and allow the robots
 This application contains three behaviours:
 * *Wikisearch*: it looks for something on Wikipedia
 * *Translator*: it translates a word or a sentence from English to one of the following languages: Arabic, Brazilian, Chinese, Czech, Danish, Dutch, English,
-Finnish, French, German, Greek, Italian, Japanese, Korean, Norwegian, Polish, Portuguese, Russian, Spanish, Swedish, Turkish. 
-_Note: the destination language must be installed on the robot._
+Finnish, French, German, Greek, Italian, Japanese, Korean, Norwegian, Polish, Portuguese, Russian, Spanish, Swedish, Turkish*.
 * *Dictionary*: it searches for the definition of a word in the dictionary.
+*_Note: the destination language must be installed on the robot._
 
 ## Movement
 This application contains four behaviours:
