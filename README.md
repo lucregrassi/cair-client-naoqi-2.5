@@ -14,7 +14,7 @@ To stop the application say:
 
 All the other applications are integrated with the main one and allow the robots to perform extra actions during the conversation.
 
-# WordTools
-# Movement
-# MusicPlayer
-# Weather
+## WordTools
+## Movement
+## MusicPlayer
+## Weather
