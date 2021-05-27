@@ -1,0 +1,4 @@
+entrance_0.0_0.0_0.0
+kitchen_1.2_-0.6_0.0
+bedroom_3.0_0.0_1.57
+bathroom_1.8_1.2_3.14

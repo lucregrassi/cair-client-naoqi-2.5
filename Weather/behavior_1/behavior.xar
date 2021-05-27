@@ -13,6 +13,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         self.sMemory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.voice_speed = "\\RSPD=85\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
 
     def onLoad(self):
@@ -49,7 +50,8 @@ class MyClass(GeneratedClass):
             # weather report
             report = data['weather']
             reply = "Today in " + city + " there are " + str(temperature) + " degrees with " + str(report[0]['description']) + ". During the day the minimum temperature will be " + str(temp_min) + " and the maximum temperature will be " + str(temp_max) + "."
-            self.animated_speech.say(str(reply), self.configuration)
+            self.logger.info(str(reply))
+            self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
         else:
             # showing the error message
             print("Error in the HTTP request")

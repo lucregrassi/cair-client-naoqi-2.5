@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package uuid="movement" version="0.0.0">
+ <names>
+  <name lang="en_US">Movement</name>
+ </names>
+ <supportedLanguages>
+  <language>en_US</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path="go">
+   <nature>interactive</nature>
+   <names>
+    <name lang="en_US">go</name>
+   </names>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="move">
+   <nature>interactive</nature>
+   <names>
+    <name lang="en_US">move</name>
+   </names>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="learn_place">
+   <nature>interactive</nature>
+   <names>
+    <name lang="en_US">learn_place</name>
+   </names>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="set_position">
+   <nature>interactive</nature>
+   <names>
+    <name lang="en_US">set_position</name>
+   </names>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="move_to">
+   <nature>interactive</nature>
+   <names>
+    <name lang="en_US">move_to</name>
+   </names>
+   <permissions/>
+  </behaviorContent>
+ </contents>
+</package>

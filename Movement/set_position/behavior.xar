@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Python Script" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="200" y="68"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+import time
+import functools
+import motion
+import argparse
+import qi
+import numpy as np
+from naoqi import ALProxy
+import os
+
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.memory = ALProxy("ALMemory")
+        self.motionProxy = ALProxy("ALMotion")
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.voice_speed = "\\RSPD=85\\"
+        self.configuration = {"bodyLanguageMode": "contextual"}
+
+    def get_places_from_map(self):
+        with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'r') as f:
+            lines = f.readlines()
+        places = {}
+        self.logger.info("Getting places from map")
+        for line in lines:
+            self.logger.info(str(line))
+            place = line.split('_')[0]
+            X = float(line.split('_')[1])
+            Y = float(line.split('_')[2])
+            Theta = float(line.split('_')[3])
+            places[place] = (X, Y, Theta)
+        return places
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        where = str(self.memory.getData("CARESSES/set_position"))
+        places = self.get_places_from_map()
+
+        # If the position you want the robot to believe it is in, is mapped, save the offset in the memory
+        if where in places.keys():
+            Px_w = places[where][0]
+            Py_w = places[where][1]
+            Pz_w = 1.0
+            Ptheta_w = places[where][2]
+            # Position wrt the world frame where I want the robot to think it is
+            P_w = [Px_w, Py_w, Pz_w, Ptheta_w]
+            self.logger.info("P_w:" + str(P_w))
+            # Position wrt the point where the robot was turned on
+            P_r = self.motionProxy.getRobotPosition(True)
+
+            # self.logger.info("P_r:" + str(P_r))
+            Px_r = P_r[0]
+            Py_r = P_r[1]
+            Ptheta_r = P_r[2]
+            # Angle of rotation of the robot frame wrt the world frame
+            theta = float(Ptheta_w - Ptheta_r)
+            self.logger.info("Rotation angle between the two frames:" + str(theta))
+            self.memory.insertData("CARESSES/theta", theta)
+
+            # Compute the translation between the origins of the two frames
+            translation_x = Px_w - np.cos(theta) * Px_r + np.sin(theta) * Py_r
+            translation_y = Py_w - np.sin(theta) * Px_r - np.cos(theta) * Py_r
+
+            # Now we can compute the transformation matrix having theta, tx and tx
+            transformation_matrix = np.array([[np.cos(theta), -np.sin(theta), translation_x],
+                                              [np.sin(theta), np.cos(theta), translation_y],
+                                              [0, 0, 1]])
+            self.logger.info("Transformation matrix:" + str(transformation_matrix))
+            self.memory.insertData("CARESSES/transformation_matrix", transformation_matrix.tolist())
+            self.animated_speech.say(self.voice_speed + "My position is now set to " + str(where) + ".", self.configuration)
+
+            # COUNTER CHECK
+            # This is the array that must be post-multiplied by the transformation matrix
+            P_r = np.array([[Px_r, Py_r, 1.0]])
+            Pr_w = np.dot(transformation_matrix, P_r.T)
+            Pr_w = np.array([[round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]])
+            self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
+            self.onInput_onStop()
+
+        else:
+            self.animated_speech.say(self.voice_speed + "I'm sorry I don't know where " + str(where) + " is.", self.configuration)
+            self.onInput_onStop()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

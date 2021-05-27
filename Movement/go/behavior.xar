@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Python Script" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="250" y="75"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
+import sys
+from naoqi import ALProxy
+import functools
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.isRunning = True
+        self.memory = ALProxy("ALMemory")
+        self.motionProxy = ALProxy("ALMotion")
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onTouched(self, strVarName, value):
+        self.logger.info("touched")
+        self.motionProxy.stopMove()
+        self.isRunning = False
+
+    def onInput_onStart(self):
+        self.logger.info("onStart")
+        self.memory.subscribeToEvent("MiddleTactilTouched", self.getName(), "onTouched")
+        self.memory.subscribeToEvent("FrontTactilTouched", self.getName(), "onTouched")
+        self.memory.subscribeToEvent("RearTactilTouched", self.getName(), "onTouched")
+        self.logger.info("here1")
+
+        self.motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION", True]])
+
+        where = str(self.memory.getData("CARESSES/go"))
+        if where == "forward":
+            X = 0.5
+            Y = 0.0
+        elif where == "back":
+            X = -0.5
+            Y = 0.0
+        elif where == "right":
+            X = 0.0
+            Y = -0.5
+        elif where == "left":
+            X = 0.0
+            Y = 0.5
+        else:
+            self.onStopped()
+
+        Theta = 0.0
+        self.motionProxy.moveToward(X, Y, Theta)
+
+        while self.isRunning:
+            pass
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
