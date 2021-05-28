@@ -7,6 +7,7 @@
         <BehaviorDescription name="behavior" src="learn_place" xar="behavior.xar" />
         <BehaviorDescription name="behavior" src="set_position" xar="behavior.xar" />
         <BehaviorDescription name="behavior" src="move_to" xar="behavior.xar" />
+        <BehaviorDescription name="behavior" src="forget_map" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>

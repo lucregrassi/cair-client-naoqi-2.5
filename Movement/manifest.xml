@@ -45,5 +45,9 @@
    </names>
    <permissions/>
   </behaviorContent>
+  <behaviorContent path="forget_map">
+   <nature>interactive</nature>
+   <permissions/>
+  </behaviorContent>
  </contents>
 </package>

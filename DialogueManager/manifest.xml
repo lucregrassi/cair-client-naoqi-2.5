@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="dialoguemanager-39f22b" version="0.0.0">
+<package uuid="dialoguemanager" version="0.0.0">
  <names>
   <name lang="en_US">DialogueManager</name>
  </names>
@@ -19,7 +19,6 @@
    <loadingResponses>
     <sentence lang="en_US">Ok, I am connecting to the CARESSES cloud!</sentence>
    </loadingResponses>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

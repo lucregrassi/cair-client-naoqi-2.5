@@ -17,6 +17,15 @@ class MyClass(GeneratedClass):
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=85\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
+        self.memory.subscribeToEvent("MiddleTactilTouched", self.getName(), "onTouched")
+        self.memory.subscribeToEvent("FrontTactilTouched", self.getName(), "onTouched")
+        self.memory.subscribeToEvent("RearTactilTouched", self.getName(), "onTouched")
+        self.isRunning = True
+
+    def onTouched(self, strVarName, value):
+        self.logger.info("touched")
+        self.motionProxy.stopMove()
+        self.isRunning = False
 
     def onLoad(self):
         #put initialization code here
@@ -63,7 +72,12 @@ class MyClass(GeneratedClass):
         Ptheta_r = odometry[2]
         P_r = [Px_r, Py_r, 1.0]
 
-        transformation_matrix = self.memory.getData("CARESSES/transformation_matrix")
+        try:
+            transformation_matrix = self.memory.getData("CARESSES/transformation_matrix")
+        except:
+            self.animated_speech.say(self.voice_speed + "I'm sorry, I need to know where I am with respect to the environment before I can go somewhere.", self.configuration)
+            self.onInput_onStop()
+
         theta = self.memory.getData("CARESSES/theta")
         Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
         Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
@@ -81,6 +95,10 @@ class MyClass(GeneratedClass):
         relative_movement = np.dot(rotation_matrix, x_y_relative_dest.T)
         self.logger.info("Relative movement: " + str(relative_movement) + str(theta_rotation))
         self.motionProxy.moveTo(round(relative_movement[0], 2), round(relative_movement[1], 2), relative_destination[3])
+
+        while self.isRunning:
+            pass
+
         self.motionProxy.waitUntilMoveIsFinished()
 
         odometry = self.motionProxy.getRobotPosition(True)

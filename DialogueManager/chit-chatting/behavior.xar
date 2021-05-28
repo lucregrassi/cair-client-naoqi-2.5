@@ -45,15 +45,15 @@ class MyClass(GeneratedClass):
         BASE = "http://" + cineca + ":5000/"
 
         client_id = -1
-        if os.path.exists("/data/home/nao/.local/share/PackageManager/apps/caresses/credentials.txt"):
-            with open("/data/home/nao/.local/share/PackageManager/apps/caresses/credentials.txt", 'r') as f:
+        if os.path.exists("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/credentials.txt"):
+            with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/credentials.txt", 'r') as f:
                 client_id = f.readline()
             self.animated_speech.say(self.voice_speed + "I missed you client " + str(client_id) +  ". What would you like to talk about?", self.configuration)
 
         if client_id == -1:
             response = requests.put(BASE + "caresses/0/0", verify=False)
             client_id = str(response.json()['id'])
-            with open("/data/home/nao/.local/share/PackageManager/apps/caresses/credentials.txt", 'w') as credentials:
+            with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/credentials.txt", 'w') as credentials:
                 credentials.write(str(client_id))
             self.animated_speech.say(self.voice_speed + "Your client ID is " + client_id + ". Let's talk!", self.configuration)
 
@@ -190,6 +190,10 @@ class MyClass(GeneratedClass):
                         self.logger.info(str(self.memory.getData("CARESSES/learn_place")))
                         self.behavior_manager.runBehavior("movement/learn_place")
                         while self.behavior_manager.isBehaviorRunning("movement/learn_place"):
+                            pass
+                    elif action == "forgetmap":
+                        self.behavior_manager.runBehavior("movement/forget_map")
+                        while self.behavior_manager.isBehaviorRunning("movement/forget_map"):
                             pass
                     elif action == "followme":
                         self.logger.info("hello1")

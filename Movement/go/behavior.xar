@@ -28,7 +28,6 @@ class MyClass(GeneratedClass):
         self.memory.subscribeToEvent("MiddleTactilTouched", self.getName(), "onTouched")
         self.memory.subscribeToEvent("FrontTactilTouched", self.getName(), "onTouched")
         self.memory.subscribeToEvent("RearTactilTouched", self.getName(), "onTouched")
-        self.logger.info("here1")
 
         self.motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION", True]])
 
@@ -53,6 +52,7 @@ class MyClass(GeneratedClass):
 
         while self.isRunning:
             pass
+
         self.onStopped()
 
     def onInput_onStop(self):
