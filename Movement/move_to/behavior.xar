@@ -54,7 +54,6 @@ class MyClass(GeneratedClass):
         places = self.get_places_from_map()
 
         if where in places.keys():
-            self.animated_speech.say(self.voice_speed + "I'm going to " + where + ".", self.configuration)
             Px_w = places[where][0]
             Py_w = places[where][1]
             Pz_w = 1.0
@@ -74,42 +73,41 @@ class MyClass(GeneratedClass):
 
         try:
             transformation_matrix = self.memory.getData("CARESSES/transformation_matrix")
+            theta = self.memory.getData("CARESSES/theta")
+            Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
+            Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
+            self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
+
+            relative_destination = [dest - robot_pos for dest, robot_pos in zip(destination, Pr_w)]
+            self.logger.info("Relative destination:" + str(relative_destination))
+            # Difference between destination and current position (just X, Y and Z - no theta)
+            theta_rotation = Pr_w[3]
+
+            rotation_matrix = np.array([[np.cos(theta_rotation), np.sin(theta_rotation)],
+                                        [-np.sin(theta_rotation), np.cos(theta_rotation)]])
+
+            x_y_relative_dest = np.array([relative_destination[0], relative_destination[1]])
+            relative_movement = np.dot(rotation_matrix, x_y_relative_dest.T)
+            self.logger.info("Relative movement: " + str(relative_movement) + str(theta_rotation))
+            self.animated_speech.say(self.voice_speed + "I'm going to " + where + ".", self.configuration)
+            self.motionProxy.moveTo(round(relative_movement[0], 2), round(relative_movement[1], 2), relative_destination[3])
+
+            while self.isRunning and self.motionProxy.moveIsActive():
+                pass
+
+            odometry = self.motionProxy.getRobotPosition(True)
+            Px_r = odometry[0]
+            Py_r = odometry[1]
+            Ptheta_r = odometry[2]
+            P_r = [Px_r, Py_r, 1.0]
+            Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
+            Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
+            self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
+            self.onInput_onStop()
+
         except:
             self.animated_speech.say(self.voice_speed + "I'm sorry, I need to know where I am with respect to the environment before I can go somewhere.", self.configuration)
             self.onInput_onStop()
-
-        theta = self.memory.getData("CARESSES/theta")
-        Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
-        Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
-        self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
-
-        relative_destination = [dest - robot_pos for dest, robot_pos in zip(destination, Pr_w)]
-        self.logger.info("Relative destination:" + str(relative_destination))
-        # Difference between destination and current position (just X, Y and Z - no theta)
-        theta_rotation = Pr_w[3]
-
-        rotation_matrix = np.array([[np.cos(theta_rotation), np.sin(theta_rotation)],
-                                    [-np.sin(theta_rotation), np.cos(theta_rotation)]])
-
-        x_y_relative_dest = np.array([relative_destination[0], relative_destination[1]])
-        relative_movement = np.dot(rotation_matrix, x_y_relative_dest.T)
-        self.logger.info("Relative movement: " + str(relative_movement) + str(theta_rotation))
-        self.motionProxy.moveTo(round(relative_movement[0], 2), round(relative_movement[1], 2), relative_destination[3])
-
-        while self.isRunning:
-            pass
-
-        self.motionProxy.waitUntilMoveIsFinished()
-
-        odometry = self.motionProxy.getRobotPosition(True)
-        Px_r = odometry[0]
-        Py_r = odometry[1]
-        Ptheta_r = odometry[2]
-        P_r = [Px_r, Py_r, 1.0]
-        Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
-        Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
-        self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
-        self.onInput_onStop()
 
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
