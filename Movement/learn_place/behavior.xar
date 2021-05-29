@@ -23,11 +23,50 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        where = str(memory.getData("CARESSES/learn_place"))
-        if os.path.exists("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt"):
-            with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'a') as f:
+        # Get the name of place the user wants to add
+        where = str(self.memory.getData("CARESSES/learn_place"))
+        odometry = self.motion.getRobotPosition(True)
+        Px_r = round(odometry[0], 2)
+        Py_r = round(odometry[1], 2)
+        Ptheta_r = round(odometry[2], 2)
+        P_r = [Px_r, Py_r, 1.0]
 
-        self.animated_speech.say(self.voice_speed + "Now I now that this place is " + str(where) +  ".", self.configuration)
+        # Check if the transformation exists
+        try:
+            # If the transformation exists, the position should be computed wrt to the enviromnent
+            transformation_matrix = self.memory.getData("CARESSES/transformation_matrix")
+            theta = self.memory.getData("CARESSES/theta")
+            Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
+            Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
+            self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
+            with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'a') as f:
+                    f.write(where + "_" + str(Pr_w[0]) + '_' + str(Pr_w[1]) + '_' + str(Pr_w[3]))
+
+            self.animated_speech.say(self.voice_speed + "Now I now that this place is the " + str(where) +  ".", self.configuration)
+
+        # If the transformation matrix does not exist in the memory, it means the robot does not know its position
+        except:
+            # Check if the file is empty:
+            if os.stat("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt").st_size == 0:
+                # If it's empty, store the current position with respect to the robot's odometry
+                with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'a') as f:
+                    f.write(where + "_" + str(Px_r) + '_' + str(Py_r) + '_' + str(Ptheta_r))
+
+                theta = 0
+                transformation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
+                                              [np.sin(theta), np.cos(theta), 0],
+                                              [0, 0, 1]])
+                self.logger.info("Transformation matrix:" + str(transformation_matrix))
+                self.memory.insertData("CARESSES/transformation_matrix", transformation_matrix.tolist())
+                self.memory.insertData("CARESSES/theta", theta)
+
+                self.animated_speech.say(self.voice_speed + "This is the first place of the map. Now I know that this is the " + str(where) +  ".", self.configuration)
+
+            # If the file is not empty, but the robot does not know the transformation, it can't learn the new place
+            else:
+                self.animated_speech.say(self.voice_speed + "The map is not empty, but I don't know where I am. Please, bring me to a known position before telling me to add a new place.", self.configuration)
+
+        self.onInput_onStop()
 
 
     def onInput_onStop(self):

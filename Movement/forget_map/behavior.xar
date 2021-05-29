@@ -26,6 +26,13 @@ class MyClass(GeneratedClass):
             with open(file, 'w'):
                 pass
 
+        # If there is the transformation in the memory, delete it and delete also theta.
+        try:
+            self.memory.removeData("CARESSES/transformation_matrix")
+            self.memory.removeData("CARESSES/theta")
+        except:
+            pass
+
         self.animated_speech.say(self.voice_speed + "The map is now empty.", self.configuration)
         self.onInput_onStop()
 
