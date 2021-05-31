@@ -109,10 +109,12 @@ class MyClass(GeneratedClass):
             if not plan:
                 reply = intent_reply + " " + reply
                 self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
+                self.logger.info(str(reply))
             else:
                 self.logger.info(str(plan))
                 if intent_reply:
                     self.animated_speech.say(self.voice_speed + str(intent_reply), self.configuration)
+                    self.logger.info(str(intent_reply))
 
                 plan_items = plan.split("#")[1:]
                 for item in plan_items:

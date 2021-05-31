@@ -26,7 +26,7 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        ssl._create_default_https_context = ssl._create_unverified_context
+        # ssl._create_default_https_context = ssl._create_unverified_context
         installed_languages = self.tts.getAvailableLanguages()
         available_languages = ['Arabic', 'Brazilian', 'Chinese', 'Czech', 'Danish', 'Dutch', 'English', 'Finnish', 'French', 'German', 'Greek', 'Italian', 'Japanese', 'Korean', 'Norwegian', 'Polish', 'Portuguese','Russian',  'Spanish', 'Swedish', 'Turkish']
         self.logger.info(str(installed_languages))
@@ -52,7 +52,9 @@ class MyClass(GeneratedClass):
                 self.animated_speech.say(self.voice_speed + "The " + dest_language + " for " + to_translate + " is: ")
                 self.tts.setLanguage(dest_language)
                 self.tts.setParameter("speed", 85)
-                self.tts.say(str(translate(to_translate, languages_mapping[dest_language])))
+                translation = str(translate(to_translate, languages_mapping[dest_language]))
+                self.logger.info(translation)
+                self.tts.say(translate.encode('utf-8'))
                 self.tts.setLanguage("English")
 
         self.onStopped()

@@ -50,7 +50,7 @@ class MyClass(GeneratedClass):
         Theta = 0.0
         self.motionProxy.moveToward(X, Y, Theta)
 
-        while self.isRunning:
+        while self.isRunning and self.motionProxy.moveIsActive():
             pass
 
         self.onStopped()

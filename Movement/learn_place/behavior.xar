@@ -40,7 +40,7 @@ class MyClass(GeneratedClass):
             Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
             self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
             with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'a') as f:
-                    f.write(where + "_" + str(Pr_w[0]) + '_' + str(Pr_w[1]) + '_' + str(Pr_w[3]))
+                    f.write('\n' + where + "_" + str(Pr_w[0]) + '_' + str(Pr_w[1]) + '_' + str(Pr_w[3]))
 
             self.animated_speech.say(self.voice_speed + "Now I now that this place is the " + str(where) +  ".", self.configuration)
 
@@ -50,7 +50,7 @@ class MyClass(GeneratedClass):
             if os.stat("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt").st_size == 0:
                 # If it's empty, store the current position with respect to the robot's odometry
                 with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'a') as f:
-                    f.write(where + "_" + str(Px_r) + '_' + str(Py_r) + '_' + str(Ptheta_r))
+                    f.write('\n' + where + "_" + str(Px_r) + '_' + str(Py_r) + '_' + str(Ptheta_r))
 
                 theta = 0
                 transformation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],

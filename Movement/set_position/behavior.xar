@@ -24,12 +24,13 @@ class MyClass(GeneratedClass):
         places = {}
         self.logger.info("Getting places from map")
         for line in lines:
-            self.logger.info(str(line))
-            place = line.split('_')[0]
-            X = float(line.split('_')[1])
-            Y = float(line.split('_')[2])
-            Theta = float(line.split('_')[3])
-            places[place] = (X, Y, Theta)
+            if line != '\n':
+                self.logger.info(str(line))
+                place = line.split('_')[0]
+                X = float(line.split('_')[1])
+                Y = float(line.split('_')[2])
+                Theta = float(line.split('_')[3])
+                places[place] = (X, Y, Theta)
         return places
 
     def onLoad(self):
