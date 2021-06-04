@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="wordtools" version="0.0.0">
+<package version="0.0.0" uuid="musicplayer">
  <names>
-  <name lang="en_US">WordTools</name>
+  <name lang="en_US">MusicPlayer_Pepper</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
@@ -10,15 +10,15 @@
   <language>en_US</language>
  </descriptionLanguages>
  <contents>
-  <behaviorContent path="translator">
+  <behaviorContent path="play-song">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>
-  <behaviorContent path="wikisearch">
+  <behaviorContent path="play-music">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>
-  <behaviorContent path="dictionary">
+  <behaviorContent path="play-video">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play song" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="239" y="67"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+import qi
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/musicplayer/libs")
+import os
+import urllib2
+import re
+import os
+import ssl
+from naoqi import ALProxy
+
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.tablet_service = ALProxy("ALTabletService")
+        self.motionProxy = ALProxy("ALMotion")
+        self.memory = ALProxy("ALMemory")
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.voice_speed = "\\RSPD=85\\"
+        self.configuration = {"bodyLanguageMode": "contextual"}
+
+        # Things needed to understand if the user wants to watch the video
+        self.asr_service = ALProxy("ALSpeechRecognition")
+        # asr needs to be paused before changing the language and setting the vocabulary
+        self.asr_service.pause(True)
+        # change the language to overcome vocabulary problem
+        self.asr_service.setLanguage("Italian")
+        self.asr_service.setLanguage("English")
+        vocabulary = ["yes", "no"]
+        self.asr_service.pause(True)
+        self.asr_service.setVocabulary(vocabulary, False)
+        self.behavior_manager = ALProxy("ALBehaviorManager")
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        pass
+
+    def onInput_onStart(self):
+        # text = self.memory.getData("CARESSES/song_title")
+        self.animated_speech.say(self.voice_speed + "Do you want me to show you also the video?", self.configuration)
+
+        # Restart asr service
+        self.asr_service.pause(False)
+        self.asr_service.subscribe("Test_ASR")
+        time.sleep(5)
+        answer = self.memory.getData("WordRecognized")[0]
+        self.asr_service.unsubscribe("Test_ASR")
+        self.logger.info(answer)
+
+        # Call the play-video behavior
+        if answer == "yes":
+            self.behavior_manager.runBehavior("musicplayer/play-video")
+            while self.behavior_manager.isBehaviorRunning("musicplayer/play-video"):
+                pass
+
+        # Call the play-song behavior
+        else:
+            self.behavior_manager.runBehavior("musicplayer/play-music")
+            while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
+                pass
+
+        self.onInput_onStop()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

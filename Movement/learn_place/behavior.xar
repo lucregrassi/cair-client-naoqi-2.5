@@ -4,6 +4,8 @@ import sys
 from naoqi import ALProxy
 import os
 import re
+import json
+import numpy as np
 
 class MyClass(GeneratedClass):
     def __init__(self):
@@ -13,6 +15,17 @@ class MyClass(GeneratedClass):
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=85\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
+        self.place_key = -1
+        self.asr_service = ALProxy("ALSpeechRecognition")
+        self.tts = ALProxy("ALTextToSpeech")
+        # asr needs to be paused before changing the language and setting the vocabulary
+        self.asr_service.pause(True)
+        # change the language to overcome vocabulary problem
+        self.asr_service.setLanguage("Italian")
+        self.asr_service.setLanguage("English")
+        vocabulary = ["yes", "no"]
+        self.asr_service.pause(True)
+        self.asr_service.setVocabulary(vocabulary, False)
 
     def onLoad(self):
         #put initialization code here
@@ -22,27 +35,78 @@ class MyClass(GeneratedClass):
         #put clean-up code here
         pass
 
+    def get_places_from_map(self):
+        with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'r') as f:
+            lines = f.readlines()
+
+        places = {}
+        for line in lines:
+            # Check that the line is not empty
+            if line != '\n':
+                place = line.split('_')[0]
+                X = float(line.split('_')[1])
+                Y = float(line.split('_')[2])
+                Theta = float(line.split('_')[3])
+                places[place] = (X, Y, Theta)
+        result = json.dumps(places)
+        self.logger.info("Map places: " + result)
+        return places
+
     def onInput_onStart(self):
-        # Get the name of place the user wants to add
+        # Get the name of place the user wants to add from the memory
+        places = self.get_places_from_map()
         where = str(self.memory.getData("CARESSES/learn_place"))
+
+        # Get the position of the robot wrt its odometry
         odometry = self.motion.getRobotPosition(True)
         Px_r = round(odometry[0], 2)
         Py_r = round(odometry[1], 2)
         Ptheta_r = round(odometry[2], 2)
         P_r = [Px_r, Py_r, 1.0]
 
-        # Check if the transformation exists
+        # Check if the transformation matrix of the robot wrt the environment exists
         try:
-            # If the transformation exists, the position should be computed wrt to the enviromnent
+            # If the transformation exists, the position should be computed wrt the enviromnent
             transformation_matrix = self.memory.getData("CARESSES/transformation_matrix")
             theta = self.memory.getData("CARESSES/theta")
             Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
             Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
             self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
-            with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'a') as f:
+
+            for k in places.keys():
+                if str(where) == k:
+                    self.place_key = k
+                    self.logger.info("Already existing place: " + str(where))
+
+            # If the place already exists in the map
+            if self.place_key != -1:
+                self.animated_speech.say(self.voice_speed + "This place is already present in the map. Do you want to overwrite the location of the " + str(where) +  "?", self.configuration)
+                self.asr_service.pause(False)
+                self.asr_service.subscribe("Test_ASR")
+                time.sleep(5)
+                answer = self.memory.getData("WordRecognized")[0]
+                self.asr_service.unsubscribe("Test_ASR")
+                self.logger.info(answer)
+
+                if answer == "yes":
+                    with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'r') as f:
+                        lines = f.readlines()
+                    with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'w') as f:
+                        for line in lines:
+                            if line != '\n':
+                                if line.split('_')[0] != self.place_key:
+                                    f.write(line)
+                        f.write('\n' + where + "_" + str(Pr_w[0]) + '_' + str(Pr_w[1]) + '_' + str(Pr_w[3]))
+                    self.animated_speech.say(self.voice_speed + "Ok. I updated the position of the " + str(where) +  ".", self.configuration)
+                else:
+                    self.animated_speech.say(self.voice_speed + "Ok. I will not update the position of the" + str(where) +  ".", self.configuration)
+
+            # If the place does already not exist in the map
+            else:
+                with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'a') as f:
                     f.write('\n' + where + "_" + str(Pr_w[0]) + '_' + str(Pr_w[1]) + '_' + str(Pr_w[3]))
 
-            self.animated_speech.say(self.voice_speed + "Now I now that this place is the " + str(where) +  ".", self.configuration)
+                self.animated_speech.say(self.voice_speed + "Now I now that this place is the " + str(where) +  ".", self.configuration)
 
         # If the transformation matrix does not exist in the memory, it means the robot does not know its position
         except:

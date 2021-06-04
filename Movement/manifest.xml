@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="movement">
+<package uuid="movement" version="0.0.0">
  <names>
   <name lang="en_US">Movement</name>
  </names>
@@ -15,6 +15,9 @@
    <names>
     <name lang="en_US">go</name>
    </names>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
   <behaviorContent path="move">
@@ -29,6 +32,9 @@
    <names>
     <name lang="en_US">learn_place</name>
    </names>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
   <behaviorContent path="set_position">
@@ -36,6 +42,9 @@
    <names>
     <name lang="en_US">set_position</name>
    </names>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
   <behaviorContent path="move_to">
@@ -43,6 +52,9 @@
    <names>
     <name lang="en_US">move_to</name>
    </names>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
   <behaviorContent path="forget_map">

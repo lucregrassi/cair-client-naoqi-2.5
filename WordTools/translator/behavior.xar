@@ -5,8 +5,10 @@ from naoqi import ALProxy
 import os
 import re
 from mtranslate import translate
+from unidecode import unidecode
 import ssl
 import random
+import codecs
 
 class MyClass(GeneratedClass):
     def __init__(self):
@@ -50,12 +52,17 @@ class MyClass(GeneratedClass):
                 self.animated_speech.say(self.voice_speed + "I'm sorry I can't translate in " + dest_language, self.configuration)
             else:
                 self.animated_speech.say(self.voice_speed + "The " + dest_language + " for " + to_translate + " is: ")
-                self.tts.setLanguage(dest_language)
                 self.tts.setParameter("speed", 85)
-                translation = str(translate(to_translate, languages_mapping[dest_language]))
-                self.logger.info(translation)
-                self.tts.say(translate.encode('utf-8'))
-                self.tts.setLanguage("English")
+                try:
+                    translation = translate(to_translate, languages_mapping[dest_language]).encode('utf-8')
+                    self.logger.info(translation)
+                    self.tts.say(translation, dest_language)
+                    self.tts.setLanguage("English")
+                    self.onInput_onStop()
+                except:
+                    self.tts.setLanguage("English")
+                    self.onInput_onStop()
+
 
         self.onStopped()
 

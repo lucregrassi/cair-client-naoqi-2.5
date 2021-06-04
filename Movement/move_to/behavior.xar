@@ -89,6 +89,8 @@ class MyClass(GeneratedClass):
                 relative_movement = np.dot(rotation_matrix, x_y_relative_dest.T)
                 self.logger.info("Relative movement: " + str(relative_movement) + str(theta_rotation))
                 self.animated_speech.say(self.voice_speed + "I'm going to " + where + ".", self.configuration)
+
+                # CHANGE WITH VELOCITIES
                 self.motionProxy.moveTo(round(relative_movement[0], 2), round(relative_movement[1], 2), relative_destination[3])
 
                 while self.isRunning and self.motionProxy.moveIsActive():
