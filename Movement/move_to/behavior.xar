@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Python Script" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="239" y="84"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Move to" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="239" y="84"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
 import qi
 import numpy as np
 import motion
@@ -12,6 +12,9 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         self.gain = 0.2
         self.motionProxy = ALProxy("ALMotion")
+        self.sASR = ALProxy("ASR2")
+        self.al = ALProxy("ALAutonomousLife")
+        self.speech_reco_event = "Audio/RecognizedWords"
         self.motionProxy.wakeUp()
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
@@ -21,6 +24,13 @@ class MyClass(GeneratedClass):
         self.memory.subscribeToEvent("FrontTactilTouched", self.getName(), "onTouched")
         self.memory.subscribeToEvent("RearTactilTouched", self.getName(), "onTouched")
         self.isRunning = True
+
+    def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
+        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
+        self.al.setAutonomousAbilityEnabled("BackgroundMovement", background)
+        self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
+        self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
+        self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
 
     def onTouched(self, strVarName, value):
         self.logger.info("touched")
@@ -52,7 +62,55 @@ class MyClass(GeneratedClass):
 
 
     def onInput_onStart(self):
-        where = str(self.memory.getData("CARESSES/move_to"))
+        try:
+            where = str(self.memory.getData("CARESSES/move_to"))
+            self.logger.info(where)
+            where = where.strip()
+            if where == "somewhere":
+                raise Exception("No data")
+        # If there is no parameter, ask for it
+        except:
+            self.animated_speech.say(self.voice_speed + "Where should I go?", self.configuration)
+
+            # Start speech recognition
+            self.sASR.startReco("English", False, True)
+            self.setAutonomousAbilities(True, True, True, True, True)
+
+            start_time_silence = time.time() + 1800
+
+            sentence = ""
+            reco_speech = self.memory.getData(self.speech_reco_event)
+            self.logger.info(str(reco_speech))
+            stop = False
+
+            while True:
+                while not reco_speech:
+                    if sentence and time.time() - start_time_silence > 0.1:
+                        self.sASR.stopReco()
+                        self.setAutonomousAbilities(False, True, True, True, True)
+                        stop = True
+                        break
+                    reco_speech = self.memory.getData(self.speech_reco_event)
+                    print reco_speech
+                sys.stdout.flush()
+                if stop:
+                    break
+                if sentence == "":
+                    sep = ""
+                else:
+                    sep = " "
+
+                if reco_speech:
+                    sentence = sentence + sep + reco_speech[0][0]
+                start_time_silence = time.time()
+                self.memory.insertData(self.speech_reco_event, [])
+                reco_speech = self.memory.getData(self.speech_reco_event)
+
+            self.logger.info(str(sentence))
+            self.memory.insertData(self.speech_reco_event, [])
+            self.memory.insertData("CARESSES/move_to", str(sentence))
+            where = str(self.memory.getData("CARESSES/move_to"))
+
         places = self.get_places_from_map()
 
         if where in places.keys():
@@ -104,17 +162,18 @@ class MyClass(GeneratedClass):
                 Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
                 Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
                 self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
+                self.memory.removeData("CARESSES/move_to")
                 self.onInput_onStop()
 
             except:
                 self.animated_speech.say(self.voice_speed + "I need to know where I am with respect to the environment before I can go somewhere.", self.configuration)
+                self.memory.removeData("CARESSES/move_to")
                 self.onInput_onStop()
 
         else:
             self.animated_speech.say(self.voice_speed + "I'm sorry I don't know where " + where + " is.", self.configuration)
+            self.memory.removeData("CARESSES/move_to")
             self.onInput_onStop()
-
-
 
 
     def onInput_onStop(self):

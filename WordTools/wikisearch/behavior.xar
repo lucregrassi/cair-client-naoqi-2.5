@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Python Script" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="252" y="87"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Wikisearch" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="252" y="87"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
 import sys
 sys.path.append("/data/home/nao/.local/share/PackageManager/apps/wordtools/libs")
 from naoqi import ALProxy
@@ -11,10 +11,20 @@ import random
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
-        self.sMemory = ALProxy("ALMemory")
+        self.memory = ALProxy("ALMemory")
+        self.sASR = ALProxy("ASR2")
+        self.al = ALProxy("ALAutonomousLife")
+        self.speech_reco_event = "Audio/RecognizedWords"
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=85\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
+
+    def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
+        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
+        self.al.setAutonomousAbilityEnabled("BackgroundMovement", background)
+        self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
+        self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
+        self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
 
     def onLoad(self):
         #put initialization code here
@@ -25,25 +35,74 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        what = str(self.sMemory.getData("CARESSES/wikisearch"))
-        self.logger.info(what)
+        # Check if the parameter is in memory
+        try:
+            what = str(self.memory.getData("CARESSES/wikisearch"))
+            self.logger.info(what)
+            what = what.strip()
+            if what == "wikipedia" or what == "Wikipedia":
+                raise Exception("No data")
+        # If there is no parameter, ask for it
+        except:
+            self.animated_speech.say(self.voice_speed + "What would you like me to search on Wikipedia?", self.configuration)
+
+            # Start speech recognition
+            self.sASR.startReco("English", False, True)
+            self.setAutonomousAbilities(True, True, True, True, True)
+
+            start_time_silence = time.time() + 1800
+
+            sentence = ""
+            reco_speech = self.memory.getData(self.speech_reco_event)
+            self.logger.info(str(reco_speech))
+            stop = False
+
+            while True:
+                while not reco_speech:
+                    if sentence and time.time() - start_time_silence > 0.1:
+                        self.sASR.stopReco()
+                        self.setAutonomousAbilities(False, True, True, True, True)
+                        stop = True
+                        break
+                    reco_speech = self.memory.getData(self.speech_reco_event)
+                    print reco_speech
+                sys.stdout.flush()
+                if stop:
+                    break
+                if sentence == "":
+                    sep = ""
+                else:
+                    sep = " "
+
+                if reco_speech:
+                    sentence = sentence + sep + reco_speech[0][0]
+                start_time_silence = time.time()
+                self.memory.insertData(self.speech_reco_event, [])
+                reco_speech = self.memory.getData(self.speech_reco_event)
+
+            self.logger.info(str(sentence))
+            self.memory.insertData(self.speech_reco_event, [])
+            self.memory.insertData("CARESSES/wikisearch", str(sentence))
+            what = str(self.memory.getData("CARESSES/wikisearch"))
+
         warnings.catch_warnings()
         warnings.simplefilter("ignore")
         wikipedia.set_lang("en")
         try:
             tmp = wikipedia.summary(what, sentences=1)
-            res = re.sub(r"\(.*?\)", "", tmp).replace(")", "")
+            res = re.sub(r"\(.*?\)", "", tmp).replace(")", "").encode('utf-8')
             reply = "Here's what I found on Wikipedia about " + str(what) + ". " + res
         except wikipedia.DisambiguationError as e:
             opt = random.choice(e.options)
             self.logger.info(str(opt))
-            res = wikipedia.summary(opt, sentences=1)
+            res = wikipedia.summary(opt, sentences=1).encode('utf-8')
             reply = "Here's what I found on Wikipedia about " + str(opt) + ". " + str(res)
         except wikipedia.exceptions.PageError:
             reply = "I'm sorry, I didn't find anything about " + str(what) + " on Wikipedia."
 
         self.logger.info(str(reply))
         self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
+        self.memory.removeData("CARESSES/wikisearch")
         self.onStopped()
 
     def onInput_onStop(self):

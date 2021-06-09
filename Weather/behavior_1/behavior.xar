@@ -11,10 +11,20 @@ import time
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
-        self.sMemory = ALProxy("ALMemory")
+        self.memory = ALProxy("ALMemory")
+        self.sASR = ALProxy("ASR2")
+        self.al = ALProxy("ALAutonomousLife")
+        self.speech_reco_event = "Audio/RecognizedWords"
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=85\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
+
+    def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
+        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
+        self.al.setAutonomousAbilityEnabled("BackgroundMovement", background)
+        self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
+        self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
+        self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
 
     def onLoad(self):
         #put initialization code here
@@ -25,8 +35,56 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        city = str(self.sMemory.getData("CARESSES/weather_city"))
-        self.logger.info(city)
+        # Check if the parameter is in memory
+        try:
+            city = str(self.memory.getData("CARESSES/weather_city"))
+            self.logger.info(city)
+            city = city.strip()
+            if city == "weather":
+                raise Exception("No data")
+        # If there is no parameter, ask for it
+        except:
+            self.animated_speech.say(self.voice_speed + "Of which city do you want to know the weather forecast?", self.configuration)
+
+            # Start speech recognition
+            self.sASR.startReco("English", False, True)
+            self.setAutonomousAbilities(True, True, True, True, True)
+
+            start_time_silence = time.time() + 1800
+
+            sentence = ""
+            reco_speech = self.memory.getData(self.speech_reco_event)
+            self.logger.info(str(reco_speech))
+            stop = False
+
+            while True:
+                while not reco_speech:
+                    if sentence and time.time() - start_time_silence > 0.1:
+                        self.sASR.stopReco()
+                        self.setAutonomousAbilities(False, True, True, True, True)
+                        stop = True
+                        break
+                    reco_speech = self.memory.getData(self.speech_reco_event)
+                    print reco_speech
+                sys.stdout.flush()
+                if stop:
+                    break
+                if sentence == "":
+                    sep = ""
+                else:
+                    sep = " "
+
+                if reco_speech:
+                    sentence = sentence + sep + reco_speech[0][0]
+                start_time_silence = time.time()
+                self.memory.insertData(self.speech_reco_event, [])
+                reco_speech = self.memory.getData(self.speech_reco_event)
+
+            self.logger.info(str(sentence))
+            self.memory.insertData(self.speech_reco_event, [])
+            self.memory.insertData("CARESSES/weather_city", str(sentence))
+            city = str(self.memory.getData("CARESSES/weather_city"))
+
 
         BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
         API_KEY = "06e80be25a22e79a3fb26d7461199a2a"
@@ -55,6 +113,8 @@ class MyClass(GeneratedClass):
         else:
             # showing the error message
             print("Error in the HTTP request")
+
+        self.memory.removeData("CARESSES/weather_city")
         self.onInput_onStop()
 
     def onInput_onStop(self):

@@ -1,1 +1,67 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play music" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="228" y="78"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[# CALL THE SERVICE TO GET MP3]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play music" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="228" y="78"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+import qi
+import requests
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/musicplayer/libs")
+import os
+import urllib2
+import base64
+from naoqi import ALProxy
+
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.app_path = "/data/home/nao/.local/share/PackageManager/apps/musicplayer"
+        self.memory = ALProxy("ALMemory")
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.voice_speed = "\\RSPD=85\\"
+        self.configuration = {"bodyLanguageMode": "contextual"}
+        self.memory.subscribeToEvent("MiddleTactilTouched", self.getName(), "onTouched")
+        self.memory.subscribeToEvent("FrontTactilTouched", self.getName(), "onTouched")
+        self.memory.subscribeToEvent("RearTactilTouched", self.getName(), "onTouched")
+        self.isRunning = True
+        self.audio_player_service = ALProxy("ALAudioPlayer")
+
+    def onTouched(self, strVarName, value):
+        self.logger.info("touched")
+        self.isRunning = False
+        self.audio_player_service.stopAll()
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        pass
+
+    def onInput_onStart(self):
+        cineca = "131.175.198.134"
+        BASE = "http://" + cineca + ":5002/"
+
+        text = self.memory.getData("CARESSES/song_title")
+        self.logger.info(str(text))
+
+        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the song.", self.configuration)
+        text = text.replace(" ", "+")
+
+        response = requests.get(BASE + "musicdownloader/" + str(text), verify=False)
+        encoded_string = response.json()['mp3']
+        wav_file = open(self.app_path + '/song.mp3', 'wb')
+        decoded_string = base64.b64decode(encoded_string)
+        wav_file.write(decoded_string)
+        self.animated_speech.say(self.voice_speed + "Touch my head when you want me to stop.", self.configuration)
+
+        fileId = self.audio_player_service.loadFile(self.app_path + "/song.mp3")
+        self.logger.info(fileId)
+        self.audio_player_service.play(fileId)
+        file_length = self.audio_player_service.getFileLength(fileId)
+        self.logger.info(file_length)
+        currentPos = self.audio_player_service.getCurrentPosition(fileId)
+
+        while self.isRunning and abs(currentPos - file_length) > 1e-09:
+            currentPos = self.audio_player_service.getCurrentPosition(fileId)
+
+        self.onInput_onStop()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

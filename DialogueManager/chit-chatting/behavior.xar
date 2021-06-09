@@ -199,7 +199,7 @@ class MyClass(GeneratedClass):
                             pass
                     elif action == "followme":
                         self.logger.info("hello1")
-                        self.behaviour_manager.runBehavior("follow-me/.")
+                        self.behavior_manager.runBehavior("follow-me/.")
                         self.logger.info("hello2")
                         while self.behavior_manager.isBehaviorRunning("follow-me/."):
                             pass

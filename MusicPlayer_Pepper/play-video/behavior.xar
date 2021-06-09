@@ -3,9 +3,8 @@ import qi
 sys.path.append("/data/home/nao/.local/share/PackageManager/apps/musicplayer/libs")
 import os
 import urllib2
-import re
-import os
 import ssl
+import re
 from naoqi import ALProxy
 
 
@@ -13,7 +12,6 @@ class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
         self.tablet_service = ALProxy("ALTabletService")
-        self.motionProxy = ALProxy("ALMotion")
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=85\\"
@@ -35,9 +33,11 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         text = self.memory.getData("CARESSES/song_title")
-        search_keyword = text.replace(" ", "+") + "+lyrics"
+        self.logger.info(str(text))
 
-        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm searching on Youtube.", self.configuration)
+        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the video on YouTube.", self.configuration)
+
+        search_keyword = text.replace(" ", "+") + "+lyrics"
         html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode('utf-8'))
         my_url = "https://www.youtube.com/watch?v=" + video_ids[0]

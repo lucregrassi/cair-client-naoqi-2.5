@@ -12,12 +12,14 @@ from naoqi import ALProxy
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
-        self.tablet_service = ALProxy("ALTabletService")
         self.motionProxy = ALProxy("ALMotion")
         self.memory = ALProxy("ALMemory")
+        self.al = ALProxy("ALAutonomousLife")
+        self.sASR = ALProxy("ASR2")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=85\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
+        self.speech_reco_event = "Audio/RecognizedWords"
 
         # Things needed to understand if the user wants to watch the video
         self.asr_service = ALProxy("ALSpeechRecognition")
@@ -31,6 +33,13 @@ class MyClass(GeneratedClass):
         self.asr_service.setVocabulary(vocabulary, False)
         self.behavior_manager = ALProxy("ALBehaviorManager")
 
+    def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
+        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
+        self.al.setAutonomousAbilityEnabled("BackgroundMovement", background)
+        self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
+        self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
+        self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
+
     def onLoad(self):
         pass
 
@@ -38,13 +47,63 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        # text = self.memory.getData("CARESSES/song_title")
+        # Check if the parameter is in memory
+        try:
+            text = self.memory.getData("CARESSES/song_title")
+            self.logger.info(str(text))
+            if text == "some music" or text == "something" or text == "a song" or text == "music":
+                raise Exception("No data")
+        # If there is no parameter, ask for it
+        except:
+            self.animated_speech.say(self.voice_speed + "Please, tell me the title of the song.", self.configuration)
+
+            # Start speech recognition
+            self.sASR.startReco("English", False, True)
+            self.setAutonomousAbilities(True, True, True, True, True)
+
+            start_time_silence = time.time() + 1800
+
+            sentence = ""
+            reco_speech = self.memory.getData(self.speech_reco_event)
+            self.logger.info(str(reco_speech))
+            stop = False
+
+            while True:
+                while not reco_speech:
+                    if sentence and time.time() - start_time_silence > 0.1:
+                        self.sASR.stopReco()
+                        self.setAutonomousAbilities(False, True, True, True, True)
+                        stop = True
+                        break
+                    reco_speech = self.memory.getData(self.speech_reco_event)
+                    print reco_speech
+                sys.stdout.flush()
+                if stop:
+                    break
+                if sentence == "":
+                    sep = ""
+                else:
+                    sep = " "
+
+                if reco_speech:
+                    sentence = sentence + sep + reco_speech[0][0]
+                start_time_silence = time.time()
+                self.memory.insertData(self.speech_reco_event, [])
+                reco_speech = self.memory.getData(self.speech_reco_event)
+
+            sentence = sentence.replace(" ", "_")
+            print sentence
+            self.logger.info(str(sentence))
+            self.memory.insertData(self.speech_reco_event, [])
+            self.memory.insertData("CARESSES/song_title", str(sentence))
+
+        # Once the parameter is obtained, ask the user if he/she wants to watch also the video
         self.animated_speech.say(self.voice_speed + "Do you want me to show you also the video?", self.configuration)
 
         # Restart asr service
         self.asr_service.pause(False)
         self.asr_service.subscribe("Test_ASR")
-        time.sleep(5)
+        time.sleep(4)
         answer = self.memory.getData("WordRecognized")[0]
         self.asr_service.unsubscribe("Test_ASR")
         self.logger.info(answer)
@@ -61,6 +120,7 @@ class MyClass(GeneratedClass):
             while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
                 pass
 
+        self.memory.removeData("CARESSES/song_title")
         self.onInput_onStop()
 
     def onInput_onStop(self):
