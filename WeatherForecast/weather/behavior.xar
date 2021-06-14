@@ -81,8 +81,9 @@ class MyClass(GeneratedClass):
                 reco_speech = self.memory.getData(self.speech_reco_event)
 
                 exit_keywords = ["stop", "exit", "quit"]
-                if sentence.lower() in exit_keywords:
+                if any(keyword in sentence.lower() for keyword in exit_keywords):
                     self.onInput_onStop()
+                    sys.exit(0)
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
@@ -116,7 +117,7 @@ class MyClass(GeneratedClass):
             self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
         else:
             # showing the error message
-            self.animated_speech.say(self.voice_speed + "I'm sorry, the weather forecast for " + city + " is not available." self.configuration)
+            self.animated_speech.say(self.voice_speed + "I'm sorry, the weather forecast for " + city + " is not available.", self.configuration)
 
         self.memory.removeData("CARESSES/weather_city")
         self.onInput_onStop()

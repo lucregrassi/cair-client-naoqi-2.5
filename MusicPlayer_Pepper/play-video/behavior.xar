@@ -46,9 +46,8 @@ class MyClass(GeneratedClass):
         # Start the application on tablet
         self.tablet_service.cleanWebview()
         self.tablet_service.loadUrl(str(my_url))
-        # self.tablet_service.loadUrl('https://www.youtube.com/tv#/watch/video/control?v=' + id)
         self.tablet_service.showWebview()
-        self.animated_speech.say(self.voice_speed + "Press play when you're ready. Touch my head when you want to stop.", self.configuration)
+        self.animated_speech.say(self.voice_speed + "Press play when you're ready. Touch my head, my hands or my bumpers when you want to stop.", self.configuration)
 
         while self.isRunning:
             pass

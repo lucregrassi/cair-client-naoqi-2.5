@@ -77,6 +77,11 @@ class MyClass(GeneratedClass):
                 self.memory.insertData(self.speech_reco_event, [])
                 reco_speech = self.memory.getData(self.speech_reco_event)
 
+                exit_keywords = ["stop", "exit", "quit"]
+                if any(keyword in sentence.lower() for keyword in exit_keywords):
+                    self.onInput_onStop()
+                    sys.exit(0)
+
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
             self.memory.insertData("CARESSES/dictionary", str(sentence))
