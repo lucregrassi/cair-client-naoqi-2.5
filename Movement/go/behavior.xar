@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Go" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="250" y="75"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Go" id="1" localization="8" tooltip="This box contains a basic python script that makes the robot move towards the requested direction. To stop the movement and exit the behavior, touch the robot&apos;s head/hands/bumpers." x="250" y="75"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
 import sys
 from naoqi import ALProxy
 import functools
@@ -6,9 +6,12 @@ import functools
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
-        self.isRunning = True
         self.memory = ALProxy("ALMemory")
+        self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.motionProxy = ALProxy("ALMotion")
+        # For NAO robot
+        self.motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION", True]])
+        self.isRunning = True
 
     def onLoad(self):
         #put initialization code here
@@ -18,19 +21,13 @@ class MyClass(GeneratedClass):
         #put clean-up code here
         pass
 
+    # Every time a robot sensor is touched, the movement is stopped and the behavior will stop.
     def onTouched(self, strVarName, value):
         self.logger.info("touched")
         self.motionProxy.stopMove()
         self.isRunning = False
 
     def onInput_onStart(self):
-        self.logger.info("onStart")
-        self.memory.subscribeToEvent("MiddleTactilTouched", self.getName(), "onTouched")
-        self.memory.subscribeToEvent("FrontTactilTouched", self.getName(), "onTouched")
-        self.memory.subscribeToEvent("RearTactilTouched", self.getName(), "onTouched")
-
-        self.motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION", True]])
-
         where = str(self.memory.getData("CARESSES/go"))
         if where == "forward":
             X = 0.5

@@ -102,7 +102,6 @@ class MyClass(GeneratedClass):
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
             response = requests.get(BASE + "caresses/" + str(client_id) + "/" + sentence, verify=False)
-            # print("Response time: ", response.elapsed.total_seconds())
             intent_reply = response.json()['intent_reply']
             plan = response.json()['plan']
             reply = response.json()['reply']
@@ -125,8 +124,16 @@ class MyClass(GeneratedClass):
                         self.logger.info(str(city))
                         self.memory.insertData("CARESSES/weather_city", str(city))
                         self.logger.info(str(self.memory.getData("CARESSES/weather_city")))
-                        self.behavior_manager.runBehavior("weather/behavior_1")
-                        while self.behavior_manager.isBehaviorRunning("weather/behavior_1"):
+                        self.behavior_manager.runBehavior("weatherforecast/weather")
+                        while self.behavior_manager.isBehaviorRunning("weatherforecast/weather"):
+                            pass
+                    elif action == "playsong":
+                        title = re.findall("title=(.*)", plan)[0]
+                        self.logger.info(str(title))
+                        self.memory.insertData("CARESSES/song_title", str(title))
+                        self.logger.info(str(self.memory.getData("CARESSES/song_title")))
+                        self.behavior_manager.runBehavior("musicplayer/play-song")
+                        while self.behavior_manager.isBehaviorRunning("musicplayer/play-song"):
                             pass
                     elif action == "wikisearch":
                         what = re.findall("what=(.*)", plan)[0]
@@ -153,14 +160,6 @@ class MyClass(GeneratedClass):
                         self.behavior_manager.runBehavior("wordtools/dictionary")
                         while self.behavior_manager.isBehaviorRunning("wordtools/dictionary"):
                             pass
-                    elif action == "go":
-                        where = re.findall("where=(\w+)", plan)[0]
-                        self.logger.info(str(where))
-                        self.memory.insertData("CARESSES/go", str(where))
-                        self.logger.info(str(self.memory.getData("CARESSES/go")))
-                        self.behavior_manager.runBehavior("movement/go")
-                        while self.behavior_manager.isBehaviorRunning("movement/go"):
-                            pass
                     elif action == "move":
                         where = re.findall("where=(\w+)", plan)[0]
                         self.logger.info(str(where))
@@ -169,21 +168,13 @@ class MyClass(GeneratedClass):
                         self.behavior_manager.runBehavior("movement/move")
                         while self.behavior_manager.isBehaviorRunning("movement/move"):
                             pass
-                    elif action == "setposition":
-                        where = re.findall("where=(.*)", plan)[0]
+                    elif action == "go":
+                        where = re.findall("where=(\w+)", plan)[0]
                         self.logger.info(str(where))
-                        self.memory.insertData("CARESSES/set_position", str(where))
-                        self.logger.info(str(self.memory.getData("CARESSES/set_position")))
-                        self.behavior_manager.runBehavior("movement/set_position")
-                        while self.behavior_manager.isBehaviorRunning("movement/set_position"):
-                            pass
-                    elif action == "moveto":
-                        where = re.findall("where=(.*)", plan)[0]
-                        self.logger.info(str(where))
-                        self.memory.insertData("CARESSES/move_to", str(where))
-                        self.logger.info(str(self.memory.getData("CARESSES/move_to")))
-                        self.behavior_manager.runBehavior("movement/move_to")
-                        while self.behavior_manager.isBehaviorRunning("movement/move_to"):
+                        self.memory.insertData("CARESSES/go", str(where))
+                        self.logger.info(str(self.memory.getData("CARESSES/go")))
+                        self.behavior_manager.runBehavior("movement/go")
+                        while self.behavior_manager.isBehaviorRunning("movement/go"):
                             pass
                     elif action == "learnplace":
                         where = re.findall("where=(.*)", plan)[0]
@@ -193,23 +184,29 @@ class MyClass(GeneratedClass):
                         self.behavior_manager.runBehavior("movement/learn_place")
                         while self.behavior_manager.isBehaviorRunning("movement/learn_place"):
                             pass
+                    elif action == "setposition":
+                        where = re.findall("where=(.*)", plan)[0]
+                        self.logger.info(str(where))
+                        self.memory.insertData("CARESSES/set_position", str(where))
+                        self.logger.info(str(self.memory.getData("CARESSES/set_position")))
+                        self.behavior_manager.runBehavior("movement/set_position")
+                        while self.behavior_manager.isBehaviorRunning("movement/set_position"):
+                            pass
+                    elif action == "goto":
+                        where = re.findall("where=(.*)", plan)[0]
+                        self.logger.info(str(where))
+                        self.memory.insertData("CARESSES/go_to", str(where))
+                        self.logger.info(str(self.memory.getData("CARESSES/go_to")))
+                        self.behavior_manager.runBehavior("movement/go_to")
+                        while self.behavior_manager.isBehaviorRunning("movement/go_to"):
+                            pass
                     elif action == "forgetmap":
                         self.behavior_manager.runBehavior("movement/forget_map")
                         while self.behavior_manager.isBehaviorRunning("movement/forget_map"):
                             pass
                     elif action == "followme":
-                        self.logger.info("hello1")
                         self.behavior_manager.runBehavior("follow-me/.")
-                        self.logger.info("hello2")
                         while self.behavior_manager.isBehaviorRunning("follow-me/."):
-                            pass
-                    elif action == "playsong":
-                        title = re.findall("title=(.*)", plan)[0]
-                        self.logger.info(str(title))
-                        self.memory.insertData("CARESSES/song_title", str(title))
-                        self.logger.info(str(self.memory.getData("CARESSES/song_title")))
-                        self.behavior_manager.runBehavior("musicplayer/play-song")
-                        while self.behavior_manager.isBehaviorRunning("musicplayer/play-song"):
                             pass
                 # Uncomment when testing the whole system - continues dialogue after action.
                 if reply:

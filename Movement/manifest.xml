@@ -15,6 +15,9 @@
    <names>
     <name lang="en_US">go</name>
    </names>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
   <behaviorContent path="move">
@@ -38,15 +41,15 @@
    </names>
    <permissions/>
   </behaviorContent>
-  <behaviorContent path="move_to">
-   <nature>interactive</nature>
-   <names>
-    <name lang="en_US">move_to</name>
-   </names>
-   <permissions/>
-  </behaviorContent>
   <behaviorContent path="forget_map">
    <nature>interactive</nature>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="go_to">
+   <nature>interactive</nature>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>
