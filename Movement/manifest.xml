@@ -15,9 +15,6 @@
    <names>
     <name lang="en_US">go</name>
    </names>
-   <triggerSentences/>
-   <loadingResponses/>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
   <behaviorContent path="move">
@@ -47,9 +44,14 @@
   </behaviorContent>
   <behaviorContent path="go_to">
    <nature>interactive</nature>
-   <triggerSentences/>
-   <loadingResponses/>
-   <autonomous/>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="rest">
+   <nature>interactive</nature>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="wakeup">
+   <nature>interactive</nature>
    <permissions/>
   </behaviorContent>
  </contents>

@@ -8,6 +8,8 @@
         <BehaviorDescription name="behavior" src="set_position" xar="behavior.xar" />
         <BehaviorDescription name="behavior" src="forget_map" xar="behavior.xar" />
         <BehaviorDescription name="behavior" src="go_to" xar="behavior.xar" />
+        <BehaviorDescription name="behavior" src="rest" xar="behavior.xar" />
+        <BehaviorDescription name="behavior" src="wakeup" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>

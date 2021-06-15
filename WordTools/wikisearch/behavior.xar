@@ -44,7 +44,7 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "What would you like me to search on Wikipedia?", self.configuration)
+            self.animated_speech.say(self.voice_speed + "What would you like to search on Wikipedia?", self.configuration)
 
             # Start speech recognition
             self.sASR.startReco("English", False, True)
@@ -79,6 +79,11 @@ class MyClass(GeneratedClass):
                 start_time_silence = time.time()
                 self.memory.insertData(self.speech_reco_event, [])
                 reco_speech = self.memory.getData(self.speech_reco_event)
+
+                exit_keywords = ["quit", "stop", "exit"]
+                if sentence.lower() in exit_keywords:
+                    self.onInput_onStop()
+                    sys.exit(0)
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])

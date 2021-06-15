@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play song" id="1" localization="8" tooltip="This box contains a basic python script to play music. It  retrieves eventual missing parameters and asks the user if he/she wants to watch also the video of the requested song." x="239" y="67"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play Song" id="1" localization="8" tooltip="This box contains a basic python script to play music. It  retrieves eventual missing parameters and plays the requested song." x="167" y="74"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
 import qi
 import urllib2
 import re
+import ssl
 from naoqi import ALProxy
 
 
@@ -98,28 +99,10 @@ class MyClass(GeneratedClass):
             self.memory.insertData(self.speech_reco_event, [])
             self.memory.insertData("CARESSES/song_title", str(sentence))
 
-        # Once the parameter is obtained, ask the user if he/she wants to watch also the video
-        self.animated_speech.say(self.voice_speed + "Do you want me to show you also the video?", self.configuration)
 
-        # Restart asr service
-        self.asr_service.pause(False)
-        self.asr_service.subscribe("Test_ASR")
-        time.sleep(4)
-        answer = self.memory.getData("WordRecognized")[0]
-        self.asr_service.unsubscribe("Test_ASR")
-        self.logger.info(answer)
-
-        # Call the play-video behavior
-        if answer == "yes":
-            self.behavior_manager.runBehavior("musicplayer/play-video")
-            while self.behavior_manager.isBehaviorRunning("musicplayer/play-video"):
-                pass
-
-        # Call the play-song behavior
-        else:
-            self.behavior_manager.runBehavior("musicplayer/play-music")
-            while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
-                pass
+        self.behavior_manager.runBehavior("musicplayer/play-music")
+        while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
+            pass
 
         self.memory.removeData("CARESSES/song_title")
         self.onInput_onStop()
