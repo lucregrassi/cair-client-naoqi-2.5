@@ -37,6 +37,7 @@
         <File name="CARESSES_logo" src="html/img/CARESSES_logo.png" />
         <File name="ExecutionMode" src="html/img/ExecutionMode.png" />
         <File name="RestMode" src="html/img/RestMode.png" />
+        <File name="icon" src="icon.png" />
     </Resources>
     <Topics />
     <IgnoredPaths />

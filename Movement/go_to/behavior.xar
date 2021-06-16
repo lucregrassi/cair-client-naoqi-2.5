@@ -113,7 +113,7 @@ class MyClass(GeneratedClass):
                 self.memory.insertData(self.speech_reco_event, [])
                 reco_speech = self.memory.getData(self.speech_reco_event)
 
-                exit_keywords = ["exit", "quit"]
+                exit_keywords = ["exit", "quit", "stop"]
                 if sentence.lower() in exit_keywords:
                     self.onInput_onStop()
 
@@ -157,7 +157,7 @@ class MyClass(GeneratedClass):
                 x_y_relative_dest = np.array([relative_destination[0], relative_destination[1]])
                 relative_movement = np.dot(rotation_matrix, x_y_relative_dest.T)
                 self.logger.info("Relative movement: " + str(relative_movement) + str(theta_rotation))
-                self.animated_speech.say(self.voice_speed + "I'm going to " + where + ".", self.configuration)
+                self.animated_speech.say(self.voice_speed + "I'm going to the " + where + ". Touch one of my sensors if you want me to stop.", self.configuration)
 
                 ######### CHANGE WITH VELOCITIES ###########
                 self.motionProxy.moveTo(round(relative_movement[0], 2), round(relative_movement[1], 2), relative_destination[3])
@@ -182,7 +182,7 @@ class MyClass(GeneratedClass):
                 self.onInput_onStop()
 
         else:
-            self.animated_speech.say(self.voice_speed + "I'm sorry I don't know where " + where + " is.", self.configuration)
+            self.animated_speech.say(self.voice_speed + "I'm sorry I don't know where the " + where + " is.", self.configuration)
             self.memory.removeData("CARESSES/go_to")
             self.onInput_onStop()
 

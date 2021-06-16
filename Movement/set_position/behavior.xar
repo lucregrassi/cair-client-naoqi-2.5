@@ -87,7 +87,7 @@ class MyClass(GeneratedClass):
             self.onInput_onStop()
 
         else:
-            self.animated_speech.say(self.voice_speed + "I'm sorry I don't know where " + str(where) + " is.", self.configuration)
+            self.animated_speech.say(self.voice_speed + "I'm sorry, I don't know where the " + str(where) + " is.", self.configuration)
             self.onInput_onStop()
 
     def onInput_onStop(self):

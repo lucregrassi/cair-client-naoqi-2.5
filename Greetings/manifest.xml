@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="timetools" version="0.0.0">
+<package version="0.0.0" uuid="greetings">
  <names>
-  <name lang="en_US">TimeTools</name>
+  <name lang="en_US">Greetings</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
@@ -10,12 +10,22 @@
   <language>en_US</language>
  </descriptionLanguages>
  <contents>
-  <behaviorContent path="time">
+  <behaviorContent path="namaste">
+   <nature>interactive</nature>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="hello">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>
-  <behaviorContent path="date">
+  <behaviorContent path="konnichiwa">
    <nature>interactive</nature>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

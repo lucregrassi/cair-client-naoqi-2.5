@@ -5,7 +5,9 @@
         <BehaviorDescription name="behavior" src="karaoke" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
-    <Resources />
+    <Resources>
+        <File name="icon" src="icon.png" />
+    </Resources>
     <Topics />
     <IgnoredPaths />
     <Translations auto-fill="en_US">

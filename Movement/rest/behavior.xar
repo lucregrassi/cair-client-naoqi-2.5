@@ -22,12 +22,12 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         self.al.setAutonomousAbilityEnabled("All", False)
-        self.animated_speech.say(self.voice_speed + "I'm looking for my docking station", self.configuration)
+        self.animated_speech.say(self.voice_speed + "I'm looking for my docking station.", self.configuration)
         try:
             self.recharge.goToStation()
-            self.animated_speech.say(self.voice_speed + "I'm successfully docked", self.configuration)
+            self.animated_speech.say(self.voice_speed + "I'm successfully docked!", self.configuration)
         except:
-            self.animated_speech.say(self.voice_speed + "I'm sorry I can't go to my docking station", self.configuration)
+            self.animated_speech.say(self.voice_speed + "I'm sorry, I can't go to my docking station.", self.configuration)
 
         self.onInput_onStop()
 
