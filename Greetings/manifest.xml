@@ -12,9 +12,6 @@
  <contents>
   <behaviorContent path="namaste">
    <nature>interactive</nature>
-   <triggerSentences/>
-   <loadingResponses/>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
   <behaviorContent path="hello">
@@ -23,9 +20,6 @@
   </behaviorContent>
   <behaviorContent path="konnichiwa">
    <nature>interactive</nature>
-   <triggerSentences/>
-   <loadingResponses/>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

@@ -36,10 +36,14 @@
     <context>
         <name>hello/behavior.xar:/hello/behavior_layer1/keyframe25/Say</name>
         <message>
-            <location filename="hello/behavior.xar" line="0"/>
             <source>Hello!</source>
             <comment>Text</comment>
-            <translation type="unfinished">Hello!</translation>
+            <translation type="obsolete">Hello!</translation>
+        </message>
+        <message>
+            <source>Hello</source>
+            <comment>Text</comment>
+            <translation type="vanished">Hello</translation>
         </message>
     </context>
     <context>
@@ -51,6 +55,32 @@
         </message>
     </context>
     <context>
+        <name>konnichiwa/behavior.xar:/Say</name>
+        <message>
+            <source>Hello</source>
+            <comment>Text</comment>
+            <translation type="vanished">Hello</translation>
+        </message>
+        <message>
+            <source>Konnichiwa</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Konnichiwa</translation>
+        </message>
+    </context>
+    <context>
+        <name>konnichiwa/behavior.xar:/bow/behavior_layer1/keyframe1/Say</name>
+        <message>
+            <source>Hello</source>
+            <comment>Text</comment>
+            <translation type="vanished">Hello</translation>
+        </message>
+        <message>
+            <source>Konnichiwa</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Konnichiwa</translation>
+        </message>
+    </context>
+    <context>
         <name>konnichiwa/behavior.xar:/bow/behavior_layer1/keyframe25/Say</name>
         <message>
             <source>Konichiwa</source>
@@ -58,10 +88,9 @@
             <translation type="obsolete">Konichiwa</translation>
         </message>
         <message>
-            <location filename="konnichiwa/behavior.xar" line="0"/>
             <source>Konnichiwa</source>
             <comment>Text</comment>
-            <translation type="unfinished">Konnichiwa</translation>
+            <translation type="obsolete">Konnichiwa</translation>
         </message>
     </context>
     <context>
@@ -109,10 +138,9 @@
     <context>
         <name>namaste/behavior.xar:/namaste/behavior_layer1/keyframe25/Say</name>
         <message>
-            <location filename="namaste/behavior.xar" line="0"/>
             <source>Namasté</source>
             <comment>Text</comment>
-            <translation type="unfinished">Namasté</translation>
+            <translation type="obsolete">Namasté</translation>
         </message>
         <message>
             <source>Hello</source>
@@ -131,6 +159,34 @@
             <source>Namasté</source>
             <comment>Text</comment>
             <translation type="obsolete">Namasté</translation>
+        </message>
+    </context>
+    <context>
+        <name>say/behavior.xar:/Say</name>
+        <message>
+            <source>Hello</source>
+            <comment>Text</comment>
+            <translation type="vanished">Hello</translation>
+        </message>
+        <message>
+            <source>Namastee</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Namastee</translation>
+        </message>
+        <message>
+            <source>Namasteee</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Namasteee</translation>
+        </message>
+        <message>
+            <source>Namaste</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Namaste</translation>
+        </message>
+        <message>
+            <source>Namastè</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Namastè</translation>
         </message>
     </context>
 </TS>

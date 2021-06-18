@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Package name="KaraokePlayer_Pepper" format_version="4">
+<Package name="ProvidePrivacy" format_version="4">
     <Manifest src="manifest.xml" />
     <BehaviorDescriptions>
-        <BehaviorDescription name="behavior" src="play-karaoke" xar="behavior.xar" />
+        <BehaviorDescription name="behavior" src="privacy" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>
-        <File name="icon" src="icon.png" />
+        <File name="turn3" src="privacy/turn3.pmt" />
     </Resources>
     <Topics />
     <IgnoredPaths />

@@ -7,6 +7,8 @@ import argparse
 import time
 import os
 import re
+import time
+import threading
 
 class MyClass(GeneratedClass):
     def __init__(self):
@@ -17,6 +19,7 @@ class MyClass(GeneratedClass):
         self.speech_reco_event = "Audio/RecognizedWords"
         self.al = ALProxy("ALAutonomousLife")
         self.motion = ALProxy("ALMotion")
+        self.tts = ALProxy("ALTextToSpeech")
         self.tablet = True
         try:
             self.tablet_service = ALProxy("ALTabletService")
@@ -34,6 +37,23 @@ class MyClass(GeneratedClass):
         self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
         self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
         self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
+
+    def thread_function(self, greeting):
+        self.logger.info(greeting)
+
+        if greeting == 1:
+            time.sleep(2.5)
+            self.tts.say("Hello")
+
+        elif greeting == 2:
+            time.sleep(3)
+            self.tts.say("Namastay")
+
+        elif greeting == 3:
+            time.sleep(3)
+            self.tts.say("Konnichiwa")
+
+        self.tts.setLanguage("English")
 
     def onLoad(self):
         #put initialization code here
@@ -137,9 +157,12 @@ class MyClass(GeneratedClass):
                     self.logger.info(item)
                     action = re.findall("action=(\w+)", item)[0]
                     self.logger.info(str(action))
+
                     if action == "hello":
                         if self.tablet:
                             self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                        x = threading.Thread(target=self.thread_function, args=(1,))
+                        x.start()
                         self.behavior_manager.runBehavior("greetings/hello")
                         while self.behavior_manager.isBehaviorRunning("greetings/hello"):
                             pass
@@ -147,6 +170,8 @@ class MyClass(GeneratedClass):
                     elif action == "namaste":
                         if self.tablet:
                             self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                        x = threading.Thread(target=self.thread_function, args=(2,))
+                        x.start()
                         self.behavior_manager.runBehavior("greetings/namaste")
                         while self.behavior_manager.isBehaviorRunning("greetings/namaste"):
                             pass
@@ -154,6 +179,8 @@ class MyClass(GeneratedClass):
                     elif action == "konnichiwa":
                         if self.tablet:
                             self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                        x = threading.Thread(target=self.thread_function, args=(3,))
+                        x.start()
                         self.behavior_manager.runBehavior("greetings/konnichiwa")
                         while self.behavior_manager.isBehaviorRunning("greetings/konnichiwa"):
                             pass
@@ -313,6 +340,27 @@ class MyClass(GeneratedClass):
                             self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                         self.behavior_manager.runBehavior("movement/forget_map")
                         while self.behavior_manager.isBehaviorRunning("movement/forget_map"):
+                            pass
+
+                    elif action == "hug":
+                        if self.tablet:
+                            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                        self.behavior_manager.runBehavior("affectivecommunication/hug")
+                        while self.behavior_manager.isBehaviorRunning("affectivecommunication/hug"):
+                            pass
+
+                    elif action == "handshake":
+                        if self.tablet:
+                            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                        self.behavior_manager.runBehavior("affectivecommunication/handshake")
+                        while self.behavior_manager.isBehaviorRunning("affectivecommunication/handshake"):
+                            pass
+
+                    elif action == "privacy":
+                        if self.tablet:
+                            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                        self.behavior_manager.runBehavior("provideprivacy/privacy")
+                        while self.behavior_manager.isBehaviorRunning("provideprivacy/privacy"):
                             pass
 
                     elif action == "followme":
