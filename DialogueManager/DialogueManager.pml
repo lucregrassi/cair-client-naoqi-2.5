@@ -35,7 +35,7 @@
         <File name="views" src="libs/flask/views.py" />
         <File name="wrappers" src="libs/flask/wrappers.py" />
         <File name="CARESSES_logo" src="html/img/CARESSES_logo.png" />
-        <File name="ExecutionMode" src="html/img/ExecutionMode.png" />
+        <File name="ExecutionMode" src="html/img/PrivacyMode.png" />
         <File name="RestMode" src="html/img/RestMode.png" />
         <File name="icon" src="icon.png" />
     </Resources>

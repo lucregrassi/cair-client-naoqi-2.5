@@ -97,7 +97,7 @@ class MyClass(GeneratedClass):
             tmp = wikipedia.summary(what, sentences=1)
             res = re.sub(r"\(.*?\)", "", tmp).replace(")", "").encode('utf-8')
             reply = "Here's what I found on Wikipedia about " + str(what) + ". " + res
-        except wikipedia.DisambiguationError as e:
+        except (wikipedia.DisambiguationError, wikipedia.exceptions.DisambiguationError) as e:
             opt = random.choice(e.options)
             self.logger.info(str(opt))
             res = wikipedia.summary(opt, sentences=1).encode('utf-8')
