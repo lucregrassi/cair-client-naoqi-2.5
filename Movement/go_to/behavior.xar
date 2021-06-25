@@ -23,9 +23,8 @@ class MyClass(GeneratedClass):
         self.speech_reco_event = "Audio/RecognizedWords"
 
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=85\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
-
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
         self.gain = 0.2
         self.isRunning = True
 

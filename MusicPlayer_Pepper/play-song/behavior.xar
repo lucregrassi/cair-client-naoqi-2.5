@@ -13,7 +13,7 @@ class MyClass(GeneratedClass):
         self.al = ALProxy("ALAutonomousLife")
         self.sASR = ALProxy("ASR2")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=85\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.speech_reco_event = "Audio/RecognizedWords"
 

@@ -12,7 +12,7 @@ class MyClass(GeneratedClass):
         self.app_path = "/data/home/nao/.local/share/PackageManager/apps/musicplayer"
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=85\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.isRunning = True

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="karaokeplayer">
+<package uuid="karaokeplayer" version="0.0.0">
  <names>
   <name lang="en_US">KaraokePlayer_Pepper</name>
  </names>
@@ -12,9 +12,6 @@
  <contents>
   <behaviorContent path="play-karaoke">
    <nature>interactive</nature>
-   <triggerSentences/>
-   <loadingResponses/>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

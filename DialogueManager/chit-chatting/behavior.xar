@@ -21,15 +21,24 @@ class MyClass(GeneratedClass):
         self.motion = ALProxy("ALMotion")
         self.tts = ALProxy("ALTextToSpeech")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=85\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.setAutonomousAbilities(True, True, True, True, True)
         self.behavior_manager = ALProxy("ALBehaviorManager")
+        self.audio_device = ALProxy("ALAudioDevice")
         self.tablet = True
         try:
             self.tablet_service = ALProxy("ALTabletService")
         except:
             self.tablet = False
+
+        try:
+            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        except:
+            self.memory.insertData("CARESSES/voice_speed", 75)
+            self.voice_speed = "\\RSPD=75\\"
+
+        self.audio_device = ALProxy("ALAudioDevice")
+        self.audio_device.setOutputVolume(60)
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
         self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
@@ -80,7 +89,7 @@ class MyClass(GeneratedClass):
         if self.tablet:
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/CARESSES_logo.png")
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
-            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/RestMode.png")
+            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/PrivacyMode.png")
             self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/CARESSES_logo.png")
 
         # If the file with the credentials exists, read the ID and use it during the requests to the Cloud
@@ -188,7 +197,34 @@ class MyClass(GeneratedClass):
                         action = re.findall("action=(\w+)", item)[0]
                         self.logger.info(str(action))
 
-                        if action == "hello":
+                        if action == "volume":
+                            if self.behavior_manager.isBehaviorInstalled("utility/volume"):
+                                if self.tablet:
+                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                                level = re.findall("level=(\w+)", item)[0]
+                                self.logger.info(str(level))
+                                self.memory.insertData("CARESSES/volume_level", str(level))
+                                self.behavior_manager.runBehavior("utility/volume")
+                                while self.behavior_manager.isBehaviorRunning("utility/volume"):
+                                    pass
+                            else:
+                                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+
+                        elif action == "voicespeed":
+                            if self.behavior_manager.isBehaviorInstalled("utility/voice_speed"):
+                                if self.tablet:
+                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                                level = re.findall("level=(\w+)", item)[0]
+                                self.logger.info(str(level))
+                                self.memory.insertData("CARESSES/voice_speed_level", str(level))
+                                self.behavior_manager.runBehavior("utility/voice_speed")
+                                while self.behavior_manager.isBehaviorRunning("utility/voice_speed"):
+                                    pass
+                                self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+                            else:
+                                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+
+                        elif action == "hello":
                             if self.behavior_manager.isBehaviorInstalled("greetings/hello"):
                                 if self.tablet:
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")

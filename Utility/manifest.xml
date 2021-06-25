@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="musicplayer" version="0.0.0">
+<package uuid="utility" version="0.0.0">
  <names>
-  <name lang="en_US">MusicPlayer_Nao</name>
+  <name lang="en_US">Utility</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
@@ -10,11 +10,11 @@
   <language>en_US</language>
  </descriptionLanguages>
  <contents>
-  <behaviorContent path="play-music">
+  <behaviorContent path="volume">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>
-  <behaviorContent path="play-song">
+  <behaviorContent path="voice_speed">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>
