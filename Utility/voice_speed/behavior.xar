@@ -2,7 +2,10 @@
     def __init__(self):
         GeneratedClass.__init__(self)
         self.memory = ALProxy("ALMemory")
-        #self.tts = ALProxy("ALTextToSpeech")
+        self.tts = ALProxy("ALTextToSpeech")
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.configuration = {"bodyLanguageMode": "contextual"}
 
     def onLoad(self):
         #put initialization code here
@@ -18,25 +21,50 @@
         self.logger.info(previous_speed)
 
         if level == "faster":
-            new_speed = previous_speed + 10
-            if new_speed > 100:
-                new_speed = 100
+            if previous_speed == 100:
+                self.animated_speech.say(self.voice_speed + "Sorry, I can't speak faster than this.", self.configuration)
+            else:
+                new_speed = previous_speed + 10
+                if new_speed > 100:
+                    new_speed = 100
+                self.voice_speed = "\\RSPD=100\\"
+                self.animated_speech.say(self.voice_speed + "I increased my voice speed.", self.configuration)
         elif level == "slower":
-            new_speed = previous_speed - 10
-            if new_speed < 50:
-                new_speed = 50
+            if previous_speed == 50:
+                self.animated_speech.say(self.voice_speed + "Sorry, I can't speak slower than this.", self.configuration)
+            else:
+                new_speed = previous_speed - 10
+                if new_speed < 50:
+                    new_speed = 50
+                self.voice_speed = "\\RSPD=50\\"
+                self.animated_speech.say(self.voice_speed + "I decreased my voice speed.", self.configuration)
         elif level == "high":
-            new_speed = 100
+            if previous_speed == 100:
+                self.animated_speech.say(self.voice_speed + "My voice speed is already set to high.", self.configuration)
+            else:
+                new_speed = 100
+                self.voice_speed = "\\RSPD=100\\"
+                self.animated_speech.say(self.voice_speed + "My voice speed is now set to high.", self.configuration)
+        elif level == "normal":
+            if previous_speed == 70:
+                self.animated_speech.say(self.voice_speed + "My voice speed is already set to normal.", self.configuration)
+            else:
+                new_speed = 70
+                self.voice_speed = "\\RSPD=70\\"
+                self.animated_speech.say(self.voice_speed + "My voice speed is now set to normal.", self.configuration)
         elif level == "low":
-            new_speed = 60
+            if previous_speed == 60:
+                self.animated_speech.say(self.voice_speed + "My voice speed is already set to low.", self.configuration)
+            else:
+                new_speed = 60
+                self.voice_speed = "\\RSPD=60\\"
+                self.animated_speech.say(self.voice_speed + "My voice speed is now set to low.", self.configuration)
         else:
-            new_speed = 70
+            self.tts.say("I'm sorry, I can't set my voice speed to " + str(level) + " .")
 
         self.logger.info(new_speed)
 
         self.memory.insertData("CARESSES/voice_speed", new_speed)
-        #self.tts.setParameter("speed", new_speed)
-        #self.tts.say("Hello, my name is pepper and I'm very sexy")
         self.onInput_onStop()
 
     def onInput_onStop(self):

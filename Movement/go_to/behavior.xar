@@ -14,6 +14,8 @@ class MyClass(GeneratedClass):
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
 
         self.motionProxy = ALProxy("ALMotion")
+        self.motionProxy.setExternalCollisionProtectionEnabled("All", False)
+
         self.motionProxy.wakeUp()
         # For NAO robot
         self.motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION", True]])
@@ -72,7 +74,7 @@ class MyClass(GeneratedClass):
             where = str(self.memory.getData("CARESSES/go_to"))
             self.logger.info(where)
             where = where.strip()
-            if where == "somewhere":
+            if where == "None":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
@@ -187,5 +189,6 @@ class MyClass(GeneratedClass):
 
 
     def onInput_onStop(self):
+        self.motionProxy.setExternalCollisionProtectionEnabled("All", True)
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
         self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

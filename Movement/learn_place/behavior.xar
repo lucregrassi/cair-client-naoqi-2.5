@@ -14,7 +14,7 @@ class MyClass(GeneratedClass):
         self.motion = ALProxy("ALMotion")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
-        self.voice_speed = "\\RSPD=" + self.memory.getData("CARESSES/voice_speed") + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
 
         self.place_key = -1
         self.asr_service = ALProxy("ALSpeechRecognition")
@@ -67,10 +67,10 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
 
         try:
-            where = str(self.memory.getData("CARESSES/learn place"))
+            where = str(self.memory.getData("CARESSES/learn_place"))
             self.logger.info(where)
             where = where.strip()
-            if where == "place":
+            if where == "None":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Chit-chatting" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="163" y="53"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Chit-chatting" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="234" y="60"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
 import sys
 sys.path.append("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/libs/")
 from naoqi import ALProxy
@@ -39,6 +39,9 @@ class MyClass(GeneratedClass):
 
         self.audio_device = ALProxy("ALAudioDevice")
         self.audio_device.setOutputVolume(60)
+
+        self.asr_service = ALProxy("ALSpeechRecognition")
+        self.asr_service.setAudioExpression(False)
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
         self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
@@ -82,7 +85,10 @@ class MyClass(GeneratedClass):
         self.previous_sentence = ""
         self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         self.repeat = False
-
+        try:
+            self.al.setState("disabled")
+        except:
+            pass
         self.motion.wakeUp()
 
         # With Pepper robot, preload the images to be set on the tablet during the conversation
@@ -144,7 +150,7 @@ class MyClass(GeneratedClass):
                 self.memory.insertData(self.speech_reco_event, [])
                 reco_speech = self.memory.getData(self.speech_reco_event)
 
-                exit_keywords = ["quit", "stop", "exit", "stop talking", "goodbye", "i have to go"]
+                exit_keywords = ["stop talking"]
                 repeat_keywords = ["repeat", "say it again"]
                 # Reset repeat to false, otherwise it will always repeat the previous sentence
                 self.repeat = False
@@ -436,24 +442,27 @@ class MyClass(GeneratedClass):
                                 self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
                         elif action == "rest":
-                            if self.behavior_manager.isBehaviorInstalled("movement/rest"):
-                                if self.tablet:
-                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/RestMode.png")
-                                self.behavior_manager.runBehavior("movement/rest")
-                                while self.behavior_manager.isBehaviorRunning("movement/rest"):
-                                    pass
-                            else:
-                                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+                            if self.tablet:
+                                if self.behavior_manager.isBehaviorInstalled("movement/rest"):
+                                    # Execute this behavior only on Pepper.
+                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/PrivacyMode.png")
+                                    self.behavior_manager.runBehavior("movement/rest")
+                                    while self.behavior_manager.isBehaviorRunning("movement/rest"):
+                                        pass
+                                else:
+                                    self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
                         elif action == "wakeup":
-                            if self.behavior_manager.isBehaviorInstalled("movement/wakeup"):
-                                if self.tablet:
-                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
-                                self.behavior_manager.runBehavior("movement/wakeup")
-                                while self.behavior_manager.isBehaviorRunning("movement/wakeup"):
-                                    pass
-                            else:
-                                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+                            if self.tablet:
+                                if self.behavior_manager.isBehaviorInstalled("movement/wakeup"):
+                                    # Execute this behavior only on Pepper.
+
+                                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                                        self.behavior_manager.runBehavior("movement/wakeup")
+                                        while self.behavior_manager.isBehaviorRunning("movement/wakeup"):
+                                            pass
+                                else:
+                                    self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
                         elif action == "forgetmap":
                             if self.behavior_manager.isBehaviorInstalled("movement/forget_map"):

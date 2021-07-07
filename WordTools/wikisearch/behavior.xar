@@ -40,7 +40,7 @@ class MyClass(GeneratedClass):
             what = str(self.memory.getData("CARESSES/wikisearch"))
             self.logger.info(what)
             what = what.strip()
-            if what == "wikipedia" or what == "Wikipedia":
+            if what == "None":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:

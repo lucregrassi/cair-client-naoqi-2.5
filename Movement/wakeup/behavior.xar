@@ -7,6 +7,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         self.recharge = ALProxy("ALRecharge")
         self.motion = ALProxy("ALMotion")
+        self.memory = ALProxy("ALMemory")
         self.al = ALProxy("ALAutonomousLife")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"

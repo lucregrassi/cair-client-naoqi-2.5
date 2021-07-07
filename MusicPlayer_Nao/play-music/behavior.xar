@@ -14,7 +14,9 @@ class MyClass(GeneratedClass):
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
-        self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
+        self.memory.subscribeToEvent("MiddleTactilTouched", self.getName(),"onTouched")
+        self.memory.subscribeToEvent("FrontTactilTouched", self.getName(),"onTouched")
+        self.memory.subscribeToEvent("RearTactilTouched", self.getName(),"onTouched")
         self.isRunning = True
         self.audio_player_service = ALProxy("ALAudioPlayer")
 
@@ -36,7 +38,7 @@ class MyClass(GeneratedClass):
         text = self.memory.getData("CARESSES/song_title")
         self.logger.info(str(text))
 
-        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the song.", self.configuration)
+        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the song. Please, be patient, it may take some time.", self.configuration)
         text = text.replace(" ", "+")
 
         response = requests.get(BASE + "musicdownloader/" + str(text), verify=False)
@@ -44,7 +46,7 @@ class MyClass(GeneratedClass):
         wav_file = open(self.app_path + '/song.mp3', 'wb')
         decoded_string = base64.b64decode(encoded_string)
         wav_file.write(decoded_string)
-        self.animated_speech.say(self.voice_speed + "Touch my head, my hands or my bumpers when you want me to stop.", self.configuration)
+        self.animated_speech.say(self.voice_speed + "Touch my head when you want me to stop.", self.configuration)
 
         fileId = self.audio_player_service.loadFile(self.app_path + "/song.mp3")
         self.logger.info(fileId)

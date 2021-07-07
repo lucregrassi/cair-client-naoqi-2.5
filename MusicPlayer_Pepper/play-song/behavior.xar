@@ -27,6 +27,7 @@ class MyClass(GeneratedClass):
         vocabulary = ["yes", "no"]
         self.asr_service.pause(True)
         self.asr_service.setVocabulary(vocabulary, False)
+        self.asr_service.setAudioExpression(False)
         self.behavior_manager = ALProxy("ALBehaviorManager")
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
@@ -47,7 +48,7 @@ class MyClass(GeneratedClass):
         try:
             text = self.memory.getData("CARESSES/song_title")
             self.logger.info(str(text))
-            if text == "some music" or text == "something" or text == "a song" or text == "music":
+            if text == "None" or "music" in text or text == "a song":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:

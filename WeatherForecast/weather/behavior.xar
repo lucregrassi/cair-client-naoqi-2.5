@@ -40,7 +40,7 @@ class MyClass(GeneratedClass):
             city = str(self.memory.getData("CARESSES/weather_city"))
             self.logger.info(city)
             city = city.strip()
-            if city == "weather":
+            if city == "None":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:

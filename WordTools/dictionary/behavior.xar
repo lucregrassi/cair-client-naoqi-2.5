@@ -37,7 +37,7 @@ class MyClass(GeneratedClass):
             to_define = str(self.memory.getData("CARESSES/dictionary"))
             self.logger.info(to_define)
             to_define = to_define.strip()
-            if to_define == "dictionary":
+            if to_define == "None":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:

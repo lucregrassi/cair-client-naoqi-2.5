@@ -43,7 +43,7 @@ class MyClass(GeneratedClass):
         try:
             text = self.memory.getData("CARESSES/karaoke_title")
             self.logger.info(str(text))
-            if text == "karaoke" or text == "a song" or text == "something":
+            if text == "None" or text == "":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:

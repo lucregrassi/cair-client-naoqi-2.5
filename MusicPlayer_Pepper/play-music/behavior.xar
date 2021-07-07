@@ -36,7 +36,7 @@ class MyClass(GeneratedClass):
         text = self.memory.getData("CARESSES/song_title")
         self.logger.info(str(text))
 
-        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the song.", self.configuration)
+        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the song. Please, be patient, it may take a while.", self.configuration)
         text = text.replace(" ", "+")
 
         response = requests.get(BASE + "musicdownloader/" + str(text), verify=False)

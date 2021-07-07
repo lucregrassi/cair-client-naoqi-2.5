@@ -15,6 +15,7 @@
    <triggerSentences>
     <sentence lang="en_US">Let's talk</sentence>
     <sentence lang="en_US">Connect to the cloud</sentence>
+    <sentence lang="en_US">Open CARESSES</sentence>
    </triggerSentences>
    <loadingResponses>
     <sentence lang="en_US">I am connected to the CARESSES Cloud!</sentence>

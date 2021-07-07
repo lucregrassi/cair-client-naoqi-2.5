@@ -41,7 +41,7 @@ class MyClass(GeneratedClass):
             to_translate = str(self.memory.getData("CARESSES/translate_text"))
             self.logger.info(to_translate)
             to_translate = to_translate.strip()
-            if to_translate == "translate" or to_translate == "Translate" or to_translate == "translator":
+            if to_translate == "None":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
@@ -93,7 +93,7 @@ class MyClass(GeneratedClass):
             dest_language = str(self.memory.getData("CARESSES/translate_lan"))
             self.logger.info(dest_language)
             dest_language = dest_language.strip()
-            if dest_language == "translate" or dest_language == "Translate" or dest_language == "start" or dest_language == "Start" or dest_language == "open" or dest_language == "Open":
+            if dest_language == "None":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
