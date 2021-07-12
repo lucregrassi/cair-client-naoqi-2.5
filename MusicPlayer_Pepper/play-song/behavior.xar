@@ -13,7 +13,7 @@ class MyClass(GeneratedClass):
         self.al = ALProxy("ALAutonomousLife")
         self.sASR = ALProxy("ASR2")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.speech_reco_event = "Audio/RecognizedWords"
 
@@ -46,7 +46,7 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
         # Check if the parameter is in memory
         try:
-            text = self.memory.getData("CARESSES/song_title")
+            text = self.memory.getData("CAIR/song_title")
             self.logger.info(str(text))
             if text == "None" or "music" in text or text == "a song":
                 raise Exception("No data")
@@ -97,7 +97,7 @@ class MyClass(GeneratedClass):
             print sentence
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/song_title", str(sentence))
+            self.memory.insertData("CAIR/song_title", str(sentence))
 
         # Once the parameter is obtained, ask the user if he/she wants to watch also the video
         self.animated_speech.say(self.voice_speed + "Do you want me to show you also the video?", self.configuration)
@@ -122,7 +122,7 @@ class MyClass(GeneratedClass):
             while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
                 pass
 
-        self.memory.removeData("CARESSES/song_title")
+        self.memory.removeData("CAIR/song_title")
         self.onInput_onStop()
 
     def onInput_onStop(self):

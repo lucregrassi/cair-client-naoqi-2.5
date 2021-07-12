@@ -11,7 +11,7 @@ class MyClass(GeneratedClass):
         self.al = ALProxy("ALAutonomousLife")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
 
     def onLoad(self):
         #put initialization code here
@@ -22,7 +22,6 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        self.al.setAutonomousAbilityEnabled("All", False)
         self.animated_speech.say(self.voice_speed + "I'm looking for my docking station.", self.configuration)
         try:
             self.recharge.goToStation()

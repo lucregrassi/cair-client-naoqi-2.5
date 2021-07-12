@@ -12,7 +12,7 @@ class MyClass(GeneratedClass):
         self.tablet_service = ALProxy("ALTabletService")
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.sASR = ALProxy("ASR2")
@@ -41,9 +41,9 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
         # Check if the parameter is in memory
         try:
-            text = self.memory.getData("CARESSES/karaoke_title")
+            text = self.memory.getData("CAIR/karaoke_title")
             self.logger.info(str(text))
-            if text == "None" or text == "":
+            if text == "None" or text == "" or text == "a song":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
@@ -92,9 +92,9 @@ class MyClass(GeneratedClass):
             print sentence
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/karaoke_title", str(sentence))
+            self.memory.insertData("CAIR/karaoke_title", str(sentence))
 
-        text = self.memory.getData("CARESSES/karaoke_title")
+        text = self.memory.getData("CAIR/karaoke_title")
         self.logger.info(str(text))
 
         self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the karaoke on YouTube.", self.configuration)
@@ -117,7 +117,7 @@ class MyClass(GeneratedClass):
         self.tablet_service.cleanWebview()
         self.tablet_service.hideWebview()
 
-        self.memory.removeData("CARESSES/karaoke_title")
+        self.memory.removeData("CAIR/karaoke_title")
         self.onInput_onStop()
 
     def onInput_onStop(self):

@@ -37,7 +37,7 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
         # Check if the parameter is in memory
         try:
-            city = str(self.memory.getData("CARESSES/weather_city"))
+            city = str(self.memory.getData("CAIR/weather_city"))
             self.logger.info(city)
             city = city.strip()
             if city == "None":
@@ -87,8 +87,8 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/weather_city", str(sentence))
-            city = str(self.memory.getData("CARESSES/weather_city"))
+            self.memory.insertData("CAIR/weather_city", str(sentence))
+            city = str(self.memory.getData("CAIR/weather_city"))
 
 
         BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
@@ -119,7 +119,7 @@ class MyClass(GeneratedClass):
             # showing the error message
             self.animated_speech.say(self.voice_speed + "I'm sorry, the weather forecast for " + city + " is not available.", self.configuration)
 
-        self.memory.removeData("CARESSES/weather_city")
+        self.memory.removeData("CAIR/weather_city")
         self.onInput_onStop()
 
     def onInput_onStop(self):

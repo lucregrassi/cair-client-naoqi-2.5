@@ -4,7 +4,7 @@
         self.memory = ALProxy("ALMemory")
         self.audio_device = ALProxy("ALAudioDevice")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
 
     def onLoad(self):
@@ -16,17 +16,18 @@
         pass
 
     def onInput_onStart(self):
-        level = self.memory.getData("CARESSES/volume_level").lower()
+        level = self.memory.getData("CAIR/volume_level").lower()
         previous_volume = self.audio_device.getOutputVolume()
         self.logger.info(previous_volume)
 
-        if level == "higher" or level == "raise":
+        if level == "higher" or level == "raise" or level == "louder":
             if previous_volume == 100:
                 self.animated_speech.say(self.voice_speed + "Sorry, I can't speak louder than this.", self.configuration)
             else:
                 new_volume = previous_volume + 10
                 if new_volume > 100:
                     new_volume = 100
+                    self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 self.animated_speech.say(self.voice_speed + "I raised my volume.", self.configuration)
         elif level == "lower" or level == "quieter":
@@ -36,6 +37,7 @@
                 new_volume = previous_volume - 10
                 if new_volume < 40:
                     new_volume = 40
+                    self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 self.animated_speech.say(self.voice_speed + "I lowered my volume.", self.configuration)
         elif level == "high":
@@ -43,6 +45,7 @@
                 self.animated_speech.say(self.voice_speed + "My volume is already set to high.", self.configuration)
             else:
                 new_volume = 100
+                self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 self.animated_speech.say(self.voice_speed + "My volume is now set to high.", self.configuration)
         elif level == "normal":
@@ -50,6 +53,7 @@
                 self.animated_speech.say(self.voice_speed + "My volume is already set to normal.", self.configuration)
             else:
                 new_volume = 60
+                self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 self.animated_speech.say(self.voice_speed + "My volume is now set to normal.", self.configuration)
         elif level == "low":
@@ -57,12 +61,11 @@
                 self.animated_speech.say(self.voice_speed + "My volume is already set to low.", self.configuration)
             else:
                 new_volume = 45
+                self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 self.animated_speech.say(self.voice_speed + "My volume is now set to low.", self.configuration)
         else:
-            self.tts.say("I'm sorry, I can't set my volume to " + str(level) + " .")
-
-        self.logger.info(new_volume)
+            self.animated_speech.say(self.voice_speed  + "I'm sorry, I can't set my volume to " + str(level) + " .", self.configuration)
 
         self.onInput_onStop()
 

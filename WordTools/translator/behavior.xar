@@ -19,7 +19,7 @@ class MyClass(GeneratedClass):
         self.al = ALProxy("ALAutonomousLife")
         self.speech_reco_event = "Audio/RecognizedWords"
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
 
     def onLoad(self):
@@ -38,7 +38,7 @@ class MyClass(GeneratedClass):
 
         # Check if the text to translate is in memory
         try:
-            to_translate = str(self.memory.getData("CARESSES/translate_text"))
+            to_translate = str(self.memory.getData("CAIR/translate_text"))
             self.logger.info(to_translate)
             to_translate = to_translate.strip()
             if to_translate == "None":
@@ -86,11 +86,11 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/translate_text", str(sentence))
-            to_translate = self.memory.getData("CARESSES/translate_text")
+            self.memory.insertData("CAIR/translate_text", str(sentence))
+            to_translate = self.memory.getData("CAIR/translate_text")
 
         try:
-            dest_language = str(self.memory.getData("CARESSES/translate_lan"))
+            dest_language = str(self.memory.getData("CAIR/translate_lan"))
             self.logger.info(dest_language)
             dest_language = dest_language.strip()
             if dest_language == "None":
@@ -137,8 +137,8 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/translate_lan", str(sentence))
-            dest_language = self.memory.getData("CARESSES/translate_lan")
+            self.memory.insertData("CAIR/translate_lan", str(sentence))
+            dest_language = self.memory.getData("CAIR/translate_lan")
 
         dest_language = dest_language.strip().capitalize()
 
@@ -168,8 +168,8 @@ class MyClass(GeneratedClass):
                     self.tts.setLanguage("English")
                     self.onInput_onStop()
 
-        self.memory.removeData("CARESSES/translate_text")
-        self.memory.removeData("CARESSES/translate_lan")
+        self.memory.removeData("CAIR/translate_text")
+        self.memory.removeData("CAIR/translate_lan")
         self.onStopped()
 
     def onInput_onStop(self):

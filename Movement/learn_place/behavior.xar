@@ -14,7 +14,7 @@ class MyClass(GeneratedClass):
         self.motion = ALProxy("ALMotion")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
 
         self.place_key = -1
         self.asr_service = ALProxy("ALSpeechRecognition")
@@ -67,7 +67,7 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
 
         try:
-            where = str(self.memory.getData("CARESSES/learn_place"))
+            where = str(self.memory.getData("CAIR/learn_place"))
             self.logger.info(where)
             where = where.strip()
             if where == "None":
@@ -116,8 +116,8 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/learn_place", str(sentence))
-            where = str(self.memory.getData("CARESSES/learn_place"))
+            self.memory.insertData("CAIR/learn_place", str(sentence))
+            where = str(self.memory.getData("CAIR/learn_place"))
 
         # Get the name of place the user wants to add from the memory
         places = self.get_places_from_map()
@@ -132,8 +132,8 @@ class MyClass(GeneratedClass):
         # Check if the transformation matrix of the robot wrt the environment exists
         try:
             # If the transformation exists, the position should be computed wrt the enviromnent
-            transformation_matrix = self.memory.getData("CARESSES/transformation_matrix")
-            theta = self.memory.getData("CARESSES/theta")
+            transformation_matrix = self.memory.getData("CAIR/transformation_matrix")
+            theta = self.memory.getData("CAIR/theta")
             Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
             Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
             self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
@@ -186,8 +186,8 @@ class MyClass(GeneratedClass):
                                               [np.sin(theta), np.cos(theta), 0],
                                               [0, 0, 1]])
                 self.logger.info("Transformation matrix:" + str(transformation_matrix))
-                self.memory.insertData("CARESSES/transformation_matrix", transformation_matrix.tolist())
-                self.memory.insertData("CARESSES/theta", theta)
+                self.memory.insertData("CAIR/transformation_matrix", transformation_matrix.tolist())
+                self.memory.insertData("CAIR/theta", theta)
 
                 self.animated_speech.say(self.voice_speed + "This is the first place of the map. Now I know that this is the " + str(where) +  ".", self.configuration)
 

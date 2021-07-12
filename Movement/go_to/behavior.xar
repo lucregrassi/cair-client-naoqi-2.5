@@ -26,7 +26,7 @@ class MyClass(GeneratedClass):
 
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.gain = 0.2
         self.isRunning = True
 
@@ -71,7 +71,7 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         try:
-            where = str(self.memory.getData("CARESSES/go_to"))
+            where = str(self.memory.getData("CAIR/go_to"))
             self.logger.info(where)
             where = where.strip()
             if where == "None":
@@ -120,8 +120,8 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/go_to", str(sentence))
-            where = str(self.memory.getData("CARESSES/go_to"))
+            self.memory.insertData("CAIR/go_to", str(sentence))
+            where = str(self.memory.getData("CAIR/go_to"))
 
         places = self.get_places_from_map()
 
@@ -141,8 +141,8 @@ class MyClass(GeneratedClass):
             P_r = [Px_r, Py_r, 1.0]
 
             try:
-                transformation_matrix = self.memory.getData("CARESSES/transformation_matrix")
-                theta = self.memory.getData("CARESSES/theta")
+                transformation_matrix = self.memory.getData("CAIR/transformation_matrix")
+                theta = self.memory.getData("CAIR/theta")
                 Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
                 Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
                 self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
@@ -174,17 +174,17 @@ class MyClass(GeneratedClass):
                 Pr_w = np.dot(transformation_matrix, np.array([P_r]).T)
                 Pr_w = [round(Pr_w[0], 2), round(Pr_w[1], 2), 1.0, round(Ptheta_r + theta, 2)]
                 self.logger.info("Position of the robot wrt the world:" + str(Pr_w))
-                self.memory.removeData("CARESSES/go_to")
+                self.memory.removeData("CAIR/go_to")
                 self.onInput_onStop()
 
             except:
                 self.animated_speech.say(self.voice_speed + "I need to know where I am with respect to the environment before I can go somewhere.", self.configuration)
-                self.memory.removeData("CARESSES/go_to")
+                self.memory.removeData("CAIR/go_to")
                 self.onInput_onStop()
 
         else:
             self.animated_speech.say(self.voice_speed + "I'm sorry I don't know where the " + where + " is.", self.configuration)
-            self.memory.removeData("CARESSES/go_to")
+            self.memory.removeData("CAIR/go_to")
             self.onInput_onStop()
 
 

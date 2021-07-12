@@ -12,7 +12,7 @@ class MyClass(GeneratedClass):
         self.al = ALProxy("ALAutonomousLife")
         self.speech_reco_event = "Audio/RecognizedWords"
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
 
 
@@ -34,7 +34,7 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
         # Check if the parameter is in memory
         try:
-            to_define = str(self.memory.getData("CARESSES/dictionary"))
+            to_define = str(self.memory.getData("CAIR/dictionary"))
             self.logger.info(to_define)
             to_define = to_define.strip()
             if to_define == "None":
@@ -84,8 +84,8 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/dictionary", str(sentence))
-            to_define = str(self.memory.getData("CARESSES/dictionary"))
+            self.memory.insertData("CAIR/dictionary", str(sentence))
+            to_define = str(self.memory.getData("CAIR/dictionary"))
 
         dictionary = PyDictionary()
         try:
@@ -99,7 +99,7 @@ class MyClass(GeneratedClass):
             definition = "I'm sorry, I can't find a definition for " + to_define + " on the dictionary."
             self.animated_speech.say(self.voice_speed + definition, self.configuration)
 
-        self.memory.removeData("CARESSES/dictionary")
+        self.memory.removeData("CAIR/dictionary")
         self.onStopped()
 
     def onInput_onStop(self):

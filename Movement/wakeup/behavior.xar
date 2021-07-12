@@ -10,7 +10,7 @@ class MyClass(GeneratedClass):
         self.memory = ALProxy("ALMemory")
         self.al = ALProxy("ALAutonomousLife")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
 
     def onLoad(self):

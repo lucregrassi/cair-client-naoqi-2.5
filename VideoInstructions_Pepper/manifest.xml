@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="karaokeplayer">
+<package version="0.0.0" uuid="videoinstructions">
  <names>
-  <name lang="en_US">KaraokePlayer_Pepper</name>
+  <name lang="en_US">VideoInstructions_Pepper</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
@@ -10,7 +10,7 @@
   <language>en_US</language>
  </descriptionLanguages>
  <contents>
-  <behaviorContent path="play-karaoke">
+  <behaviorContent path="show-instructions">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>

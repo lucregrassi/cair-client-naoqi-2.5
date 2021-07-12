@@ -10,7 +10,7 @@ class MyClass(GeneratedClass):
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
 
     def onLoad(self):
         #put initialization code here
@@ -29,8 +29,8 @@ class MyClass(GeneratedClass):
 
         # If there is the transformation in the memory, delete it and delete also theta (angle offset)
         try:
-            self.memory.removeData("CARESSES/transformation_matrix")
-            self.memory.removeData("CARESSES/theta")
+            self.memory.removeData("CAIR/transformation_matrix")
+            self.memory.removeData("CAIR/theta")
         except:
             pass
 

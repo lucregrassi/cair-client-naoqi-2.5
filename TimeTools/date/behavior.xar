@@ -8,7 +8,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
 
     def onLoad(self):
@@ -21,7 +21,7 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         today = date.today()
-        d1 = today.strftime("%d/%m/%Y")
+        d1 = today.strftime("%m/%d/%Y")
         self.logger.info(str(d1))
         self.animated_speech.say(self.voice_speed + "It's " + str(d1))
         self.onStopped()

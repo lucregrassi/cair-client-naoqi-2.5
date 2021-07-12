@@ -32,9 +32,9 @@ class MyClass(GeneratedClass):
             self.tablet = False
 
         try:
-            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
-            self.memory.insertData("CARESSES/voice_speed", 75)
+            self.memory.insertData("CAIR/voice_speed", 75)
             self.voice_speed = "\\RSPD=75\\"
 
         self.audio_device = ALProxy("ALAudioDevice")
@@ -81,6 +81,7 @@ class MyClass(GeneratedClass):
         self.previous_sentence = ""
         self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         self.repeat = False
+        self.animated_speech.say(self.voice_speed + "Give me a moment, I need to change some of my settings before we start.", self.configuration)
         try:
             self.al.setState("disabled")
         except:
@@ -89,10 +90,11 @@ class MyClass(GeneratedClass):
 
         # With Pepper robot, preload the images to be set on the tablet during the conversation
         if self.tablet:
-            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/CARESSES_logo.png")
+            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/DialogueMode.png")
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/PrivacyMode.png")
-            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/CARESSES_logo.png")
+            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/DialogueMode.png")
+
 
         # If the file with the credentials exists, read the ID and use it during the requests to the Cloud
         if os.path.exists("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/credentials.txt"):
@@ -103,7 +105,7 @@ class MyClass(GeneratedClass):
 
         # If it is the first interaction with the Cloud, perform a put request to get a new incremental ID
         if client_id == -1:
-            response = requests.put(BASE + "caresses/0/0", verify=False)
+            response = requests.put(BASE + "CAIR_dialogue/0/0", verify=False)
             client_id = str(response.json()['id'])
             with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/credentials.txt", 'w') as credentials:
                 credentials.write(str(client_id))
@@ -146,7 +148,7 @@ class MyClass(GeneratedClass):
                 self.memory.insertData(self.speech_reco_event, [])
                 reco_speech = self.memory.getData(self.speech_reco_event)
 
-                exit_keywords = ["stop talking"]
+                exit_keywords = ["stop talking", "quit the application"]
                 repeat_keywords = ["repeat", "say it again"]
                 # Reset repeat to false, otherwise it will always repeat the previous sentence
                 self.repeat = False
@@ -171,7 +173,7 @@ class MyClass(GeneratedClass):
                 sentence = sentence.replace(" ", "_")
                 self.logger.info(str(sentence))
                 self.memory.insertData(self.speech_reco_event, [])
-                response = requests.get(BASE + "caresses/" + str(client_id) + "/" + sentence, verify=False)
+                response = requests.get(BASE + "CAIR_dialogue/" + str(client_id) + "/" + sentence, verify=False)
                 intent_reply = response.json()['intent_reply']
                 plan = response.json()['plan']
                 reply = response.json()['reply']
@@ -205,7 +207,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 level = re.findall("level=(\w+)", item)[0]
                                 self.logger.info(str(level))
-                                self.memory.insertData("CARESSES/volume_level", str(level))
+                                self.memory.insertData("CAIR/volume_level", str(level))
                                 self.behavior_manager.runBehavior("utility/volume")
                                 while self.behavior_manager.isBehaviorRunning("utility/volume"):
                                     pass
@@ -218,11 +220,11 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 level = re.findall("level=(\w+)", item)[0]
                                 self.logger.info(str(level))
-                                self.memory.insertData("CARESSES/voice_speed_level", str(level))
+                                self.memory.insertData("CAIR/voice_speed_level", str(level))
                                 self.behavior_manager.runBehavior("utility/voice_speed")
                                 while self.behavior_manager.isBehaviorRunning("utility/voice_speed"):
                                     pass
-                                self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+                                self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
                             else:
                                 self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
@@ -288,8 +290,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 city = re.findall("city=(.*)", item)[0]
                                 self.logger.info(str(city))
-                                self.memory.insertData("CARESSES/weather_city", str(city))
-                                self.logger.info(str(self.memory.getData("CARESSES/weather_city")))
+                                self.memory.insertData("CAIR/weather_city", str(city))
                                 self.behavior_manager.runBehavior("weatherforecast/weather")
                                 while self.behavior_manager.isBehaviorRunning("weatherforecast/weather"):
                                     pass
@@ -302,8 +303,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 title = re.findall("title=(.*)", item)[0]
                                 self.logger.info(str(title))
-                                self.memory.insertData("CARESSES/song_title", str(title))
-                                self.logger.info(str(self.memory.getData("CARESSES/song_title")))
+                                self.memory.insertData("CAIR/song_title", str(title))
                                 self.behavior_manager.runBehavior("musicplayer/play-song")
                                 while self.behavior_manager.isBehaviorRunning("musicplayer/play-song"):
                                     pass
@@ -316,8 +316,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 title = re.findall("title=(.*)", item)[0]
                                 self.logger.info(str(title))
-                                self.memory.insertData("CARESSES/karaoke_title", str(title))
-                                self.logger.info(str(self.memory.getData("CARESSES/karaoke_title")))
+                                self.memory.insertData("CAIR/karaoke_title", str(title))
                                 self.behavior_manager.runBehavior("karaokeplayer/play-karaoke")
                                 while self.behavior_manager.isBehaviorRunning("karaokeplayer/play-karaoke"):
                                     pass
@@ -330,8 +329,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 what = re.findall("what=(.*)", item)[0]
                                 self.logger.info(str(what))
-                                self.memory.insertData("CARESSES/wikisearch", str(what))
-                                self.logger.info(str(self.memory.getData("CARESSES/wikisearch")))
+                                self.memory.insertData("CAIR/wikisearch", str(what))
                                 self.behavior_manager.runBehavior("wordtools/wikisearch")
                                 while self.behavior_manager.isBehaviorRunning("wordtools/wikisearch"):
                                     pass
@@ -344,10 +342,10 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 language = re.findall("language=(\w+)", item)[0]
                                 self.logger.info(str(language))
-                                self.memory.insertData("CARESSES/translate_lan", str(language))
+                                self.memory.insertData("CAIR/translate_lan", str(language))
                                 what = re.findall("what=(.*)", plan)[0]
                                 self.logger.info(str(what))
-                                self.memory.insertData("CARESSES/translate_text", str(what))
+                                self.memory.insertData("CAIR/translate_text", str(what))
                                 self.behavior_manager.runBehavior("wordtools/translator")
                                 while self.behavior_manager.isBehaviorRunning("wordtools/translator"):
                                     pass
@@ -360,7 +358,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 what = re.findall("what=(.*)", item)[0]
                                 self.logger.info(str(what))
-                                self.memory.insertData("CARESSES/dictionary", str(what))
+                                self.memory.insertData("CAIR/dictionary", str(what))
                                 self.behavior_manager.runBehavior("wordtools/dictionary")
                                 while self.behavior_manager.isBehaviorRunning("wordtools/dictionary"):
                                     pass
@@ -373,8 +371,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 where = re.findall("where=(\w+)", item)[0]
                                 self.logger.info(str(where))
-                                self.memory.insertData("CARESSES/move", str(where))
-                                self.logger.info(str(self.memory.getData("CARESSES/move")))
+                                self.memory.insertData("CAIR/move", str(where))
                                 self.behavior_manager.runBehavior("movement/move")
                                 while self.behavior_manager.isBehaviorRunning("movement/move"):
                                     pass
@@ -387,8 +384,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 where = re.findall("where=(\w+)", item)[0]
                                 self.logger.info(str(where))
-                                self.memory.insertData("CARESSES/go", str(where))
-                                self.logger.info(str(self.memory.getData("CARESSES/go")))
+                                self.memory.insertData("CAIR/go", str(where))
                                 self.behavior_manager.runBehavior("movement/go")
                                 while self.behavior_manager.isBehaviorRunning("movement/go"):
                                     pass
@@ -401,8 +397,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 where = re.findall("where=(.*)", item)[0]
                                 self.logger.info(str(where))
-                                self.memory.insertData("CARESSES/learn_place", str(where))
-                                self.logger.info(str(self.memory.getData("CARESSES/learn_place")))
+                                self.memory.insertData("CAIR/learn_place", str(where))
                                 self.behavior_manager.runBehavior("movement/learn_place")
                                 while self.behavior_manager.isBehaviorRunning("movement/learn_place"):
                                     pass
@@ -415,8 +410,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 where = re.findall("where=(.*)", item)[0]
                                 self.logger.info(str(where))
-                                self.memory.insertData("CARESSES/set_position", str(where))
-                                self.logger.info(str(self.memory.getData("CARESSES/set_position")))
+                                self.memory.insertData("CAIR/set_position", str(where))
                                 self.behavior_manager.runBehavior("movement/set_position")
                                 while self.behavior_manager.isBehaviorRunning("movement/set_position"):
                                     pass
@@ -429,8 +423,7 @@ class MyClass(GeneratedClass):
                                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
                                 where = re.findall("where=(.*)", item)[0]
                                 self.logger.info(str(where))
-                                self.memory.insertData("CARESSES/go_to", str(where))
-                                self.logger.info(str(self.memory.getData("CARESSES/go_to")))
+                                self.memory.insertData("CAIR/go_to", str(where))
                                 self.behavior_manager.runBehavior("movement/go_to")
                                 while self.behavior_manager.isBehaviorRunning("movement/go_to"):
                                     pass
@@ -452,11 +445,10 @@ class MyClass(GeneratedClass):
                             if self.tablet:
                                 if self.behavior_manager.isBehaviorInstalled("movement/wakeup"):
                                     # Execute this behavior only on Pepper.
-
-                                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
-                                        self.behavior_manager.runBehavior("movement/wakeup")
-                                        while self.behavior_manager.isBehaviorRunning("movement/wakeup"):
-                                            pass
+                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                                    self.behavior_manager.runBehavior("movement/wakeup")
+                                    while self.behavior_manager.isBehaviorRunning("movement/wakeup"):
+                                        pass
                                 else:
                                     self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
@@ -510,9 +502,48 @@ class MyClass(GeneratedClass):
                             else:
                                 self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
+                        elif action == "playmovie":
+                            if self.behavior_manager.isBehaviorInstalled("movieplayer/play-movie"):
+                                if self.tablet:
+                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                                title = re.findall("title=(.*)", item)[0]
+                                self.logger.info(str(title))
+                                self.memory.insertData("CAIR/movie_title", str(title))
+                                self.behavior_manager.runBehavior("movieplayer/play-movie")
+                                while self.behavior_manager.isBehaviorRunning("movieplayer/play-movie"):
+                                    pass
+                            else:
+                                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+
+                        elif action == "showinstructions":
+                            if self.behavior_manager.isBehaviorInstalled("videoinstructions/show-instructions"):
+                                if self.tablet:
+                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                                what = re.findall("what=(.*)", item)[0]
+                                self.logger.info(str(what))
+                                self.memory.insertData("CAIR/instructions", str(what))
+                                self.behavior_manager.runBehavior("videoinstructions/show-instructions")
+                                while self.behavior_manager.isBehaviorRunning("videoinstructions/show-instructions"):
+                                    pass
+                            else:
+                                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+
+                        elif action == "showexercise":
+                            if self.behavior_manager.isBehaviorInstalled("videoexercises/play-exercise"):
+                                if self.tablet:
+                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/ExecutionMode.png")
+                                what = re.findall("what=(.*)", item)[0]
+                                self.logger.info(str(what))
+                                self.memory.insertData("CAIR/exercise", str(what))
+                                self.behavior_manager.runBehavior("videoexercises/play-exercise")
+                                while self.behavior_manager.isBehaviorRunning("videoexercises/play-exercise"):
+                                    pass
+                            else:
+                                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+
                     # Once the execution of the plan is finished, set the dialogue mode image on the tablet
                     if self.tablet:
-                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/CARESSES_logo.png")
+                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/DialogueMode.png")
 
                     # If there is a reply from the Cloud, say it after the plan has been executed
                     if reply:
@@ -525,10 +556,10 @@ class MyClass(GeneratedClass):
         self.al.setState("interactive")
         self.onStopped()
         self.onUnload()
-        # If present, delete the transformation - if the robot moves outside caresses it is no more valid
+        # If present, delete the transformation - if the robot moves outside CAIR it is no more valid
         try:
-            self.memory.removeData("CARESSES/transformation_matrix")
-            self.memory.removeData("CARESSES/theta")
+            self.memory.removeData("CAIR/transformation_matrix")
+            self.memory.removeData("CAIR/theta")
         except:
             self.logger.info("No transformation to delete in memory.")
             pass

@@ -16,7 +16,7 @@ class MyClass(GeneratedClass):
         self.motionProxy = ALProxy("ALMotion")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
 
     def get_places_from_map(self):
         with open("/data/home/nao/.local/share/PackageManager/apps/movement/map.txt", 'r') as f:
@@ -42,7 +42,7 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        where = str(self.memory.getData("CARESSES/set_position"))
+        where = str(self.memory.getData("CAIR/set_position"))
         places = self.get_places_from_map()
 
         # If the position you want the robot to believe it is in, is mapped, save the offset in the memory
@@ -64,7 +64,7 @@ class MyClass(GeneratedClass):
             # Angle of rotation of the robot frame wrt the world frame
             theta = float(Ptheta_w - Ptheta_r)
             self.logger.info("Rotation angle between the two frames:" + str(theta))
-            self.memory.insertData("CARESSES/theta", theta)
+            self.memory.insertData("CAIR/theta", theta)
 
             # Compute the translation between the origins of the two frames
             translation_x = Px_w - np.cos(theta) * Px_r + np.sin(theta) * Py_r
@@ -75,7 +75,7 @@ class MyClass(GeneratedClass):
                                               [np.sin(theta), np.cos(theta), translation_y],
                                               [0, 0, 1]])
             self.logger.info("Transformation matrix:" + str(transformation_matrix))
-            self.memory.insertData("CARESSES/transformation_matrix", transformation_matrix.tolist())
+            self.memory.insertData("CAIR/transformation_matrix", transformation_matrix.tolist())
             self.animated_speech.say(self.voice_speed + "My position is now set to " + str(where) + ".", self.configuration)
 
             # COUNTER CHECK

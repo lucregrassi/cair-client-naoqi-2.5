@@ -28,7 +28,7 @@ class MyClass(GeneratedClass):
         self.isRunning = False
 
     def onInput_onStart(self):
-        where = str(self.memory.getData("CARESSES/go"))
+        where = str(self.memory.getData("CAIR/go"))
         if where == "forward":
             X = 0.5
             Y = 0.0

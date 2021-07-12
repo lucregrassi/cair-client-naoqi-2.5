@@ -12,7 +12,7 @@ class MyClass(GeneratedClass):
         self.app_path = "/data/home/nao/.local/share/PackageManager/apps/musicplayer"
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory.subscribeToEvent("MiddleTactilTouched", self.getName(),"onTouched")
         self.memory.subscribeToEvent("FrontTactilTouched", self.getName(),"onTouched")
@@ -35,13 +35,13 @@ class MyClass(GeneratedClass):
         cineca = "131.175.198.134"
         BASE = "http://" + cineca + ":5002/"
 
-        text = self.memory.getData("CARESSES/song_title")
+        text = self.memory.getData("CAIR/song_title")
         self.logger.info(str(text))
 
         self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the song. Please, be patient, it may take some time.", self.configuration)
         text = text.replace(" ", "+")
 
-        response = requests.get(BASE + "musicdownloader/" + str(text), verify=False)
+        response = requests.get(BASE + "CAIR_music/" + str(text), verify=False)
         encoded_string = response.json()['mp3']
         wav_file = open(self.app_path + '/song.mp3', 'wb')
         decoded_string = base64.b64decode(encoded_string)

@@ -1,34 +1,25 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play Song" id="1" localization="8" tooltip="This box contains a basic python script to play music. It  retrieves eventual missing parameters and plays the requested song." x="167" y="74"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play Movie" id="1" localization="8" tooltip="This box contains a basic python script that allows the robot to look for the trailer of a movie." x="191" y="77"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
 import qi
+import os
 import urllib2
 import re
-import ssl
 from naoqi import ALProxy
 
 
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
-        self.motionProxy = ALProxy("ALMotion")
+        self.tablet_service = ALProxy("ALTabletService")
         self.memory = ALProxy("ALMemory")
-        self.al = ALProxy("ALAutonomousLife")
-        self.sASR = ALProxy("ASR2")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
+        self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
+        self.sASR = ALProxy("ASR2")
         self.speech_reco_event = "Audio/RecognizedWords"
-
-        # Things needed to understand if the user wants to watch the video
-        self.asr_service = ALProxy("ALSpeechRecognition")
-        # asr needs to be paused before changing the language and setting the vocabulary
-        self.asr_service.pause(True)
-        # change the language to overcome vocabulary problem
-        self.asr_service.setLanguage("Italian")
-        self.asr_service.setLanguage("English")
-        vocabulary = ["yes", "no"]
-        self.asr_service.pause(True)
-        self.asr_service.setVocabulary(vocabulary, False)
-        self.behavior_manager = ALProxy("ALBehaviorManager")
+        self.al = ALProxy("ALAutonomousLife")
+        self.isRunning = True
+        self.isAlive = True
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
         self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
@@ -36,6 +27,10 @@ class MyClass(GeneratedClass):
         self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
         self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
         self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
+
+    def onTouched(self, strVarName, value):
+        self.logger.info("touched")
+        self.isRunning = False
 
     def onLoad(self):
         pass
@@ -46,13 +41,13 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
         # Check if the parameter is in memory
         try:
-            text = self.memory.getData("CAIR/song_title")
+            text = self.memory.getData("CAIR/movie_title")
             self.logger.info(str(text))
-            if text == "None" or "music" in text or text == "a song" or text == "":
+            if text == "None" or text == "":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "Please, tell me the title of the song.", self.configuration)
+            self.animated_speech.say(self.voice_speed + "Please, tell me the title of the movie.", self.configuration)
 
             # Start speech recognition
             self.sASR.startReco("English", False, True)
@@ -97,14 +92,36 @@ class MyClass(GeneratedClass):
             print sentence
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CAIR/song_title", str(sentence))
+            self.memory.insertData("CAIR/movie_title", str(sentence))
 
+        text = self.memory.getData("CAIR/movie_title")
+        self.logger.info(str(text))
 
-        self.behavior_manager.runBehavior("musicplayer/play-music")
-        while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
-            pass
+        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the trailer on YouTube.", self.configuration)
 
-        self.memory.removeData("CAIR/song_title")
+        search_keyword = text.replace(" ", "+") + "+official+trailer"
+        html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
+        video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode('utf-8'))
+        try:
+            my_url = "https://www.youtube.com/watch?v=" + video_ids[0]
+            self.logger.info(str(my_url))
+
+            # Start the application on tablet
+            self.tablet_service.cleanWebview()
+            self.tablet_service.loadUrl(str(my_url))
+            self.tablet_service.showWebview()
+            self.animated_speech.say(self.voice_speed + "Press play when you're ready to watch the trailer. Touch one of my sensors when you want to stop.", self.configuration)
+
+            while self.isRunning:
+                pass
+
+            self.tablet_service.cleanWebview()
+            self.tablet_service.hideWebview()
+
+        except:
+            self.animated_speech.say(self.voice_speed + "I'm sorry I didn't find what you asked for.", self.configuration)
+
+        self.memory.removeData("CAIR/movie_title")
         self.onInput_onStop()
 
     def onInput_onStop(self):

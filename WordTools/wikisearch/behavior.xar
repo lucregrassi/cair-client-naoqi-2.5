@@ -16,7 +16,7 @@ class MyClass(GeneratedClass):
         self.al = ALProxy("ALAutonomousLife")
         self.speech_reco_event = "Audio/RecognizedWords"
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CARESSES/voice_speed")) + "\\"
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
@@ -37,7 +37,7 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
         # Check if the parameter is in memory
         try:
-            what = str(self.memory.getData("CARESSES/wikisearch"))
+            what = str(self.memory.getData("CAIR/wikisearch"))
             self.logger.info(what)
             what = what.strip()
             if what == "None":
@@ -87,8 +87,8 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CARESSES/wikisearch", str(sentence))
-            what = str(self.memory.getData("CARESSES/wikisearch"))
+            self.memory.insertData("CAIR/wikisearch", str(sentence))
+            what = str(self.memory.getData("CAIR/wikisearch"))
 
         warnings.catch_warnings()
         warnings.simplefilter("ignore")
@@ -107,7 +107,7 @@ class MyClass(GeneratedClass):
 
         self.logger.info(str(reply))
         self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
-        self.memory.removeData("CARESSES/wikisearch")
+        self.memory.removeData("CAIR/wikisearch")
         self.onStopped()
 
     def onInput_onStop(self):
