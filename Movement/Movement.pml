@@ -14,7 +14,6 @@
     <Dialogs />
     <Resources>
         <File name="map" src="map.txt" />
-        <File name="icon" src="icon.png" />
     </Resources>
     <Topics />
     <IgnoredPaths />

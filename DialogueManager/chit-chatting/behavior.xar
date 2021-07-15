@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Chit-chatting" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="263" y="67"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Chit-chatting" id="1" localization="8" tooltip="This box contains a Python script that allows the robot to connect to the CAIR Cloud. &#x0A;This behavior uses ASR2 to understand the user&apos;s input and sends it to the CAIR Cloud; the response of the server is then used to make the robot reply to the user and, if present, execute the required action by calling one of the other implemented behaviors." x="227" y="60"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
 import sys
 sys.path.append("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/libs/")
 from naoqi import ALProxy
@@ -9,6 +9,8 @@ import os
 import re
 import time
 import threading
+from numpy.random import choice
+
 
 class MyClass(GeneratedClass):
     def __init__(self):
@@ -34,8 +36,8 @@ class MyClass(GeneratedClass):
         try:
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
-            self.memory.insertData("CAIR/voice_speed", 75)
-            self.voice_speed = "\\RSPD=75\\"
+            self.memory.insertData("CAIR/voice_speed", 80)
+            self.voice_speed = "\\RSPD=80\\"
 
         self.audio_device = ALProxy("ALAudioDevice")
         self.audio_device.setOutputVolume(60)
@@ -81,11 +83,14 @@ class MyClass(GeneratedClass):
         self.previous_sentence = ""
         self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         self.repeat = False
-        self.animated_speech.say(self.voice_speed + "Give me a moment, I need to change some of my settings before we start.", self.configuration)
+
         try:
-            self.al.setState("disabled")
+            if self.al.getState() != "disabled":
+                self.animated_speech.say(self.voice_speed + "Give me a moment. I need to change some of my settings before we start.", self.configuration)
+                self.al.setState("disabled")
         except:
             pass
+
         self.motion.wakeUp()
 
         # With Pepper robot, preload the images to be set on the tablet during the conversation
@@ -431,15 +436,18 @@ class MyClass(GeneratedClass):
                                 self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
                         elif action == "rest":
-                            if self.tablet:
-                                if self.behavior_manager.isBehaviorInstalled("movement/rest"):
-                                    # Execute this behavior only on Pepper.
-                                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/PrivacyMode.png")
-                                    self.behavior_manager.runBehavior("movement/rest")
-                                    while self.behavior_manager.isBehaviorRunning("movement/rest"):
-                                        pass
-                                else:
-                                    self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+                            # Check if the docking station was in the map
+                            if self.memory.getData("CAIR/go_to_outcome"):
+                                if self.tablet:
+                                    if self.behavior_manager.isBehaviorInstalled("movement/rest"):
+                                        # Execute this behavior only on Pepper.
+                                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/dialoguemanager/img/PrivacyMode.png")
+                                        self.behavior_manager.runBehavior("movement/rest")
+                                        while self.behavior_manager.isBehaviorRunning("movement/rest"):
+                                            pass
+                                    else:
+                                        self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+                                self.memory.removeData("CAIR/go_to_outcome")
 
                         elif action == "wakeup":
                             if self.tablet:
@@ -547,6 +555,7 @@ class MyClass(GeneratedClass):
 
                     # If there is a reply from the Cloud, say it after the plan has been executed
                     if reply:
+                        reply = intent_reply + " " + reply
                         self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
                         self.previous_sentence = reply
 
@@ -554,8 +563,7 @@ class MyClass(GeneratedClass):
         if self.tablet:
             self.tablet_service.hideImage()
         self.al.setState("interactive")
-        self.onStopped()
-        self.onUnload()
+        self.setAutonomousAbilities(True, True, True, True, True)
         # If present, delete the transformation - if the robot moves outside CAIR it is no more valid
         try:
             self.memory.removeData("CAIR/transformation_matrix")
@@ -563,4 +571,6 @@ class MyClass(GeneratedClass):
         except:
             self.logger.info("No transformation to delete in memory.")
             pass
+        self.onStopped()
+        self.onUnload()
         sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

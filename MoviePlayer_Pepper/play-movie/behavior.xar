@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play Movie" id="1" localization="8" tooltip="This box contains a basic python script that allows the robot to look for the trailer of a movie." x="191" y="77"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play Movie" id="1" localization="8" tooltip="This box contains a basic Python script that allows the robot to look for the trailer of a movie." x="191" y="77"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
 import qi
 import os
 import urllib2
@@ -12,7 +12,11 @@ class MyClass(GeneratedClass):
         self.tablet_service = ALProxy("ALTabletService")
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        try:
+            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        except:
+            self.voice_speed = "\\RSPD=80\\"
+
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.sASR = ALProxy("ASR2")
@@ -43,7 +47,7 @@ class MyClass(GeneratedClass):
         try:
             text = self.memory.getData("CAIR/movie_title")
             self.logger.info(str(text))
-            if text == "None" or text == "":
+            if text == "None":
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
@@ -110,7 +114,7 @@ class MyClass(GeneratedClass):
             self.tablet_service.cleanWebview()
             self.tablet_service.loadUrl(str(my_url))
             self.tablet_service.showWebview()
-            self.animated_speech.say(self.voice_speed + "Press play when you're ready to watch the trailer. Touch one of my sensors when you want to stop.", self.configuration)
+            self.animated_speech.say(self.voice_speed + "Press play when you're ready to watch the trailer. Touch my head, my hands or my bumpers when you want to stop.", self.configuration)
 
             while self.isRunning:
                 pass

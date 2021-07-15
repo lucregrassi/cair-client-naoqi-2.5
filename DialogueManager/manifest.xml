@@ -14,10 +14,10 @@
    <nature>interactive</nature>
    <triggerSentences>
     <sentence lang="en_US">Let's talk</sentence>
-    <sentence lang="en_US">Connect to the cloud</sentence>
+    <sentence lang="en_US">Talk with me</sentence>
    </triggerSentences>
    <loadingResponses>
-    <sentence lang="en_US">I am connected to the CAIR Cloud!</sentence>
+    <sentence lang="en_US">Sure, let's talk!</sentence>
    </loadingResponses>
    <permissions/>
   </behaviorContent>

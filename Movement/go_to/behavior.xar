@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Go to" id="1" localization="8" tooltip="This box contains a basic python script that allows the robot to go to the specified location. The destination place should be already present in the map, and the robot should know where it is with respect to the environment before it can go somewhere." x="239" y="81"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Go To" id="1" localization="8" tooltip="This box contains a Python script that allows the robot to go to the specified location. The destination place should already be present in the map, and the robot should know where it is with respect to the environment before it can go somewhere." x="239" y="81"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
 import qi
 import numpy as np
 import motion
@@ -26,7 +26,10 @@ class MyClass(GeneratedClass):
 
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
-        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        try:
+            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        except:
+            self.voice_speed = "\\RSPD=80\\"
         self.gain = 0.2
         self.isRunning = True
 
@@ -166,6 +169,7 @@ class MyClass(GeneratedClass):
                 while self.isRunning and self.motionProxy.moveIsActive():
                     pass
 
+                self.memory.insertData("CAIR/go_to_outcome", True)
                 odometry = self.motionProxy.getRobotPosition(True)
                 Px_r = odometry[0]
                 Py_r = odometry[1]
@@ -179,11 +183,13 @@ class MyClass(GeneratedClass):
 
             except:
                 self.animated_speech.say(self.voice_speed + "I need to know where I am with respect to the environment before I can go somewhere.", self.configuration)
+                self.memory.insertData("CAIR/go_to_outcome", False)
                 self.memory.removeData("CAIR/go_to")
                 self.onInput_onStop()
 
         else:
             self.animated_speech.say(self.voice_speed + "I'm sorry I don't know where the " + where + " is.", self.configuration)
+            self.memory.insertData("CAIR/go_to_outcome", False)
             self.memory.removeData("CAIR/go_to")
             self.onInput_onStop()
 

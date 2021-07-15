@@ -457,7 +457,6 @@
         <File name="x1f1" src="libs/unidecode/x1f1.pyc" />
         <File name="x1f6" src="libs/unidecode/x1f6.py" />
         <File name="x1f6" src="libs/unidecode/x1f6.pyc" />
-        <File name="icon" src="icon.png" />
     </Resources>
     <Topics />
     <IgnoredPaths />

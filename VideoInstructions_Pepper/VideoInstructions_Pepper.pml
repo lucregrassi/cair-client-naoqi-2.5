@@ -5,9 +5,7 @@
         <BehaviorDescription name="behavior" src="show-instructions" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
-    <Resources>
-        <File name="icon" src="icon.png" />
-    </Resources>
+    <Resources />
     <Topics />
     <IgnoredPaths />
     <Translations auto-fill="en_US">
