@@ -9,6 +9,8 @@ import os
 import re
 import time
 import threading
+import json
+import pickle
 from numpy.random import choice
 
 
@@ -76,10 +78,8 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         # Location of the API (the server it is running on)
-        azure_server = "13.95.222.73"
-        cineca = "131.175.198.134"
-        BASE = "http://" + cineca + ":5000/"
-        client_id = -1
+        server_IP = "131.175.198.134"
+        BASE = "http://" + server_IP + ":5005/"
         self.previous_sentence = ""
         self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         self.repeat = False
@@ -102,20 +102,16 @@ class MyClass(GeneratedClass):
 
 
         # If the file with the credentials exists, read the ID and use it during the requests to the Cloud
-        if os.path.exists("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/credentials.txt"):
-            with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/credentials.txt", 'r') as f:
-                client_id = f.readline()
-            self.animated_speech.say(self.voice_speed + "I missed you client " + str(client_id) +  ". What would you like to talk about?", self.configuration)
-            self.previous_sentence = "I missed you client " + str(client_id) +  ". What would you like to talk about?"
-
-        # If it is the first interaction with the Cloud, perform a put request to get a new incremental ID
-        if client_id == -1:
-            response = requests.put(BASE + "CAIR_dialogue/0/0", verify=False)
-            client_id = str(response.json()['id'])
-            with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/credentials.txt", 'w') as credentials:
-                credentials.write(str(client_id))
-            self.animated_speech.say(self.voice_speed + "Your client ID is " + client_id + ". Let's talk!", self.configuration)
-            self.previous_sentence = "Your client ID is " + client_id + ". Let's talk!"
+        if not os.path.exists("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/state.txt"):
+            resp = requests.put(BASE + "CAIR_dialogue", verify=False)
+            state = resp.json()["state"]
+            with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/state.txt", 'wb') as f:
+                pickle.dump(state, f)
+            self.animated_speech.say(self.voice_speed + "Welcome to CAIR!" + str(resp.json()["reply"]), self.configuration)
+            self.previous_sentence = "Welcome to CAIR!" + str(resp.json()["reply"])
+        else:
+            self.animated_speech.say(self.voice_speed + "I missed you! What would you like to talk about?", self.configuration)
+            self.previous_sentence = "I missed you! What would you like to talk about?"
 
         # Loop until the user wants to stop the conversation
         while self.isAlive:
@@ -175,10 +171,16 @@ class MyClass(GeneratedClass):
 
             # If the user does not want the robot to repeat something, send the sentence to the Cloud and process the response
             if not self.repeat:
-                sentence = sentence.replace(" ", "_")
                 self.logger.info(str(sentence))
                 self.memory.insertData(self.speech_reco_event, [])
-                response = requests.get(BASE + "CAIR_dialogue/" + str(client_id) + "/" + sentence, verify=False)
+                with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/state.txt", 'rb') as f:
+                    client_state = pickle.load(f)
+                response = requests.get(BASE + "CAIR_dialogue/" + sentence, data=json.dumps(client_state), verify=False)
+                # Retrieve and store the updated client state
+                client_state = response.json()["state"]
+                with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/state.txt", 'wb') as f:
+                    client_state = pickle.dump(client_state, f)
+
                 intent_reply = response.json()['intent_reply']
                 plan = response.json()['plan']
                 reply = response.json()['reply']
