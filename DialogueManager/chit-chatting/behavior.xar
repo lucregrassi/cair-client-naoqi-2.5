@@ -79,7 +79,7 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
         # Location of the API (the server it is running on)
         server_IP = "131.175.198.134"
-        BASE = "http://" + server_IP + ":5005/"
+        BASE = "http://" + server_IP + ":5000/"
         self.previous_sentence = ""
         self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         self.repeat = False
