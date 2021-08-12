@@ -103,8 +103,8 @@ class MyClass(GeneratedClass):
 
         # If the file with the credentials exists, read the ID and use it during the requests to the Cloud
         if not os.path.exists("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/state.txt"):
-            resp = requests.put(BASE + "CAIR_dialogue", verify=False)
-            state = resp.json()["state"]
+            resp = requests.put(BASE + "CAIR_server", verify=False)
+            state = resp.json()["client_state"]
             with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/state.txt", 'wb') as f:
                 pickle.dump(state, f)
             self.animated_speech.say(self.voice_speed + "Welcome to CAIR!" + str(resp.json()["reply"]), self.configuration)
@@ -175,9 +175,9 @@ class MyClass(GeneratedClass):
                 self.memory.insertData(self.speech_reco_event, [])
                 with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/state.txt", 'rb') as f:
                     client_state = pickle.load(f)
-                response = requests.get(BASE + "CAIR_dialogue/" + sentence, data=json.dumps(client_state), verify=False)
+                response = requests.get(BASE + "CAIR_server/" + sentence, data=json.dumps(client_state), verify=False)
                 # Retrieve and store the updated client state
-                client_state = response.json()["state"]
+                client_state = response.json()["client_state"]
                 with open("/data/home/nao/.local/share/PackageManager/apps/dialoguemanager/state.txt", 'wb') as f:
                     client_state = pickle.dump(client_state, f)
 
