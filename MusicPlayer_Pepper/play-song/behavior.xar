@@ -2,6 +2,7 @@
 import qi
 import urllib2
 import re
+import time
 from naoqi import ALProxy
 
 
@@ -69,7 +70,9 @@ class MyClass(GeneratedClass):
             stop = False
 
             while True:
+                time.sleep(0.5)
                 while not reco_speech:
+                    time.sleep(0.5)
                     if sentence and time.time() - start_time_silence > 0.1:
                         self.sASR.stopReco()
                         self.setAutonomousAbilities(False, True, True, True, True)
