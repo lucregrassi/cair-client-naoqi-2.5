@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="dialoguemanager" version="0.0.0">
+<package uuid="dialoguemanager_wait-a685f7" version="0.0.0">
  <names>
-  <name lang="en_US">DialogueManager</name>
+  <name lang="en_US">DialogueManager_wait</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
@@ -12,13 +12,9 @@
  <contents>
   <behaviorContent path="chit-chatting">
    <nature>interactive</nature>
-   <triggerSentences>
-    <sentence lang="en_US">Let's talk</sentence>
-    <sentence lang="en_US">Talk with me</sentence>
-   </triggerSentences>
-   <loadingResponses>
-    <sentence lang="en_US">Sure, let's talk!</sentence>
-   </loadingResponses>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>
