@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Autonomous Abilities (1)" id="4" localization="8" tooltip="Autonomous Abilities exists to keep the robot alive at all times. But this box allows you to disable all or parts of the Autonomous Abilities (Autonomous Blinking, Background Movement, Basic Awareness, Listening Movement, Speaking Movement)." x="61" y="33"><bitmap>media/images/box/auto-abilities.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Autonomous Abilities (1)" id="4" localization="8" tooltip="Autonomous Abilities exists to keep the robot alive at all times. But this box allows you to disable all or parts of the Autonomous Abilities (Autonomous Blinking, Background Movement, Basic Awareness, Listening Movement, Speaking Movement)." x="89" y="94"><bitmap>media/images/box/auto-abilities.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self, False)
 
@@ -17,7 +17,7 @@
         self.onDone() # activate output of the box
 
     def enableAnAbility(self, name):
-        self.autonomouslife.setAutonomousAbilityEnabled(name, self.getParameter(name))]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onDone" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" /><Parameter name="AutonomousBlinking" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables the robot to make its eye leds blink when it sees someone and when it is interacting." id="4" /><Parameter name="BackgroundMovement" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Defines which slight movements the robot does autonomously when its limbs are not moving." id="5" /><Parameter name="BasicAwareness" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Allow to make the robot establish and keep eye contact with people." id="6" /><Parameter name="ListeningMovement" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables some slight movements showing that the robot is listening." id="7" /><Parameter name="SpeakingMovement" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables to start autonomously movements during the speech of the robot." id="8" /></Box><Box name="Autonomous Abilities" id="6" localization="8" tooltip="Autonomous Abilities exists to keep the robot alive at all times. But this box allows you to disable all or parts of the Autonomous Abilities (Autonomous Blinking, Background Movement, Basic Awareness, Listening Movement, Speaking Movement)." x="767" y="82"><bitmap>media/images/box/auto-abilities.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+        self.autonomouslife.setAutonomousAbilityEnabled(name, self.getParameter(name))]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onDone" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" /><Parameter name="AutonomousBlinking" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables the robot to make its eye leds blink when it sees someone and when it is interacting." id="4" /><Parameter name="BackgroundMovement" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Defines which slight movements the robot does autonomously when its limbs are not moving." id="5" /><Parameter name="BasicAwareness" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Allow to make the robot establish and keep eye contact with people." id="6" /><Parameter name="ListeningMovement" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables some slight movements showing that the robot is listening." id="7" /><Parameter name="SpeakingMovement" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables to start autonomously movements during the speech of the robot." id="8" /></Box><Box name="Autonomous Abilities" id="6" localization="8" tooltip="Autonomous Abilities exists to keep the robot alive at all times. But this box allows you to disable all or parts of the Autonomous Abilities (Autonomous Blinking, Background Movement, Basic Awareness, Listening Movement, Speaking Movement)." x="725" y="98"><bitmap>media/images/box/auto-abilities.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self, False)
 
@@ -36,14 +36,14 @@
         self.onDone() # activate output of the box
 
     def enableAnAbility(self, name):
-        self.autonomouslife.setAutonomousAbilityEnabled(name, self.getParameter(name))]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onDone" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" /><Parameter name="AutonomousBlinking" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables the robot to make its eye leds blink when it sees someone and when it is interacting." id="4" /><Parameter name="BackgroundMovement" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Defines which slight movements the robot does autonomously when its limbs are not moving." id="5" /><Parameter name="BasicAwareness" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Allow to make the robot establish and keep eye contact with people." id="6" /><Parameter name="ListeningMovement" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables some slight movements showing that the robot is listening." id="7" /><Parameter name="SpeakingMovement" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Enables to start autonomously movements during the speech of the robot." id="8" /></Box><Box name="Wait Touch" id="2" localization="8" tooltip="This box contains a basic python script that makes the robot cover its eyes with its hands." x="628" y="59"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import time
+        self.autonomouslife.setAutonomousAbilityEnabled(name, self.getParameter(name))]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onDone" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" /><Parameter name="AutonomousBlinking" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables the robot to make its eye leds blink when it sees someone and when it is interacting." id="4" /><Parameter name="BackgroundMovement" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Defines which slight movements the robot does autonomously when its limbs are not moving." id="5" /><Parameter name="BasicAwareness" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Allow to make the robot establish and keep eye contact with people." id="6" /><Parameter name="ListeningMovement" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="Enables some slight movements showing that the robot is listening." id="7" /><Parameter name="SpeakingMovement" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Enables to start autonomously movements during the speech of the robot." id="8" /></Box><Box name="Rest, Wait and Wake" id="2" localization="8" tooltip="This box contains a basic python script that makes the robot go to rest then wait for a touch and wake up." x="399" y="97"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import time
 
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
         self.motion = ALProxy("ALMotion")
         self.memory = ALProxy("ALMemory")
-        self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
+        self.motion = ALProxy("ALMotion")
         self.isRunning = True
         self.motion.setExternalCollisionProtectionEnabled("All", False)
 
@@ -61,127 +61,18 @@ class MyClass(GeneratedClass):
         self.isRunning = False
 
     def onInput_onStart(self):
+        self.motion.rest()
+        time.sleep(5)
+        self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         while self.isRunning:
-            pass
-
-        self.motion.moveTo(0.0,0.0,3.14)
+            time.sleep(0.1)
+        self.motion.wakeUp()
         self.onInput_onStop()
 
     def onInput_onStop(self):
         self.motion.setExternalCollisionProtectionEnabled("All", True)
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
-        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Box name="Look At" id="9" localization="-1" tooltip="This box makes the robot look at a desired position." x="241" y="139"><bitmap>media/images/box/movement/move_head.png</bitmap><script language="4"><content><![CDATA[import time
-
-class MyClass(GeneratedClass):
-    def __init__(self):
-        GeneratedClass.__init__(self)
-        self.tracker = ALProxy( "ALTracker" )
-
-        self.x = 0.0
-        self.y = 0.0
-        self.z = 0.0
-
-        self.maxSpeed = 0.5
-
-        self.useWholeBody = False
-        self.frame = 0 #FRAME TORSO
-
-    def onLoad(self):
-        self.BIND_PYTHON(self.getName(), "setParameter")
-
-    def onUnload(self):
-        pass
-
-    def onInput_onStart(self):
-        self.x = self.getParameter("X (m)")
-        self.y = self.getParameter("Y (m)")
-        self.z = self.getParameter("Z (m)")
-
-        self.maxSpeed = self.getParameter("Speed (%)") / 100.0
-        self.useWholeBody = self.getParameter("WholeBody")
-
-        frameStr = self.getParameter("Frame")
-        if frameStr == "Torso":
-            self.frame = 0
-        elif frameStr == "World":
-            self.frame = 1
-        elif frameStr == "Robot":
-            self.frame = 2
-
-        self.tracker.lookAt([self.x, self.y, self.z], self.frame, self.maxSpeed, self.useWholeBody)
-        self.onStopped()
-
-    def onInput_onStop(self):
-        self.onUnload()
-        pass
-
-    def setParameter(self, parameterName, newValue):
-        GeneratedClass.setParameter(self, parameterName, newValue)
-
-        if (parameterName == "X (m)"):
-            self.x = newValue
-            self.tracker.lookAt([self.x, self.y, self.z], self.frame, self.maxSpeed, self.useWholeBody)
-            self.onStopped()
-            return
-
-        if (parameterName == "Y (m)"):
-            self.y = newValue
-            self.tracker.lookAt([self.x, self.y, self.z], self.frame, self.maxSpeed, self.useWholeBody)
-            self.onStopped()
-            return
-
-        if (parameterName == "Z (m)"):
-            self.z = newValue
-            self.tracker.lookAt([self.x, self.y, self.z], self.frame, self.maxSpeed, self.useWholeBody)
-            self.onStopped()
-            return
-
-        if (parameterName == "Speed (%)"):
-            self.maxSpeed = newValue / 100.0
-            return
-
-        if (parameterName == "WholeBody"):
-            self.useWholeBody = newValue
-            return
-
-        if (parameterName == "Frame"):
-            if(newValue == "Torso"):
-                self.frame = 0
-            elif newValue == "World":
-                self.frame = 1
-            elif newValue == "Robot":
-                self.frame = 2]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Parameter name="X (m)" inherits_from_parent="0" content_type="2" value="0.1" default_value="1" min="0.001" max="10" tooltip="X coordinate of the target to look at." id="5" /><Parameter name="Y (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="Y coordinate of the target to look at." id="6" /><Parameter name="Z (m)" inherits_from_parent="0" content_type="2" value="-0.1" default_value="0" min="-10" max="10" tooltip="Z coordinate of the target to look at." id="7" /><Parameter name="Speed (%)" inherits_from_parent="0" content_type="1" value="50" default_value="50" min="1" max="100" tooltip="Speed to move the head towards the desired position." id="8" /><Parameter name="WholeBody" inherits_from_parent="0" content_type="0" value="0" default_value="0" tooltip="Use whole body constraints" id="9" /><Parameter name="Frame" inherits_from_parent="0" content_type="3" value="Torso" default_value="Torso" custom_choice="0" tooltip="Select the frame of target." id="10"><Choice value="Torso" /><Choice value="World" /><Choice value="Robot" /></Parameter></Box><Box name="Hands" id="7" localization="8" tooltip="the robot stiffens the motors of one or both of his hands so that he can open or close&#x0A;it/them. Then he relaxes the motors of his hand(s)." x="366" y="129"><bitmap>media/images/box/movement/move_arm.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
-    def __init__(self):
-        GeneratedClass.__init__(self, False)
-
-    def onLoad(self):
-        self.motion = ALProxy( "ALMotion" )
-        self.bIsRunning = False
-
-    def onUnload(self):
-        self.bIsRunning = False
-
-    def onInput_onStart(self):
-        if( self.bIsRunning ):
-            return
-        self.bIsRunning = True
-        try:
-            hands = []
-            if( self.getParameter("Side") in ["Left", "Both"] ):
-                hands.append( "LHand" )
-            if( self.getParameter("Side") in ["Right", "Both"] ):
-                hands.append( "RHand" )
-            ids = []
-            for hand in hands:
-                if( self.getParameter("Action") == "Open the hand" ):
-                    ids.append( self.motion.post.openHand(hand) )
-                else:
-                    ids.append( self.motion.post.closeHand(hand) )
-            for id in ids:
-                self.motion.wait( id, 0 )
-        finally:
-            self.bIsRunning = False
-            self.onDone() # activate output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onDone" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" /><Parameter name="Side" inherits_from_parent="0" content_type="3" value="Both" default_value="Both" custom_choice="0" tooltip="Choose the hand to move or both of them." id="4"><Choice value="Both" /><Choice value="Left" /><Choice value="Right" /></Parameter><Parameter name="Action" inherits_from_parent="0" content_type="3" value="Open the hand" default_value="Open the hand" custom_choice="0" tooltip="Action you want to make on the robot&apos;s hand." id="5"><Choice value="Open the hand" /><Choice value="Close the hand" /></Parameter></Box><Box name="Move To" id="1" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="108" y="191"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Box name="Turn Around" id="1" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="243" y="92"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self, False)
@@ -222,26 +113,45 @@ class MyClass(GeneratedClass):
             self.onStoppedBeforeArriving(positionError.toVector())
 
     def onInput_onStop(self):
-        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onArrivedAtDestination" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when the robot arrives at its destination." id="4" /><Output name="onStoppedBeforeArriving" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when the robot stops before arriving to its destination. Returns a vector [x (m), y (m), theta(rad)] with the remaining distance up to the destination. This distance is expressed in the ROBOT frame." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0.2" min="-5" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-5" max="5" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (deg)" inherits_from_parent="0" content_type="2" value="180" default_value="0" min="-180" max="180" tooltip="The orientation in degrees for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Parameter name="Arms movement enabled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Enables natural motion of the arms." id="9" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Cover Eyes" id="5" localization="8" tooltip="This box contains a basic python script that makes the robot cover its eyes with its hands." x="499" y="124"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onArrivedAtDestination" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when the robot arrives at its destination." id="4" /><Output name="onStoppedBeforeArriving" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when the robot stops before arriving to its destination. Returns a vector [x (m), y (m), theta(rad)] with the remaining distance up to the destination. This distance is expressed in the ROBOT frame." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0.2" min="-5" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-5" max="5" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (deg)" inherits_from_parent="0" content_type="2" value="180" default_value="0" min="-180" max="180" tooltip="The orientation in degrees for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Parameter name="Arms movement enabled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Enables natural motion of the arms." id="9" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Return " id="8" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="557" y="97"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[
+class MyClass(GeneratedClass):
     def __init__(self):
-        GeneratedClass.__init__(self)
+        GeneratedClass.__init__(self, False)
         self.motion = ALProxy("ALMotion")
+        self.positionErrorThresholdPos = 0.01
+        self.positionErrorThresholdAng = 0.03
 
     def onLoad(self):
-        #put initialization code here
         pass
 
     def onUnload(self):
-        #put clean-up code here
-        pass
+        self.motion.moveToward(0.0, 0.0, 0.0)
 
     def onInput_onStart(self):
-        self.motion.setStiffnesses(["RArm", "LArm"], 1.0)
-        names = ["LShoulderPitch", "LShoulderRoll", "LElbowYaw", "LElbowRoll", "LWristYaw", "RShoulderPitch", "RShoulderRoll", "RElbowYaw", "RElbowRoll", "RWristYaw"]
-        angles = [0.0, 0.0087, -0.9, -1.5620, -1.5, 0.0, -0.0087, 0.9, 1.5620, 1.5]
-        self.motion.angleInterpolation(names, angles, [2, 2, 2, 2, 2, 2, 2, 2, 2, 2], 1.0)
-        self.onInput_onStop()
+        import almath
+        # The command position estimation will be set to the sensor position
+        # when the robot starts moving, so we use sensors first and commands later.
+        initPosition = almath.Pose2D(self.motion.getRobotPosition(True))
+        targetDistance = almath.Pose2D(self.getParameter("Distance X (m)"),
+            self.getParameter("Distance Y (m)"),
+            self.getParameter("Theta (deg)") * almath.PI / 180)
+        expectedEndPosition = initPosition * targetDistance
+        enableArms = self.getParameter("Arms movement enabled")
+        self.motion.setMoveArmsEnabled(enableArms, enableArms)
+        self.motion.moveTo(self.getParameter("Distance X (m)"),
+            self.getParameter("Distance Y (m)"),
+            self.getParameter("Theta (deg)") * almath.PI / 180)
+
+        # The move is finished so output
+        realEndPosition = almath.Pose2D(self.motion.getRobotPosition(False))
+        positionError = realEndPosition.diff(expectedEndPosition)
+        positionError.theta = almath.modulo2PI(positionError.theta)
+        if (abs(positionError.x) < self.positionErrorThresholdPos
+            and abs(positionError.y) < self.positionErrorThresholdPos
+            and abs(positionError.theta) < self.positionErrorThresholdAng):
+            self.onArrivedAtDestination()
+        else:
+            self.onStoppedBeforeArriving(positionError.toVector())
 
     def onInput_onStop(self):
-        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
-        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="6" indexofoutput="3" /><Link inputowner="7" indexofinput="2" outputowner="9" indexofoutput="4" /><Link inputowner="9" indexofinput="2" outputowner="1" indexofoutput="4" /><Link inputowner="9" indexofinput="2" outputowner="1" indexofoutput="5" /><Link inputowner="1" indexofinput="2" outputowner="4" indexofoutput="3" /><Link inputowner="5" indexofinput="2" outputowner="7" indexofoutput="3" /><Link inputowner="2" indexofinput="2" outputowner="5" indexofoutput="4" /><Link inputowner="6" indexofinput="2" outputowner="2" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onArrivedAtDestination" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when the robot arrives at its destination." id="4" /><Output name="onStoppedBeforeArriving" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when the robot stops before arriving to its destination. Returns a vector [x (m), y (m), theta(rad)] with the remaining distance up to the destination. This distance is expressed in the ROBOT frame." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0.2" min="-5" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-5" max="5" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (deg)" inherits_from_parent="0" content_type="2" value="-180" default_value="0" min="-180" max="180" tooltip="The orientation in degrees for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Parameter name="Arms movement enabled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Enables natural motion of the arms." id="9" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="6" indexofoutput="3" /><Link inputowner="1" indexofinput="2" outputowner="4" indexofoutput="3" /><Link inputowner="6" indexofinput="2" outputowner="8" indexofoutput="4" /><Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" /><Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="5" /><Link inputowner="8" indexofinput="2" outputowner="2" indexofoutput="4" /><Link inputowner="6" indexofinput="2" outputowner="8" indexofoutput="5" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
