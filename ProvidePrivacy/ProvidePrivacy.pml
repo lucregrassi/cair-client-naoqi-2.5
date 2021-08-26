@@ -7,7 +7,6 @@
     <Dialogs />
     <Resources>
         <File name="turn3" src="privacy/turn3.pmt" />
-        <File name="icon" src="icon.png" />
     </Resources>
     <Topics />
     <IgnoredPaths />
