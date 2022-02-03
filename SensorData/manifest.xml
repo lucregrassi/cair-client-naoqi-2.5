@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="dialoguemanager_wait" version="0.0.0">
+<package uuid="sensordata" version="0.0.0">
  <names>
-  <name lang="en_US">DialogueManager_wait</name>
+  <name lang="en_US">SensorData</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
@@ -10,7 +10,11 @@
   <language>en_US</language>
  </descriptionLanguages>
  <contents>
-  <behaviorContent path="chit-chatting">
+  <behaviorContent path="position">
+   <nature>interactive</nature>
+   <permissions/>
+  </behaviorContent>
+  <behaviorContent path="people_perception">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>

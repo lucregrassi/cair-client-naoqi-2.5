@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Package name="DialogueManager" format_version="4">
+<Package name="MainApp" format_version="4">
     <Manifest src="manifest.xml" />
     <BehaviorDescriptions>
-        <BehaviorDescription name="behavior" src="chit-chatting" xar="behavior.xar" />
+        <BehaviorDescription name="behavior" src="cairclient" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>
+        <File name="client_utils" src="client_utils.py" />
+        <File name="DialogueMode" src="html/img/DialogueMode.png" />
+        <File name="ExecutionMode" src="html/img/ExecutionMode.png" />
+        <File name="PrivacyMode" src="html/img/PrivacyMode.png" />
         <File name="INSTALLER" src="libs/Flask-1.1.2.dist-info/INSTALLER" />
         <File name="LICENSE" src="libs/Flask-1.1.2.dist-info/LICENSE.rst" />
         <File name="METADATA" src="libs/Flask-1.1.2.dist-info/METADATA" />
@@ -34,11 +38,8 @@
         <File name="testing" src="libs/flask/testing.py" />
         <File name="views" src="libs/flask/views.py" />
         <File name="wrappers" src="libs/flask/wrappers.py" />
-        <File name="ExecutionMode" src="html/img/ExecutionMode.png" />
-        <File name="PrivacyMode" src="html/img/PrivacyMode.png" />
-        <File name="DialogueMode" src="html/img/DialogueMode.png" />
-        <File name="utility" src="carlo.py" />
         <File name="gzip" src="libs/gzip.py" />
+        <File name="manage_actions" src="manage_actions.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

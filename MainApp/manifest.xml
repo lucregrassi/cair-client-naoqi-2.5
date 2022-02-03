@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="dialoguemanager_wait" version="0.0.0">
+<package version="0.0.0" uuid="cairapp">
  <names>
-  <name lang="en_US">DialogueManager_wait</name>
+  <name lang="en_US">MainApp</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
@@ -10,7 +10,7 @@
   <language>en_US</language>
  </descriptionLanguages>
  <contents>
-  <behaviorContent path="chit-chatting">
+  <behaviorContent path="cairclient">
    <nature>interactive</nature>
    <permissions/>
   </behaviorContent>
