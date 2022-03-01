@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIR client single speaker" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="309" y="152"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
+import sys
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_single/libs/")
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_single/")
+from naoqi import ALProxy
+import threading
+import requests
+import time
+import json
+import os
+import pickle
+import client_utils
+import manage_actions
+import socket
+import zlib
+
+audio_recorder_host = "130.251.13.128"
+audio_recorder_port = 9090
+
+server_IP = "130.251.13.128"
+BASE = "http://" + server_IP + ":50000/CAIR_hub"
+
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        # Instances of the classes of the other files in the libs folder containing functions needed here
+        self.plans = manage_actions.ActionManager(self.logger.info)
+        self.utils = client_utils.Utils(self.logger.info)
+        self.utils.setAutonomousAbilities(True, True, True, True, True)
+        self.isAlive = True
+        self.exit_keywords = ["stop talking", "quit the application"]
+        self.repeat_keywords = ["repeat", "say it again"]
+        self.memory = ALProxy("ALMemory")
+        self.speech_reco_event = "Audio/RecognizedWords"
+        self.al = ALProxy("ALAutonomousLife")
+        self.motion = ALProxy("ALMotion")
+        self.tts = ALProxy("ALTextToSpeech")
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.configuration = {"bodyLanguageMode": "contextual"}
+        self.behavior_manager = ALProxy("ALBehaviorManager")
+        self.audio_device = ALProxy("ALAudioDevice")
+        self.dialogue_state_file_path = "/data/home/nao/.local/share/PackageManager/apps/mainapp_single/dialogue_state.json"
+        self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
+        # To store the previous sentence said by the robot
+        self.previous_sentence = ""
+        # This variable tells if the user want the robot to repeat a sentence
+        self.repeat = False
+
+        # Store the number of people in front of the robot, coming from the sensor readings
+        self.people = 0
+
+        self.logger.info("Trying to connect to ALTabletService...")
+        self.tablet = True
+        try:
+            self.tablet_service = ALProxy("ALTabletService")
+        except:
+            self.tablet = False
+
+        self.logger.info("Setting voice speed")
+        try:
+            # self.voice_speed = "\\RSPD=100\\"
+            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        except:
+            self.memory.insertData("CAIR/voice_speed", 80)
+            self.voice_speed = "\\RSPD=80\\"
+
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.audio_device = ALProxy("ALAudioDevice")
+        self.audio_device.setOutputVolume(40)
+
+        self.asr_service = ALProxy("ALSpeechRecognition")
+        self.asr_service.setAudioExpression(False)
+
+    def get_sensor_data_thread(self):
+        while self.isAlive:
+            self.logger.info("Thread reading sensor data")
+            self.people = self.memory.getData("SensorData/People")
+            data = {"sentence": "", "dialogue_state": "", "sensor_data": {"people": self.people}}
+            encoded_data = json.dumps(data)
+            compressed_data = zlib(encoded_data)
+            response = requests.get(BASE, data=compressed_data, verify=False)
+            self.logger.info("Server response:" + str(response.json()['reply']))
+            time.sleep(1)
+
+        self.logger.info("Exiting sensor data thread")
+        # self.behavior_manager.stopBehavior("sensordata/people_perception")
+
+    def onInput_onStart(self):
+        # Try connecting to the socket that records the audio
+        self.logger.info("Trying to connect to the audio recorder socket")
+        try:
+            self.client_socket.connect((audio_recorder_host, audio_recorder_port))
+            self.animated_speech.say(self.voice_speed + "I'm connected to the socket!", self.configuration)
+            self.logger.info("Connected to socket!")
+        except:
+            self.animated_speech.say(self.voice_speed + "I'm sorry, I can't connect to the socket. Try again later.",
+                                     self.configuration)
+            self.onInput_onStop()
+
+        try:
+            if self.al.getState() != "disabled":
+                self.animated_speech.say(self.voice_speed + "Give me a moment. I need to disable Autonomous "
+                                                            "Life before we start.", self.configuration)
+                self.al.setState("disabled")
+        except:
+            pass
+
+        self.motion.wakeUp()
+
+        # With Pepper robot, preload the images to be set on the tablet during the conversation
+        if self.tablet:
+            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
+                                             "/apps/dialoguemanager/img/DialogueMode.png")
+            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
+                                             "/apps/dialoguemanager/img/ExecutionMode.png")
+            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
+                                             "/apps/dialoguemanager/img/PrivacyMode.png")
+            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
+                                          "/apps/dialoguemanager/img/DialogueMode.png")
+
+        # If it's the first time using the system, call the function that acquires the first state
+        if not os.path.isfile(self.dialogue_state_file_path):
+            self.logger.info("First user!")
+            # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
+            # with the info of a generic user
+            resp = requests.put(BASE, verify=False)
+            dialogue_state = resp.json()["dialogue_state"]
+            with open(self.dialogue_state_file_path, 'w') as f:
+                json.dump(dialogue_state, f)
+            self.animated_speech.say(self.voice_speed + "Welcome to CAIR!" + str(resp.json()["reply"]), self.configuration)
+            self.previous_sentence = "Welcome to CAIR!" + str(resp.json()["reply"])
+            # Store the reply to update previous reply
+            reply = "Welcome to CAIR!" + str(resp.json()["reply"])
+        else:
+            self.logger.info("existing user")
+            self.animated_speech.say(self.voice_speed + "I missed you! What would you like to talk about?",
+                                     self.configuration)
+            self.previous_sentence = "I missed you! What would you like to talk about?"
+            # Store the reply to update previous reply
+            reply = "I missed you! What would you like to talk about?"
+
+        # Start the behavior that senses people
+        # if self.behavior_manager.isBehaviorInstalled("sensordata/people_perception"):
+        #    if not self.behavior_manager.isBehaviorRunning("sensordata/people_perception"):
+        #        self.behavior_manager.runBehavior("sensordata/people_perception")
+
+        # sensor_data_thread = threading.Thread(target=self.get_sensor_data_thread)
+        # sensor_data_thread.start()
+
+        # Loop until the user wants to stop the conversation
+        while self.isAlive:
+            self.logger.info("** Listening **")
+            # Tell the audio recorder that the client is ready to receive the user reply
+            self.client_socket.send(b"ready")
+            sentence = self.client_socket.recv(256).decode('utf-8')
+
+            if sentence == "":
+                self.animated_speech.say(self.voice_speed + "I'm sorry, something went wrong with the socket connection.",
+                                         self.configuration)
+                self.onInput_onStop()
+
+            # Check if the user wants to exit or wants the robot to repeat the previous sentence
+            sentence = sentence.replace(".", "")
+            sentence = sentence.replace("?", "")
+            # Reset repeat to false, otherwise it will always repeat the previous sentence
+            self.repeat = False
+
+            # If the user said one of the "Exit Application keywords"
+            if sentence.lower() in self.exit_keywords:
+                self.isAlive = False
+                self.animated_speech.say(self.voice_speed + "Ok, thank you for talking with me! Goodbye.",
+                                         self.configuration)
+                self.memory.insertData(self.speech_reco_event, [])
+                self.onInput_onStop()
+                sys.exit(0)
+            # If the user said a Repeat keyword
+            elif sentence.lower() in self.repeat_keywords:
+                # If a previous sentence to repeat exists
+                if self.previous_sentence:
+                    self.repeat = True
+                    self.animated_speech.say(self.voice_speed + "Sure. I said: " + str(self.previous_sentence),
+                                             self.configuration)
+                else:
+                    self.animated_speech.say(self.voice_speed + "I'm sorry, I have nothing to repeat.",
+                                             self.configuration)
+
+            # If the user did not ask to exit or to repeat something, send the sentence to the server
+            if not self.repeat:
+                self.logger.info(str(sentence))
+                self.logger.info("open dialogue file")
+                with open(self.dialogue_state_file_path) as f:
+                    dialogue_state = json.load(f)
+                # Compose the payload of the message to be sent to the server
+                data = {"sentence": sentence, "dialogue_state": dialogue_state, "sensor_data": ""}
+                encoded_data = json.dumps(data).encode('utf-8')
+                compressed_data = zlib.compress(encoded_data)
+                hub_response = requests.get(BASE, data=compressed_data, verify=False)
+                # If the Hub cannot contact the dialogue service, the response will be empty
+                if hub_response:
+                    # Overwrite the array containing the states of the profiles with those contained in the Hub response
+                    dialogue_state = hub_response.json()['dialogue_state']
+                    # Store the updated dictionary in the file
+                    with open(self.dialogue_state_file_path, 'w') as f:
+                        json.dump(dialogue_state, f)
+                else:
+                    self.logger.info("No response received from the Hub!")
+                    self.onInput_onStop()
+                    exit(0)
+
+                intent_reply = hub_response.json()['intent_reply']
+                plan = hub_response.json()['plan']
+                reply = hub_response.json()['reply']
+
+                # If there is an intent reply, it means that something has been matched by the Plan manager service
+                # Assume that when there is the intent reply there is also the plan
+                if intent_reply:
+                    self.logger.info(str(intent_reply))
+                    self.logger.info(str(plan))
+
+                    # Say the intent reply and prepare the memory area in which is stored the starting sentence
+                    # of a dialogue with a new user (in the eventuality that the plan contains the registration action)
+                    self.animated_speech.say(self.voice_speed + str(intent_reply), self.configuration)
+
+                    plan_items = plan.split("#")[1:]
+                    self.logger.info(plan_items)
+                    # For each action in the plan, check which action is it and execute it
+                    # (if the corresponding behavior is installed)
+                    for item in plan_items:
+                        item = item.encode('utf-8')
+                        self.plans.perform_action(item)
+
+                    # Once the execution of the plan is finished, set the dialogue mode image on the tablet
+                    if self.tablet:
+                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
+                                                      "/apps/dialoguemanager/img/DialogueMode.png")
+
+                # If there is a reply from the Cloud (or the first sentence), say it after the plan has been executed
+                if reply:
+                    self.logger.info(str(reply))
+                    self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
+                    self.previous_sentence = reply
+
+    def onInput_onStop(self):
+        if self.tablet:
+            self.tablet_service.hideImage()
+        self.al.setState("interactive")
+        self.utils.setAutonomousAbilities(True, True, True, True, True)
+        # If present, delete the transformation - if the robot moves outside CAIR it is no more valid
+        try:
+            self.memory.removeData("CAIR/transformation_matrix")
+            self.memory.removeData("CAIR/theta")
+        except:
+            self.logger.info("No transformation to delete in memory.")
+            pass
+        self.onStopped()
+        self.onUnload()
+        sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

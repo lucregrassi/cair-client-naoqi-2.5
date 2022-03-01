@@ -12,6 +12,7 @@ import time
 import json
 import os
 import re
+import zlib
 import carlo
 
 
@@ -68,9 +69,11 @@ class MyClass(GeneratedClass):
             self.people = self.memory.getData("SensorData/People")
             self.logger.info("ciao")
             data = {"sentence": "", "client_state": "", "sensor_data": {"people": self.people}}
+            encoded_data = json.dumps(data).encode('utf-8')
+            compressed_data = zlib.compress(encoded_data)
             self.logger.info("ciao1")
             try:
-                response = requests.get(BASE, data=json.dumps(data), verify=False)
+                response = requests.get(BASE, data=compressed_data, verify=False)
                 self.logger.info(response)
                 self.logger.info("Server response:" + response.json()['reply'])
             except:
@@ -81,8 +84,8 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         # Location of the API (the server it is running on)
-        server_IP = "131.175.205.146"
-        BASE = "http://" + server_IP + ":5000/CAIR_hub"
+        server_IP = "130.251.13.128"
+        BASE = "http://" + server_IP + ":50000/CAIR_hub"
         self.previous_sentence = ""
         self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         self.repeat = False
@@ -107,7 +110,7 @@ class MyClass(GeneratedClass):
         # If the file with the credentials exists, read the ID and use it during the requests to the Cloud
         if not os.path.exists(self.state_file_path):
             resp = requests.put(BASE, verify=False)
-            state = resp.json()["client_state"]
+            state = resp.json()["dialogue_state"]
             with open(self.state_file_path, 'wb') as f:
                 pickle.dump(state, f)
             self.animated_speech.say(self.voice_speed + "Welcome to CAIR!" + str(resp.json()["reply"]), self.configuration)
@@ -187,13 +190,15 @@ class MyClass(GeneratedClass):
                 self.logger.info(str(sentence))
                 self.memory.insertData(self.speech_reco_event, [])
                 with open(self.state_file_path, 'rb') as f:
-                    client_state = pickle.load(f)
-                data = {"sentence": sentence, "client_state": client_state, "sensor_data": {"people": self.people}}
-                response = requests.get(BASE, data=json.dumps(data), verify=False)
+                    dialogue_state = pickle.load(f)
+                data = {"sentence": sentence, "dialogue_state": dialogue_state, "sensor_data": {"people": self.people}}
+                encoded_data = json.dumps(data).encode('utf-8')
+                compressed_data = zlib.compress(encoded_data)
+                response = requests.get(BASE, data=compressed_data, verify=False)
                 # Retrieve and store the updated client state
-                client_state = response.json()["client_state"]
+                dialogue_state = response.json()["dialogue_state"]
                 with open(self.state_file_path, 'wb') as f:
-                    client_state = pickle.dump(client_state, f)
+                    dialogue_state = pickle.dump(dialogue_state, f)
 
                 intent_reply = response.json()['intent_reply']
                 plan = response.json()['plan']
@@ -221,7 +226,6 @@ class MyClass(GeneratedClass):
                         self.logger.info(item)
                         action = re.findall("action=(\w+)", item)[0]
                         self.logger.info(str(action))
-
                         self.utils.perform_action(action)
 
                     # Once the execution of the plan is finished, set the dialogue mode image on the tablet

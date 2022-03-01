@@ -33,8 +33,8 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        cineca = "131.175.198.134"
-        BASE = "http://" + cineca + ":5002/"
+        cineca = "130.251.13.125"
+        BASE = "http://" + cineca + ":50003/"
 
         text = self.memory.getData("CAIR/song_title")
         self.logger.info(str(text))

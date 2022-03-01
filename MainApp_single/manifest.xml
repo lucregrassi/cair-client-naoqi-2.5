@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="mainapp_multiparty">
+<package version="0.0.0" uuid="mainapp_single">
  <names>
-  <name lang="en_US">MainApp_multiparty</name>
+  <name lang="en_US">MainApp_single</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
