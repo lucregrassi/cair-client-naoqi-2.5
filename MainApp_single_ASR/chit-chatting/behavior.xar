@@ -77,15 +77,15 @@ class MyClass(GeneratedClass):
                 self.logger.info(response)
                 self.logger.info("Server response:" + response.json()['reply'])
             except:
-                self.logger.info("ciao2")
+                pass
             time.sleep(1)
         self.logger.info("Exiting sensor data thread")
         self.behavior_manager.stopBehavior("sensordata/people_perception")
 
     def onInput_onStart(self):
         # Location of the API (the server it is running on)
-        server_IP = "130.251.13.128"
-        BASE = "http://" + server_IP + ":50000/CAIR_hub"
+        server_IP = "131.175.205.146"
+        BASE = "http://" + server_IP + ":5000/CAIR_hub"
         self.previous_sentence = ""
         self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         self.repeat = False

@@ -35,8 +35,8 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        cineca = "130.251.13.128"
-        BASE = "http://" + cineca + ":50003/"
+        server_IP = "131.175.205.146"
+        BASE = "http://" + server_IP + ":5003/"
 
         text = self.memory.getData("CAIR/song_title")
         self.logger.info(str(text))
