@@ -6,7 +6,6 @@ from naoqi import ALProxy
 import threading
 import requests
 import xml.etree.ElementTree as ET
-import time
 import json
 import os
 import manage_actions
@@ -14,12 +13,13 @@ import client_utils
 import socket
 import zlib
 
-audio_recorder_host = "130.251.13.172"
+audio_recorder_host = "130.251.13.153"
 audio_recorder_port = 9090
 
-server_IP = "130.251.13.172"
+server_IP = "130.251.13.153"
 BASE = "http://" + server_IP + ":5000/CAIR_hub"
 speakers_moving_window_size = 10
+app_name = "mainapp_multiparty"
 
 
 class MyClass(GeneratedClass):
@@ -41,8 +41,12 @@ class MyClass(GeneratedClass):
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.behavior_manager = ALProxy("ALBehaviorManager")
         self.audio_device = ALProxy("ALAudioDevice")
-        self.speakers_info_file_path = "/data/home/nao/.local/share/PackageManager/apps/mainapp_multiparty/speakers_info.json"
-        self.speakers_stats_file_path = "/data/home/nao/.local/share/PackageManager/apps/mainapp_multiparty/speakers_stats.json"
+        self.dialogue_state_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "dialogue_state.json"
+        self.speakers_info_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                       "speakers_info.json"
+        self.speakers_stats_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "speakers_stats.json"
         self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         # To store the previous sentence said by the robot
         self.previous_sentence = ""
@@ -75,23 +79,23 @@ class MyClass(GeneratedClass):
         self.asr_service = ALProxy("ALSpeechRecognition")
         self.asr_service.setAudioExpression(False)
 
-    def get_sensor_data_thread(self):
-        while self.isAlive:
-            self.logger.info("Thread reading sensor data")
-            self.people = self.memory.getData("SensorData/People")
-            data = {"sentence": "", "dialogue_states": "", "sensor_data": {"people": self.people}}
-            encoded_data = json.dumps(data)
-            compressed_data = zlib(encoded_data)
-            response = requests.get(BASE, data=compressed_data, verify=False)
-            self.logger.info("Server response:" + str(response.json()['reply']))
-            time.sleep(1)
+    # def get_sensor_data_thread(self):
+    #     while self.isAlive:
+    #         self.logger.info("Thread reading sensor data")
+    #         self.people = self.memory.getData("SensorData/People")
+    #         data = {"sentence": "", "dialogue_states": "", "sensor_data": {"people": self.people}}
+    #         encoded_data = json.dumps(data)
+    #         compressed_data = zlib.compress(encoded_data)
+    #         response = requests.get(BASE, data=compressed_data, verify=False)
+    #         self.logger.info("Server response:" + str(response.json()['reply']))
+    #         time.sleep(1)
 
-        self.logger.info("Exiting sensor data thread")
-        self.behavior_manager.stopBehavior("sensordata/people_perception")
+    #    self.logger.info("Exiting sensor data thread")
+    #    self.behavior_manager.stopBehavior("sensordata/people_perception")
 
     def onInput_onStart(self):
         # Try connecting to the socket that records the audio
-        self.logger.info("Trying to connect to the audio recorder socket")
+        self.logger.info("Trying to connect to the audio recorder socket.")
         try:
             self.client_socket.connect((audio_recorder_host, audio_recorder_port))
         except:
@@ -101,65 +105,63 @@ class MyClass(GeneratedClass):
 
         try:
             if self.al.getState() != "disabled":
-                #self.animated_speech.say(self.voice_speed + "Give me a moment. I need to disable Autonomous Life before we start.", self.configuration)
+                # self.animated_speech.say(self.voice_speed + "Give me a moment. I need to disable Autonomous Life
+                # before we start.", self.configuration)
                 self.al.setState("disabled")
         except:
             pass
 
+        # Wake the robot up if not already up
         self.motion.wakeUp()
 
         # With Pepper robot, preload the images to be set on the tablet during the conversation
         if self.tablet:
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
-                                             "/apps/dialoguemanager/img/DialogueMode.png")
+                                             "/apps/" + app_name + "/img/DialogueMode.png")
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
-                                             "/apps/dialoguemanager/img/ExecutionMode.png")
+                                             "/apps/" + app_name + "/img/ExecutionMode.png")
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
-                                             "/apps/dialoguemanager/img/PrivacyMode.png")
+                                             "/apps/" + app_name + "/img/PrivacyMode.png")
             self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
-                                          "/apps/dialoguemanager/img/DialogueMode.png")
+                                          "/apps/" + app_name + "/img/DialogueMode.png")
 
         # If it's the first time using the system, call the function that acquires the first state
         if not os.path.isfile(self.speakers_info_file_path):
             self.logger.info("First user!")
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
-            welcome_sentence, _, _ = self.utils.acquire_initial_state("00000000-0000-0000-0000-000000000000", "User")
-            self.logger.info("Welcome to CAIR! " + str(welcome_sentence))
-            if "$" in welcome_sentence:
-                welcome_sentence = welcome_sentence.replace("$00000000-0000-0000-0000-000000000000", "User")
-            self.animated_speech.say(self.voice_speed + "Welcome to CAIR!" + str(welcome_sentence), self.configuration)
-            self.previous_sentence = "Welcome to CAIR!" + welcome_sentence
-            # Store the reply to update previous reply
-            reply = "Welcome to CAIR!" + welcome_sentence
+            welcome_sentence, _, _ = self.utils.acquire_initial_state()
+            welcome_sentence_str = self.utils.compose_sentence(welcome_sentence)
+            self.logger.info("Welcome to CAIR! " + str(welcome_sentence_str))
+            self.animated_speech.say(self.voice_speed + "Welcome to CAIR!" + str(welcome_sentence_str), self.configuration)
+            self.previous_sentence = "Welcome to CAIR!" + welcome_sentence_str
         else:
             self.logger.info("Users are already present in the info file")
             self.animated_speech.say(self.voice_speed + "I missed you! What would you like to talk about?",
                                      self.configuration)
-            self.previous_sentence = "I missed you! What would you like to talk about?"
-            # Store the reply to update previous reply
-            reply = "I missed you! What would you like to talk about?"
+            self.previous_sentence = "It's good to be back! What would you like to talk about?"
 
         # Start the behavior that senses people
-        if self.behavior_manager.isBehaviorInstalled("sensordata/people_perception"):
-            if not self.behavior_manager.isBehaviorRunning("sensordata/people_perception"):
-                self.behavior_manager.runBehavior("sensordata/people_perception")
+        # if self.behavior_manager.isBehaviorInstalled("sensordata/people_perception"):
+        #     if not self.behavior_manager.isBehaviorRunning("sensordata/people_perception"):
+        #         self.behavior_manager.runBehavior("sensordata/people_perception")
 
-        sensor_data_thread = threading.Thread(target=self.get_sensor_data_thread)
-        sensor_data_thread.start()
+        # sensor_data_thread = threading.Thread(target=self.get_sensor_data_thread)
+        # sensor_data_thread.start()
 
-        # Retrieve the states of the users and save them in an array
-        with open(self.speakers_info_file_path, 'r') as f:
-            profiles_dict = json.load(f)
+        # Retrieve the states of the users and save them in a dictionary
+        with open(self.dialogue_state_file_path) as f:
+            dialogue_state = json.load(f)
 
-        profiles_dialogue_state = []
-        for profile in profiles_dict:
-            profiles_dialogue_state.append(profiles_dict[profile]["dialogue_state"])
+        # Retrieve the info of the users and store them in a dictionary
+        with open(self.speakers_info_file_path) as f:
+            speakers_info = json.load(f)
 
-        # Retrieve the json containing the matrices of the speakers stats and the mapping
+        # Retrieve the json containing the matrices of the speakers stats, the mapping, and the moving window of the
+        # last n speakers:
         # "same_interaction", "successive_interaction", "same_interaction_prob", "successive_interaction_prob",
-        # "mapping_index_speaker"
-        with open(self.speakers_stats_file_path, 'r') as f:
+        # "mapping_index_speaker", "speakers_turns", "a_priori_prob", "speakers_moving_window",
+        with open(self.speakers_stats_file_path) as f:
             speakers_stats = json.load(f)
 
         prev_interaction_last_speaker = ""
@@ -186,15 +188,15 @@ class MyClass(GeneratedClass):
             xml_profile_tags = tree.findall('profile_id')
             for i in range(len(xml_profile_tags)):
                 profile_id = xml_profile_tags[i].attrib["value"]
-
-                # Add the last speaker to the moving window and if the maximum size is exceeded, delete the first element
+                # Do not consider generic user in the moving window of the speakers!
                 if profile_id != "00000000-0000-0000-0000-000000000000":
                     speakers_stats["speakers_moving_window"].append(profile_id)
                     if len(speakers_stats["speakers_moving_window"]) > speakers_moving_window_size:
                         del speakers_stats["speakers_moving_window"][0]
                 # Increase the number of times that the previous speaker said something (including unknown speaker)
-                n_turns = profiles_dict[profile_id]["dialogue_state"]["n_turns"]
-                profiles_dict[profile_id]["dialogue_state"]["n_turns"] = n_turns + 1
+                speaker_index = speakers_stats["mapping_index_speaker"].index(profile_id)
+                n_turns = speakers_stats["speakers_turns"][speaker_index]
+                speakers_stats["speakers_turns"][speaker_index] = n_turns + 1
 
                 # If it's the first speaker of the interaction (and it is not the first interaction),
                 # check if the speaker is the same as the last one of the previous interaction
@@ -210,7 +212,7 @@ class MyClass(GeneratedClass):
                         for c in range(len(speakers_stats["mapping_index_speaker"])):
                             speakers_stats["successive_interaction_prob"][row][c] = \
                                 speakers_stats["successive_interaction"][row][c] / \
-                                profiles_dict[prev_interaction_last_speaker]["dialogue_state"]["n_turns"]
+                                speakers_stats["speakers_turns"][row]
                 else:
                     # Increment the element of the "same_interaction" matrix with th indexes mapped to
                     # row = same_interaction_last_speaker, column = profile_id
@@ -221,38 +223,32 @@ class MyClass(GeneratedClass):
                     for c in range(len(speakers_stats["mapping_index_speaker"])):
                         speakers_stats["same_interaction_prob"][row][c] = \
                             speakers_stats["same_interaction"][row][c] / \
-                            profiles_dict[same_interaction_last_speaker]["dialogue_state"]["n_turns"]
-
+                            speakers_stats["speakers_turns"][row]
+                # Update the last speaker of the interaction
                 same_interaction_last_speaker = profile_id
 
             # Compute the total number of turns of all users
             tot_turns = 0
-            for profile_id in profiles_dict:
-                tot_turns = tot_turns + profiles_dict[profile_id]["dialogue_state"]["n_turns"]
+            for elem in speakers_stats["speakers_turns"]:
+                tot_turns = tot_turns + elem
 
             # Recompute all the a priori probabilities with the updated number of turns
             for i in range(len(speakers_stats["mapping_index_speaker"])):
-                # Get the profile id from the mapping array (so that they are in the same order of the probabilities)
-                curr_id = speakers_stats["mapping_index_speaker"][i]
                 # Get the number of turns of that user
-                speaker_turns = profiles_dict[curr_id]["dialogue_state"]["n_turns"]
-                # if curr_id == same_interaction_last_speaker:
-                #    speaker_turns = speaker_turns + 1
+                speaker_turns = speakers_stats["speakers_turns"][i]
                 # Compute the a priori probability and update the value in the array
                 speakers_stats["a_priori_prob"][i] = speaker_turns / tot_turns
 
-            # Update content of the speaker stats file
-            with open(self.speakers_stats_file_path, 'w') as cl_state:
+            # Update content of the speaker stats file after having updated them after someone talked
+            with open("speakers_stats.json", 'w') as cl_state:
                 json.dump(speakers_stats, cl_state, ensure_ascii=False, indent=4)
 
-            ###################################################
             # Parse the xml string and extract the first sentence and the first speaker
-            # TODO: this is just to estimate who talked in the previous turn and to acquire exit/repeat sentences
             tree = ET.ElementTree(ET.fromstring(xml_string))
             sentence = tree.findall('profile_id')[0].text
             self.logger.info(str(sentence))
             profile_id = tree.findall("profile_id")[0].attrib["value"]
-            print(profiles_dict[profile_id]["name"] + ":", sentence)
+            print(speakers_info[profile_id]["name"] + ":", sentence)
 
             # Check if the user wants to exit or wants the robot to repeat the previous sentence
             sentence = sentence.replace(".", "")
@@ -280,32 +276,32 @@ class MyClass(GeneratedClass):
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat:
-                # Retrieve the states of the users and save them in an array
-                profiles_dialogue_state = []
-                for profile in profiles_dict:
-                    profiles_dialogue_state.append(profiles_dict[profile]["dialogue_state"])
 
                 # Compose the payload of the message to be sent to the server
-                data = {"sentence": xml_string, "dialogue_states": profiles_dialogue_state,
+                data = {"client_sentence": xml_string, "dialogue_state": dialogue_state,
                         "speakers_stats": speakers_stats,
                         "prev_speaker_info": {"id": prev_interaction_last_speaker, "topic": prev_speaker_topic},
                         "sensor_data": ""}
 
+                # Update the info about id and topic of previous speaker to the current one
+                prev_interaction_last_speaker = same_interaction_last_speaker
+                prev_speaker_topic = dialogue_state["topic"]
+
                 encoded_data = json.dumps(data).encode('utf-8')
                 compressed_data = zlib.compress(encoded_data)
                 hub_response = requests.get(BASE, data=compressed_data, verify=False)
+
                 # If the Hub cannot contact the dialogue service, the response will be empty
                 if hub_response:
                     # Overwrite the array containing the states of the profiles with those contained in the Hub response
-                    profiles_dialogue_state = hub_response.json()['dialogue_states']
+                    # The speakers info are not sent to the Hub.
+                    dialogue_state = hub_response.json()['dialogue_state']
                     speakers_stats = hub_response.json()["speakers_stats"]
-                    # Update all the profile states stored locally on the client
-                    for dialogue_state in profiles_dialogue_state:
-                        profile_id = dialogue_state["profile_id"]
-                        profiles_dict[profile_id]["dialogue_state"] = dialogue_state
-                    # Store the updated dictionary in the file
-                    with open(self.speakers_info_file_path, 'w') as f:
-                        json.dump(profiles_dict, f, ensure_ascii=False, indent=4)
+
+                    # Store the updated dialogue state in the file
+                    with open(self.dialogue_state_file_path, 'w') as f:
+                        json.dump(dialogue_state, f, ensure_ascii=False, indent=4)
+
                     # The hub updates the average topic distance matrix, hence it should be written on the file
                     with open(self.speakers_stats_file_path, 'w') as f:
                         json.dump(speakers_stats, f, ensure_ascii=False, indent=4)
@@ -314,69 +310,61 @@ class MyClass(GeneratedClass):
                     self.onInput_onStop()
                     exit(0)
 
-                intent_reply = hub_response.json()['intent_reply']
+                plan_sentence = hub_response.json()['plan_sentence']
                 plan = hub_response.json()['plan']
-                reply = hub_response.json()['reply']
+                dialogue_sentence = hub_response.json()['dialogue_sentence']
 
+                dialogue_sentence_str = self.utils.compose_sentence(dialogue_sentence)
 
                 # If there is an intent reply, it means that something has been matched by the Plan manager service
                 # Assume that when there is the intent reply there is also the plan
-                if intent_reply:
-                    self.logger.info(str(intent_reply))
-                    self.logger.info(str(plan))
-                    if "$" in intent_reply:
-                        for prof_id in profiles_dict:
-                            if prof_id in intent_reply:
-                                intent_reply = intent_reply.replace("$" + prof_id, profiles_dict[prof_id]["name"])
+                if plan_sentence:
+                    self.logger.info(str(plan_sentence))
+                    if "$" in plan_sentence:
+                        for prof_id in speakers_info:
+                            if prof_id in plan_sentence:
+                                plan_sentence = plan_sentence.replace("$" + prof_id, speakers_info[prof_id]["name"])
 
-                    # Say the intent reply and prepare the memory area in which is stored the starting sentence
-                    # of a dialogue with a new user (in the eventuality that the plan contains the registration action)
-                    self.animated_speech.say(self.voice_speed + str(intent_reply), self.configuration)
-                    self.memory.insertData("CAIR/first_dialogue_sentence", "")
+                    # Say the intent reply
+                    self.animated_speech.say(self.voice_speed + str(plan_sentence), self.configuration)
 
-                    plan_items = plan.split("#")[1:]
-                    self.logger.info(plan_items)
-                    # For each action in the plan, check which action is it and execute it
-                    # (if the corresponding behavior is installed)
-                    for item in plan_items:
-                        item = item.encode('utf-8')
-                        self.plans.perform_action(item)
+                    # Assume the plan is present only along with the plan sentence
+                    if plan:
+                        plan_items = plan.split("#")[1:]
+                        self.logger.info(plan_items)
+                        registration = False
+                        # For each action in the plan, check which action is it and execute it
+                        for item in plan_items:
+                            action = re.findall("action=(\w+)", item)[0]
+                            if action == "registration":
+                                registration = True
+                                # The function that manages the registration, updates the files and returns the updated
+                                # dictionaries, so that we don't have to read from the files at each turn.
+                                speakers_info, speakers_stats = self.utils.registration_procedure()
+                            else:
+                                item = item.encode('utf-8')
+                                self.plans.perform_action(item)
 
-                    # Read the updated stats that may have been written by the actions
-                    with open(self.speakers_info_file_path, 'r') as f:
-                        profiles_dict = json.load(f)
+                        # Once the execution of the plan is finished, set the dialogue mode image on the tablet
+                        if self.tablet:
+                            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
+                                                          "/apps/" + app_name + "/img/DialogueMode.png")
 
-                    with open(self.speakers_stats_file_path, 'r') as f:
-                        speakers_stats = json.load(f)
+                # If there is a reply from the Cloud, say it after the plan has been executed
+                # Substitute the speaker name in place of the user id
+                # The reply of the Dialogue Manager should never be empty
+                if dialogue_sentence_str:
+                    if "$" in dialogue_sentence_str:
+                        for prof_id in speakers_info:
+                            if prof_id in dialogue_sentence_str:
+                                dialogue_sentence_str = \
+                                    dialogue_sentence_str.replace("$" + prof_id, speakers_info[prof_id]["name"])
 
-
-                    # Once the execution of the plan is finished, set the dialogue mode image on the tablet
-                    if self.tablet:
-                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
-                                                      "/apps/dialoguemanager/img/DialogueMode.png")
-
-                    first_dialogue_sentence = self.memory.getData("CAIR/first_dialogue_sentence")
-                    # If a new user has registered, there will be the initial sentence which should be said instead of
-                    # the system reply
-                    if first_dialogue_sentence:
-                        reply = first_dialogue_sentence
-                        # Empty the memory area
-                        self.memory.insertData("CAIR/first_dialogue_sentence", "")
-
-                # If there is a reply from the Cloud (or the first sentence), say it after the plan has been executed
-                if reply:
-                    # Substitute the speaker name in place of the user id
-                    if "$" in reply:
-                        for prof_id in profiles_dict:
-                            if prof_id in reply:
-                                reply = reply.replace("$" + prof_id, profiles_dict[prof_id]["name"])
-                    self.logger.info(str(reply))
-                    self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
-                    self.previous_sentence = reply
-
-            # Update the info about id and topic of previous speaker to the current one, even if it asked to repeat
-            prev_interaction_last_speaker = same_interaction_last_speaker
-            prev_speaker_topic = profiles_dict[profile_id]["dialogue_state"]["topic"]
+                    self.logger.info(str(dialogue_sentence_str))
+                    self.animated_speech.say(self.voice_speed + str(dialogue_sentence_str), self.configuration)
+                    self.previous_sentence = dialogue_sentence_str
+                else:
+                    self.logger("No dialogue sentence received from the hub")
 
     def onInput_onStop(self):
         if self.tablet:
