@@ -5,6 +5,8 @@ import urllib2
 import base64
 from naoqi import ALProxy
 
+server_IP = "130.251.13.153"
+BASE = "http://" + server_IP + ":5003/"
 
 class MyClass(GeneratedClass):
     def __init__(self):
@@ -33,9 +35,6 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        server_IP = "130.251.13.146"
-        BASE = "http://" + server_IP + ":5003/"
-
         text = self.memory.getData("CAIR/song_title")
         self.logger.info(str(text))
 

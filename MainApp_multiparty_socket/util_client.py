@@ -151,7 +151,7 @@ class Utils(object):
     def registration_procedure(self):
         # Establish a socket connection with the registration.py script
         client_registration_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_registration_socket.connect(('localhost', 9091))
+        client_registration_socket.connect((registration_host, registration_port))
         # ** STEP 1 ** Create a new profile ID
         self.logger("Creating new profile ID")
         client_registration_socket.send(b"new_profile_id")
@@ -168,8 +168,7 @@ class Utils(object):
         # Wait for the completion of the enrollment
         self.logger("*** Listening ***")
         client_registration_socket.recv(256).decode('utf-8')
-        self.animated_speech.say(self.voice_speed + "Thank you for registering " + new_profile_name +
-                                 "! From now on I will recognize your voice.", self.configuration)
+        self.animated_speech.say(self.voice_speed + "Thank you for registering " + str(new_profile_name) + "! From now on I will recognize your voice.", self.configuration)
         # This function updates the info and the statistics of the users, adding the new profile id and the name to the
         # speakers_info and increasing the dimensions of the structures contained in the speakers_stats.
         speakers_info, speakers_stats = self.update_speakers_statistics(new_profile_id, new_profile_name)

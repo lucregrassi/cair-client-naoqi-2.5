@@ -9,9 +9,10 @@ import xml.etree.ElementTree as ET
 import json
 import os
 import manage_actions
-import client_utils
+import util_client
 import socket
 import zlib
+import re
 
 audio_recorder_host = "130.251.13.153"
 audio_recorder_port = 9090
@@ -27,7 +28,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         # Instances of the classes of the other files in the libs folder containing functions needed here
         self.plans = manage_actions.ActionManager(self.logger.info)
-        self.utils = client_utils.Utils(self.logger.info)
+        self.utils = util_client.Utils(self.logger.info)
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
         self.exit_keywords = ["stop talking", "quit the application"]
@@ -130,7 +131,7 @@ class MyClass(GeneratedClass):
             self.logger.info("First user!")
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
-            welcome_sentence, _, _ = self.utils.acquire_initial_state()
+            welcome_sentence, _, _, _ = self.utils.acquire_initial_state()
             welcome_sentence_str = self.utils.compose_sentence(welcome_sentence)
             self.logger.info("Welcome to CAIR! " + str(welcome_sentence_str))
             self.animated_speech.say(self.voice_speed + "Welcome to CAIR!" + str(welcome_sentence_str), self.configuration)
@@ -252,6 +253,8 @@ class MyClass(GeneratedClass):
 
             # Check if the user wants to exit or wants the robot to repeat the previous sentence
             sentence = sentence.replace(".", "")
+            sentence = sentence.replace("?", "")
+            sentence = sentence.replace("!", "")
             # Reset repeat to false, otherwise it will always repeat the previous sentence
             self.repeat = False
 
@@ -276,7 +279,8 @@ class MyClass(GeneratedClass):
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat:
-
+                # To avoid wrong parameters in the sentence (London?)
+                xml_string = xml_string.replace("?", "")
                 # Compose the payload of the message to be sent to the server
                 data = {"client_sentence": xml_string, "dialogue_state": dialogue_state,
                         "speakers_stats": speakers_stats,
