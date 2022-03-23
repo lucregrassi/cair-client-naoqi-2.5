@@ -68,7 +68,7 @@ class LanguageTools():
         if( strLang == "French" ):
             return 'fr'
         if( strLang == "English" ):
-            return 'en-IN'
+            return 'en'
         if ( strLang == "Spanish" ):
             return 'sp'
         if ( strLang == "Italian" ):
@@ -89,6 +89,8 @@ class LanguageTools():
             return 'tu'
         if ( strLang == "Portuguese" ):
             return 'pt'
+        if (strLang == "Hindi"):
+            return 'hi'
 
         logging.warning( "Language %s is unknown" % strLang  )
         raise (BaseException("Language %s is unknown" % strLang))
@@ -141,6 +143,8 @@ class LanguageTools():
             return 'it-IT'
         if( strLang == "Japanese" ):
             return 'ja-JP'
+        if (strLang == "Hindi"):
+            return 'hi-IN'
 
         logging.warning( "Language %s is unknown" % str( strLang ) )
         raise( BaseException( "Language %s is unknown" % str( strLang ) ))
