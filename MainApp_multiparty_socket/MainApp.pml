@@ -6,7 +6,7 @@
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>
-        <File name="client_utils" src="client_utils.py" />
+        <File name="client_utils" src="util_client.py" />
         <File name="DialogueMode" src="html/img/DialogueMode.png" />
         <File name="ExecutionMode" src="html/img/ExecutionMode.png" />
         <File name="PrivacyMode" src="html/img/PrivacyMode.png" />
