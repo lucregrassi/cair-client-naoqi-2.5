@@ -68,7 +68,7 @@ class LanguageTools():
         if( strLang == "French" ):
             return 'fr'
         if( strLang == "English" ):
-            return 'en'
+            return 'en-IN'
         if ( strLang == "Spanish" ):
             return 'sp'
         if ( strLang == "Italian" ):
@@ -134,7 +134,7 @@ class LanguageTools():
         if( strLang == "French" ):
             return 'fr-FR'
         if( strLang == "English" ):
-            return 'en-UK'
+            return 'en-IN'
         if( strLang == "Finnish" ):
             return 'fi-FI'
         if( strLang == "German" ):
