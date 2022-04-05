@@ -76,7 +76,7 @@ class Utils(object):
 
         profile_id = "00000000-0000-0000-0000-000000000000"
         user_name = "User"
-        speakers_info = {profile_id: {"name": user_name}}
+        speakers_info = {profile_id: {"name": user_name, "gender": 'nb'}}
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
         with open(self.speakers_info_file_path, 'w') as f:
             json.dump(speakers_info, f, ensure_ascii=False, indent=4)
@@ -158,7 +158,7 @@ class Utils(object):
     def registration_procedure(self):
         # Establish a socket connection with the registration.py script
         client_registration_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_registration_socket.connect(('localhost', 9091))
+        client_registration_socket.connect((registration_host, registration_port))
         # ** STEP 1 ** Create a new profile ID
         self.logger("Creating new profile ID")
         client_registration_socket.send(b"new_profile_id")
@@ -193,9 +193,9 @@ class Utils(object):
         self.logger("*** Listening ***")
         client_registration_socket.recv(256).decode('utf-8')
         if language == "it":
-            to_say = "Grazie per aver completato la registrazione " + new_profile_name + "! D'ora in poi riconoscerò la tua voce!"
+            to_say = "Grazie per aver completato la registrazione " + str(new_profile_name) + "! D'ora in poi riconoscero la tua voce!"
         else:
-            to_say = "Thank you for registering " + new_profile_name + "! From now on I will recognize your voice."
+            to_say = "Thank you for registering " + str(new_profile_name) + "! From now on I will recognize your voice."
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         # This function updates the info and the statistics of the users, adding the new profile id and the name to the
         # speakers_info and increasing the dimensions of the structures contained in the speakers_stats.

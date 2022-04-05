@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="mainapp_multiparty" version="0.0.0">
+<package version="0.0.0" uuid="mainapp_multiparty">
  <names>
   <name lang="en_US">MainApp_multiparty</name>
  </names>
@@ -12,6 +12,9 @@
  <contents>
   <behaviorContent path="cairclient">
    <nature>interactive</nature>
+   <triggerSentences>
+    <sentence lang="en_US">Let's talk</sentence>
+   </triggerSentences>
    <permissions/>
   </behaviorContent>
  </contents>

@@ -39,7 +39,7 @@
         <File name="wrappers" src="libs/flask/wrappers.py" />
         <File name="gzip" src="libs/gzip.py" />
         <File name="manage_actions" src="manage_actions.py" />
-        <File name="client_util" src="client_ut.py" />
+        <File name="client_utils" src="client_utils.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />
