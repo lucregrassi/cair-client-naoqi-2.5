@@ -6,6 +6,7 @@
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>
+        <File name="client_utils" src="client_util.py" />
         <File name="DialogueMode" src="html/img/DialogueMode.png" />
         <File name="ExecutionMode" src="html/img/ExecutionMode.png" />
         <File name="PrivacyMode" src="html/img/PrivacyMode.png" />
@@ -39,7 +40,6 @@
         <File name="wrappers" src="libs/flask/wrappers.py" />
         <File name="gzip" src="libs/gzip.py" />
         <File name="manage_actions" src="manage_actions.py" />
-        <File name="client_util" src="client_ut.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

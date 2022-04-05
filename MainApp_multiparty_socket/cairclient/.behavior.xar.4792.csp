@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 import json
 import os
 import manage_actions
-import client_ut
+import client_util
 import socket
 import zlib
 import re
@@ -28,7 +28,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         # Instances of the classes of the other files in the libs folder containing functions needed here
         self.plans = manage_actions.ActionManager(self.logger.info)
-        self.utils = client_ut.Utils(self.logger.info)
+        self.utils = client_util.Utils(self.logger.info)
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
         self.exit_keywords = ["stop talking", "quit the application"]

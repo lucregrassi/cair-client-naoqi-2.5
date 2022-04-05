@@ -6,10 +6,10 @@ import requests
 import time
 import numpy as np
 
-registration_host = "130.251.13.153"
+registration_host = "192.168.1.11"
 registration_port = 9091
 
-server_IP = "130.251.13.153"
+server_IP = "192.168.1.11"
 BASE = "http://" + server_IP + ":5000/CAIR_hub"
 app_name = "mainapp_multiparty"
 
