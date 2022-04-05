@@ -6,12 +6,13 @@ import requests
 import time
 import numpy as np
 
-registration_host = "192.168.1.11"
+registration_host = "130.251.13.110"
 registration_port = 9091
 
-server_IP = "192.168.1.11"
+server_IP = "130.251.13.110"
 BASE = "http://" + server_IP + ":5000/CAIR_hub"
 app_name = "mainapp_multiparty"
+language = "it"
 
 
 class Utils(object):
@@ -45,7 +46,6 @@ class Utils(object):
 
     def compose_sentence(self, sentence_pieces):
         sentence = ""
-        print(sentence_pieces)
         for elem in sentence_pieces:
             if sentence:
                 sentence = sentence + " " + elem[1]
@@ -99,7 +99,7 @@ class Utils(object):
         return first_dialogue_sentence, dialogue_state, speakers_info, speakers_stats
 
     # This method updates the info and the statistics of the users when a new user registers
-    def update_speakers_statistics(self, profile_id, user_name):
+    def update_speakers_statistics(self, profile_id, user_name, user_gender):
         # Load the information about the already existing users to add the new user
         with open(self.speakers_info_file_path, 'r') as info:
             speakers_info = json.load(info)
@@ -141,7 +141,14 @@ class Utils(object):
             json.dump(speakers_stats, f, ensure_ascii=False, indent=4)
 
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
-        speakers_info[profile_id] = {"name": user_name}
+        user_gender = user_gender.lower().strip('.,?!')
+        if "female" in user_gender or "femmina" in user_gender:
+            user_gender = "f"
+        elif "male" in user_gender or "maschio" in user_gender:
+            user_gender = "m"
+        else:
+            user_gender = "nb"
+        speakers_info[profile_id] = {"name": user_name, "gender": user_gender}
         with open(self.speakers_info_file_path, 'w') as f:
             json.dump(speakers_info, f, ensure_ascii=False, indent=4)
 
@@ -151,25 +158,46 @@ class Utils(object):
     def registration_procedure(self):
         # Establish a socket connection with the registration.py script
         client_registration_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_registration_socket.connect((registration_host, registration_port))
+        client_registration_socket.connect(('localhost', 9091))
         # ** STEP 1 ** Create a new profile ID
         self.logger("Creating new profile ID")
         client_registration_socket.send(b"new_profile_id")
         new_profile_id = client_registration_socket.recv(256).decode('utf-8')
 
         # ** STEP 2 ** Ask the name to the user
-        self.animated_speech.say(self.voice_speed + "Please, tell me your name.", self.configuration)
+        if language == "it":
+            to_say = "Per favore, dimmi come ti chiami."
+        else:
+            to_say = "Please, tell me your name."
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         client_registration_socket.send(b"new_profile_name")
         new_profile_name = client_registration_socket.recv(256).decode('utf-8')
 
-        # ** STEP 3 ** Ask the user to talk for 20 seconds
-        self.animated_speech.say(self.voice_speed + "Please, talk for twenty seconds.", self.configuration)
+        # ** STEP 3 ** Ask the gender to the user
+        if language == "it":
+            to_say = "Per favore, dimmi quale pronome di genere vuoi che usi quando parlo con te: femminile, maschile o neutro?"
+        else:
+            to_say = "Please, tell me which gender pronoun should I use when I talk with you: male, female or neutral?"
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+        client_registration_socket.send(b"new_profile_gender")
+        new_profile_gender = client_registration_socket.recv(256).decode('utf-8')
+
+        # ** STEP 4 ** Ask the user to talk for 20 seconds
+        if language == "it":
+            to_say = "Per favore, parla per 20 secondi in modo che io possa imparare a riconoscere la tua voce."
+        else:
+            to_say = "Please, talk for 20 seconds so that I can learn to recognize your voice."
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         client_registration_socket.send(b"new_profile_enrollment")
         # Wait for the completion of the enrollment
         self.logger("*** Listening ***")
         client_registration_socket.recv(256).decode('utf-8')
-        self.animated_speech.say(self.voice_speed + "Thank you for registering " + str(new_profile_name) + "! From now on I will recognize your voice.", self.configuration)
+        if language == "it":
+            to_say = "Grazie per aver completato la registrazione " + new_profile_name + "! D'ora in poi riconoscerò la tua voce!"
+        else:
+            to_say = "Thank you for registering " + new_profile_name + "! From now on I will recognize your voice."
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         # This function updates the info and the statistics of the users, adding the new profile id and the name to the
         # speakers_info and increasing the dimensions of the structures contained in the speakers_stats.
-        speakers_info, speakers_stats = self.update_speakers_statistics(new_profile_id, new_profile_name)
+        speakers_info, speakers_stats = self.update_speakers_statistics(new_profile_id, new_profile_name, new_profile_gender)
         return speakers_info, speakers_stats

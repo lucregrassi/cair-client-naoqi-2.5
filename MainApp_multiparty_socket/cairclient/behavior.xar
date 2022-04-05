@@ -4,31 +4,32 @@ sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_multipa
 sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_multiparty/")
 from naoqi import ALProxy
 import threading
-import requests
 import xml.etree.ElementTree as ET
-import json
+import re
+import requests
 import os
-import manage_actions
-import client_ut
+import json
 import socket
 import zlib
-import re
+import manage_actions
+import client_utils
 
-audio_recorder_host = "192.168.1.114"
+
+audio_recorder_host = "130.251.13.110"
 audio_recorder_port = 9090
 
-server_IP = "192.168.1.114"
+server_IP = "130.251.13.110"
 BASE = "http://" + server_IP + ":5000/CAIR_hub"
 speakers_moving_window_size = 10
 app_name = "mainapp_multiparty"
-
+language = "it"
 
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
         # Instances of the classes of the other files in the libs folder containing functions needed here
         self.plans = manage_actions.ActionManager(self.logger.info)
-        self.utils = client_ut.Utils(self.logger.info)
+        self.utils = client_utils.Utils(self.logger.info)
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
         self.exit_keywords = ["stop talking", "quit the application"]
@@ -38,6 +39,12 @@ class MyClass(GeneratedClass):
         self.al = ALProxy("ALAutonomousLife")
         self.motion = ALProxy("ALMotion")
         self.tts = ALProxy("ALTextToSpeech")
+        if language == "it":
+            self.tts.setLanguage("Italian")
+            self.not_installed_behavior = "Mi dispiace, non sono ancora capace di svolgere questa azione."
+        else:
+            self.tts.setLanguage("English")
+            self.not_installed_behavior = "I'm sorry, I am not yet able to perform this task."
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.behavior_manager = ALProxy("ALBehaviorManager")
@@ -48,7 +55,6 @@ class MyClass(GeneratedClass):
                                        "speakers_info.json"
         self.speakers_stats_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
                                         "speakers_stats.json"
-        self.not_installed_behavior = "I'm sorry, I can't perform this task because the behavior is not installed."
         # To store the previous sentence said by the robot
         self.previous_sentence = ""
         # This variable tells if the user want the robot to repeat a sentence
@@ -100,8 +106,12 @@ class MyClass(GeneratedClass):
         try:
             self.client_socket.connect((audio_recorder_host, audio_recorder_port))
         except:
-            self.animated_speech.say(self.voice_speed + "I'm sorry, I can't connect to the socket. Try again later.",
-                                     self.configuration)
+            if language == "it":
+                self.animated_speech.say(self.voice_speed + "Mi dispiace, non riesco a connettermi alla socket. Riprova più tardi.",
+                                         self.configuration)
+            else:
+                self.animated_speech.say(self.voice_speed + "I'm sorry, I can't connect to the socket. Try again later.",
+                                         self.configuration)
             self.onInput_onStop()
 
         try:
@@ -131,16 +141,24 @@ class MyClass(GeneratedClass):
             self.logger.info("First user!")
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
-            welcome_sentence, _, _, _ = self.utils.acquire_initial_state()
+            welcome_sentence, _, _ = self.utils.acquire_initial_state()
             welcome_sentence_str = self.utils.compose_sentence(welcome_sentence)
-            self.logger.info("Welcome to CAIR! " + str(welcome_sentence_str))
-            self.animated_speech.say(self.voice_speed + "Welcome to CAIR!" + str(welcome_sentence_str), self.configuration)
-            self.previous_sentence = "Welcome to CAIR!" + welcome_sentence_str
+            if language == "it":
+                welcome_msg = "Benvenuto! "
+            else:
+                welcome_msg = "Welcome! "
+            self.logger.info(welcome_msg + str(welcome_sentence_str))
+            self.animated_speech.say(self.voice_speed + welcome_msg + str(welcome_sentence_str), self.configuration)
+            self.previous_sentence = welcome_msg + welcome_sentence_str
         else:
             self.logger.info("Users are already present in the info file")
-            self.animated_speech.say(self.voice_speed + "I missed you! What would you like to talk about?",
+            if language == "it":
+                welcome_back_msg = "È bello rivederti! Di cosa vorresti parlare?"
+            else:
+                welcome_back_msg = "I missed you! What would you like to talk about?"
+            self.animated_speech.say(self.voice_speed + welcome_back_msg,
                                      self.configuration)
-            self.previous_sentence = "It's good to be back! What would you like to talk about?"
+            self.previous_sentence = welcome_back_msg
 
         # Start the behavior that senses people
         # if self.behavior_manager.isBehaviorInstalled("sensordata/people_perception"):
@@ -246,23 +264,24 @@ class MyClass(GeneratedClass):
 
             # Parse the xml string and extract the first sentence and the first speaker
             tree = ET.ElementTree(ET.fromstring(xml_string))
-            sentence = tree.findall('profile_id')[0].text
+            sentence = tree.findall('profile_id')[0].text.strip('.,!?')
             self.logger.info(str(sentence))
             profile_id = tree.findall("profile_id")[0].attrib["value"]
             print(speakers_info[profile_id]["name"] + ":", sentence)
 
             # Check if the user wants to exit or wants the robot to repeat the previous sentence
             sentence = sentence.replace(".", "")
-            sentence = sentence.replace("?", "")
-            sentence = sentence.replace("!", "")
             # Reset repeat to false, otherwise it will always repeat the previous sentence
             self.repeat = False
 
             # If the user said one of the "Exit Application keywords"
             if sentence.lower() in self.exit_keywords:
                 self.isAlive = False
-                self.animated_speech.say(self.voice_speed + "Ok, thank you for talking with me! Goodbye.",
-                                         self.configuration)
+                if language == "it":
+                    goodbye_msg = "Ok, grazie per aver parlato con me! A presto!"
+                else:
+                    goodbye_msg = "Ok, thank you for talking with me! Goodbye."
+                self.animated_speech.say(self.voice_speed + goodbye_msg, self.configuration)
                 self.memory.insertData(self.speech_reco_event, [])
                 self.onInput_onStop()
                 sys.exit(0)
@@ -271,21 +290,25 @@ class MyClass(GeneratedClass):
                 # If a previous sentence to repeat exists
                 if self.previous_sentence:
                     self.repeat = True
-                    self.animated_speech.say(self.voice_speed + "Sure. I said: " + str(self.previous_sentence),
+                    if language == "it":
+                        repeat_msg = "Certamente. Ho detto: "
+                    else:
+                        repeat_msg = "Sure! I said: "
+                    self.animated_speech.say(self.voice_speed + repeat_msg + str(self.previous_sentence),
                                              self.configuration)
                 else:
-                    self.animated_speech.say(self.voice_speed + "I'm sorry, I have nothing to repeat.",
-                                             self.configuration)
+                    if language == "it":
+                        repeat_msg = "Mi dispiace, non ho niente da ripetere."
+                    else:
+                        repeat_msg = "I'm sorry, I have nothing to repeat."
+                    self.animated_speech.say(self.voice_speed + repeat_msg, self.configuration)
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat:
-                # To avoid wrong parameters in the sentence (London?)
-                xml_string = xml_string.replace("?", "")
+
                 # Compose the payload of the message to be sent to the server
-                data = {"client_sentence": xml_string, "dialogue_state": dialogue_state,
-                        "speakers_stats": speakers_stats,
-                        "prev_speaker_info": {"id": prev_interaction_last_speaker, "topic": prev_speaker_topic},
-                        "sensor_data": ""}
+                data = {"client_sentence": xml_string, "dialogue_state": dialogue_state, "speakers_stats": speakers_stats,
+                        "prev_speaker_info": {"id": prev_interaction_last_speaker, "topic": prev_speaker_topic}}
 
                 # Update the info about id and topic of previous speaker to the current one
                 prev_interaction_last_speaker = same_interaction_last_speaker
@@ -318,10 +341,29 @@ class MyClass(GeneratedClass):
                 plan = hub_response.json()['plan']
                 dialogue_sentence = hub_response.json()['dialogue_sentence']
 
-                dialogue_sentence_str = self.utils.compose_sentence(dialogue_sentence)
+                # Loop over the elements of the list containing the pieces of the sentence along with their type
+                for elem in dialogue_sentence:
+                    gender = speakers_info[elem[2]]["gender"]
+                    if "$" in elem[1]:
+                        elem[1] = elem[1].replace("$" + elem[2], speakers_info[elem[2]]["name"])
+                    if "ə" in elem[1]:
+                        if gender == "f":
+                            elem[1] = elem[1].replace("ə", "a")
+                        elif gender == "m":
+                            elem[1] = elem[1].replace("ə", "o")
 
-                # If there is an intent reply, it means that something has been matched by the Plan manager service
-                # Assume that when there is the intent reply there is also the plan
+                dialogue_sentence_str = self.utils.compose_sentence(dialogue_sentence)
+                # Substitute the speaker name in place of the user id
+                # The reply of the Dialogue Manager should never be empty
+                if "$" in dialogue_sentence_str:
+                    for prof_id in speakers_info:
+                        if prof_id in dialogue_sentence_str:
+                            dialogue_sentence_str = \
+                                dialogue_sentence_str.replace("$" + prof_id, speakers_info[prof_id]["name"])
+
+                self.logger.info(str(dialogue_sentence_str))
+
+                # If there is a plan sentence, it means that something has been matched by the Plan manager service
                 if plan_sentence:
                     self.logger.info(str(plan_sentence))
                     if "$" in plan_sentence:
@@ -329,46 +371,31 @@ class MyClass(GeneratedClass):
                             if prof_id in plan_sentence:
                                 plan_sentence = plan_sentence.replace("$" + prof_id, speakers_info[prof_id]["name"])
 
-                    # Say the intent reply
+                    # Say the plan sentence
                     self.animated_speech.say(self.voice_speed + str(plan_sentence), self.configuration)
 
-                    # Assume the plan is present only along with the plan sentence
-                    if plan:
-                        plan_items = plan.split("#")[1:]
-                        self.logger.info(plan_items)
-                        registration = False
-                        # For each action in the plan, check which action is it and execute it
-                        for item in plan_items:
-                            action = re.findall("action=(\w+)", item)[0]
-                            if action == "registration":
-                                registration = True
-                                # The function that manages the registration, updates the files and returns the updated
-                                # dictionaries, so that we don't have to read from the files at each turn.
-                                speakers_info, speakers_stats = self.utils.registration_procedure()
-                            else:
-                                item = item.encode('utf-8')
-                                self.plans.perform_action(item)
+                # If there is a plan, execute it (if the behavior is installed)
+                if plan:
+                    plan_items = plan.split("#")[1:]
+                    self.logger.info(plan_items)
+                    # For each action in the plan, check which action is it and execute it
+                    for item in plan_items:
+                        action = re.findall("action=(\w+)", item)[0]
+                        if action == "registration":
+                            # The function that manages the registration, updates the files and returns the updated
+                            # dictionaries, so that we don't have to read from the files at each turn.
+                            speakers_info, speakers_stats = self.utils.registration_procedure()
+                        else:
+                            item = item.encode('utf-8')
+                            self.plans.perform_action(item)
 
-                        # Once the execution of the plan is finished, set the dialogue mode image on the tablet
-                        if self.tablet:
-                            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
-                                                          "/apps/" + app_name + "/img/DialogueMode.png")
+                    # Once the execution of the plan is finished, set the dialogue mode image on the tablet
+                    if self.tablet:
+                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
+                                                      "/apps/" + app_name + "/img/DialogueMode.png")
 
-                # If there is a reply from the Cloud, say it after the plan has been executed
-                # Substitute the speaker name in place of the user id
-                # The reply of the Dialogue Manager should never be empty
-                if dialogue_sentence_str:
-                    if "$" in dialogue_sentence_str:
-                        for prof_id in speakers_info:
-                            if prof_id in dialogue_sentence_str:
-                                dialogue_sentence_str = \
-                                    dialogue_sentence_str.replace("$" + prof_id, speakers_info[prof_id]["name"])
-
-                    self.logger.info(str(dialogue_sentence_str))
-                    self.animated_speech.say(self.voice_speed + str(dialogue_sentence_str), self.configuration)
-                    self.previous_sentence = dialogue_sentence_str
-                else:
-                    self.logger("No dialogue sentence received from the hub")
+                self.animated_speech.say(self.voice_speed + str(dialogue_sentence_str), self.configuration)
+                self.previous_sentence = dialogue_sentence_str
 
     def onInput_onStop(self):
         if self.tablet:
