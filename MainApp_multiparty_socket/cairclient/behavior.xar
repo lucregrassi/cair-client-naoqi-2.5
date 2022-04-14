@@ -17,10 +17,10 @@ import manage_actions
 import client_utils
 
 
-audio_recorder_host = "130.251.13.110"
+audio_recorder_host = "130.251.13.118"
 audio_recorder_port = 9090
 
-server_IP = "130.251.13.110"
+server_IP = "130.251.13.118"
 BASE = "http://" + server_IP + ":5000/CAIR_hub"
 speakers_moving_window_size = 10
 app_name = "mainapp_multiparty"
@@ -146,8 +146,7 @@ class MyClass(GeneratedClass):
             self.logger.info("First user!")
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
-            welcome_sentence, _, _, _ = self.utils.acquire_initial_state()
-            welcome_sentence_str = self.utils.compose_sentence(welcome_sentence)
+            welcome_sentence_str, _, _, _ = self.utils.acquire_initial_state()
             if language == "it":
                 welcome_msg = "Benvenuto! "
             else:
@@ -196,7 +195,7 @@ class MyClass(GeneratedClass):
             self.logger.info("** Listening **")
             # Tell the audio recorder that the client is ready to receive the user reply
             self.client_socket.send(b"ready")
-            xml_string = self.client_socket.recv(256).decode('utf-8')
+            xml_string = self.client_socket.recv(1024).decode('utf-8')
 
             if xml_string == "":
                 if language == "it":

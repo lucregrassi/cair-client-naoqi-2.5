@@ -209,7 +209,7 @@ class MyClass(GeneratedClass):
                     self.onInput_onStop()
                     exit(0)
 
-                intent_reply = hub_response.json()['intent_reply']
+                intent_reply = hub_response.json()['plan_sentence']
                 plan = hub_response.json()['plan']
                 reply = hub_response.json()['reply']
 

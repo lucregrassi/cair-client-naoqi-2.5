@@ -1,20 +1,27 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="mainapp_multiparty">
+<package uuid="mainapp_multiparty" version="0.0.0">
  <names>
   <name lang="en_US">MainApp_multiparty</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>
+  <language>it_IT</language>
  </supportedLanguages>
  <descriptionLanguages>
   <language>en_US</language>
+  <language>it_IT</language>
  </descriptionLanguages>
  <contents>
   <behaviorContent path="cairclient">
    <nature>interactive</nature>
    <triggerSentences>
     <sentence lang="en_US">Let's talk</sentence>
+    <sentence lang="en_US">Connect to the cloud</sentence>
+    <sentence lang="it_IT">Parliamo</sentence>
+    <sentence lang="it_IT">Connettiti al cloud</sentence>
    </triggerSentences>
+   <loadingResponses/>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>
