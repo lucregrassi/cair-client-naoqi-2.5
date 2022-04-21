@@ -13,6 +13,7 @@ class MyClass(GeneratedClass):
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        self.language = self.memory.getData("CAIR/language")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.sASR = ALProxy("ASR2")
@@ -39,6 +40,14 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
+        if self.language == "it":
+            ask_activity = "Per quale attività vuoi che ti mostri le istruzioni?"
+            wait_msg = "Dammi un momento. Sto cercando le istruzioni su YouTube."
+            stop_msg = "Premi play quando vuoi guardare le istruzioni. Tocca uno dei miei sensori per uscire."
+        else:
+            ask_activity = "For which activity do you want me to show you the instructions?"
+            wait_msg = "Give me a moment. I'm looking for the instructions on YouTube."
+            stop_msg = "Press play when you're ready to watch the instructions. Touch one of my sensors when you want to stop."
         # Check if the parameter is in memory
         try:
             text = self.memory.getData("CAIR/instructions")
@@ -47,7 +56,7 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "For which activity do you want me to show you the instructions?", self.configuration)
+            self.animated_speech.say(self.voice_speed + ask_activity, self.configuration)
 
             # Start speech recognition
             self.sASR.startReco("English", False, True)
@@ -99,7 +108,7 @@ class MyClass(GeneratedClass):
         text = self.memory.getData("CAIR/instructions")
         self.logger.info(str(text))
 
-        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the instructions on YouTube.", self.configuration)
+        self.animated_speech.say(self.voice_speed + wait_msg, self.configuration)
 
         search_keyword = text.replace(" ", "+") + "+tutorial"
         html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
@@ -111,7 +120,7 @@ class MyClass(GeneratedClass):
         self.tablet_service.cleanWebview()
         self.tablet_service.loadUrl(str(my_url))
         self.tablet_service.showWebview()
-        self.animated_speech.say(self.voice_speed + "Press play when you're ready to watch the instructions. Touch one of my sensors when you want to stop.", self.configuration)
+        self.animated_speech.say(self.voice_speed + stop_msg, self.configuration)
 
         while self.isRunning:
             pass

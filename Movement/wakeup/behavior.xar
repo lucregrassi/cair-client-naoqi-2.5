@@ -17,6 +17,11 @@ class MyClass(GeneratedClass):
         except:
             self.voice_speed = "\\RSPD=80\\"
 
+        try:
+            self.language = self.memory.getData("CAIR/language")
+        except:
+            self.language = "en"
+
     def onLoad(self):
         #put initialization code here
         pass
@@ -27,12 +32,24 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         self.logger.info(self.al.getState())
-        self.animated_speech.say(self.voice_speed + "I am leaving my docking station", self.configuration)
+        if self.language == "it":
+            to_say = "Sto lasciando la mia docking station"
+        else:
+            to_say = "I am leaving my docking station"
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         try:
             self.recharge.leaveStation()
-            self.animated_speech.say(self.voice_speed + "I have successfully left my docking station", self.configuration)
+            if self.language == "it":
+                to_say = "Ho lasciato la mia docking station con successo."
+            else:
+                to_say = "I have successfully left my docking station."
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         except:
-            self.tts.say(self.voice_speed + "I'm sorry I can't leave my docking station", self.configuration)
+            if self.language == "it":
+                to_say = "Mi dispice, non riesco a lasciare la mia docking station."
+            else:
+                to_say = "I'm sorry I can't leave my docking station."
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
         self.onInput_onStop()
 

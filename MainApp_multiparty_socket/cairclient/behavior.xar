@@ -17,10 +17,10 @@ import manage_actions
 import client_utils
 
 
-audio_recorder_host = "130.251.13.118"
+audio_recorder_host = "130.251.13.108"
 audio_recorder_port = 9090
 
-server_IP = "130.251.13.118"
+server_IP = "130.251.13.108"
 BASE = "http://" + server_IP + ":5000/CAIR_hub"
 speakers_moving_window_size = 10
 app_name = "mainapp_multiparty"
@@ -35,10 +35,9 @@ class MyClass(GeneratedClass):
         self.logger.info(str(sys.getdefaultencoding()))
         self.plans = manage_actions.ActionManager(self.logger.info)
         self.utils = client_utils.Utils(self.logger.info)
-        self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
         self.exit_keywords = ["stop talking", "quit the application", "esci dall'app"]
-        self.repeat_keywords = ["repeat", "say it again"]
+        self.repeat_keywords = ["repeat", "say it again", "ripeti", "puoi ripetere"]
         self.memory = ALProxy("ALMemory")
         self.speech_reco_event = "Audio/RecognizedWords"
         self.al = ALProxy("ALAutonomousLife")
@@ -46,10 +45,12 @@ class MyClass(GeneratedClass):
         self.tts = ALProxy("ALTextToSpeech")
         if language == "it":
             self.tts.setLanguage("Italian")
+            self.memory.insertData("CAIR/language", language)
             self.not_installed_behavior = "Mi dispiace, non sono ancora capace di svolgere questa azione."
         else:
             self.tts.setLanguage("English")
             self.not_installed_behavior = "I'm sorry, I am not yet able to perform this task."
+        self.memory.insertData("CAIR/language", language)
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.behavior_manager = ALProxy("ALBehaviorManager")
@@ -89,7 +90,6 @@ class MyClass(GeneratedClass):
         self.audio_device.setOutputVolume(50)
 
         self.asr_service = ALProxy("ALSpeechRecognition")
-        self.asr_service.setAudioExpression(False)
 
     # def get_sensor_data_thread(self):
     #     while self.isAlive:
@@ -106,29 +106,32 @@ class MyClass(GeneratedClass):
     #    self.behavior_manager.stopBehavior("sensordata/people_perception")
 
     def onInput_onStart(self):
+        try:
+            if self.al.getState() != "disabled":
+                # self.animated_speech.say(self.voice_speed + "Give me a moment. I need to disable Autonomous Life before we start.", self.configuration)
+                self.al.setState("disabled")
+        except:
+            pass
+
+        # Set all the awarenesses
+        self.utils.setAwareness()
+
+        # Wake the robot up if not already up
+        self.motion.wakeUp()
+
+        # Disable beep
+        self.asr_service.setAudioExpression(False)
+
         # Try connecting to the socket that records the audio
         self.logger.info("Trying to connect to the audio recorder socket.")
         try:
             self.client_socket.connect((audio_recorder_host, audio_recorder_port))
         except:
             if language == "it":
-                self.animated_speech.say(self.voice_speed + "Mi dispiace, non riesco a connettermi alla socket. Riprova più tardi.",
-                                         self.configuration)
+                self.animated_speech.say(self.voice_speed + "Mi dispiace, non riesco a connettermi alla socket. Riprova più tardi.", self.configuration)
             else:
-                self.animated_speech.say(self.voice_speed + "I'm sorry, I can't connect to the socket. Try again later.",
-                                         self.configuration)
+                self.animated_speech.say(self.voice_speed + "I'm sorry, I can't connect to the socket. Try again later.", self.configuration)
             self.onInput_onStop()
-
-        try:
-            if self.al.getState() != "disabled":
-                # self.animated_speech.say(self.voice_speed + "Give me a moment. I need to disable Autonomous Life
-                # before we start.", self.configuration)
-                self.al.setState("disabled")
-        except:
-            pass
-
-        # Wake the robot up if not already up
-        self.motion.wakeUp()
 
         # With Pepper robot, preload the images to be set on the tablet during the conversation
         if self.tablet:
@@ -406,8 +409,7 @@ class MyClass(GeneratedClass):
     def onInput_onStop(self):
         if self.tablet:
             self.tablet_service.hideImage()
-        self.al.setState("interactive")
-        self.utils.setAutonomousAbilities(True, True, True, True, True)
+        # self.al.setState("solitary")
         # If present, delete the transformation - if the robot moves outside CAIR it is no more valid
         try:
             self.memory.removeData("CAIR/transformation_matrix")

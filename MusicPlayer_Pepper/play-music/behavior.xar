@@ -5,7 +5,7 @@ import urllib2
 import base64
 from naoqi import ALProxy
 
-server_IP = "130.251.13.153"
+server_IP = "130.251.13.108"
 BASE = "http://" + server_IP + ":5003/"
 
 class MyClass(GeneratedClass):
@@ -18,6 +18,10 @@ class MyClass(GeneratedClass):
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.voice_speed = "\\RSPD=80\\"
+        try:
+            self.language = self.memory.getData("CAIR/language")
+        except:
+            self.language = "en"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.isRunning = True
@@ -38,7 +42,13 @@ class MyClass(GeneratedClass):
         text = self.memory.getData("CAIR/song_title")
         self.logger.info(str(text))
 
-        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the song. Please, be patient, it may take a while.", self.configuration)
+        if self.language == "it":
+            wait_str = "Dammi un momento. Sto cercando la canzone che mi hai chiesto. Per favore, sii paziente, potrebbe volerci un po'."
+            stop_str = "Tocca uno dei miei sensori quando vuoi uscire."
+        else:
+            wait_str = "Give me a moment. I'm looking for the song. Please, be patient, it may take a while."
+            stop_str = "Touch one of my sensors when you want me to stop."
+        self.animated_speech.say(self.voice_speed + wait_str, self.configuration)
         text = text.replace(" ", "+")
 
         response = requests.get(BASE + "CAIR_music/" + str(text), verify=False)
@@ -46,7 +56,8 @@ class MyClass(GeneratedClass):
         wav_file = open(self.app_path + '/song.mp3', 'wb')
         decoded_string = base64.b64decode(encoded_string)
         wav_file.write(decoded_string)
-        self.animated_speech.say(self.voice_speed + "Touch my head, my hands or my bumpers when you want me to stop.", self.configuration)
+
+        self.animated_speech.say(self.voice_speed + stop_str, self.configuration)
 
         fileId = self.audio_player_service.loadFile(self.app_path + "/song.mp3")
         self.logger.info(fileId)

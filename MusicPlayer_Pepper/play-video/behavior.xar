@@ -16,6 +16,10 @@ class MyClass(GeneratedClass):
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.voice_speed = "\\RSPD=80\\"
+        try:
+            self.language = self.memory.getData("CAIR/language")
+        except:
+            self.language = "en"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.isRunning = True
@@ -34,7 +38,13 @@ class MyClass(GeneratedClass):
         text = self.memory.getData("CAIR/song_title")
         self.logger.info(str(text))
 
-        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the video on YouTube.", self.configuration)
+        if self.language == "it":
+            wait_str = "Dammi un momento. Sto cercando il video della canzone su YouTube."
+            stop_str = "Premi play quando vuoi guardare il video. Tocca uno dei miei sensori quando vuoi uscire."
+        else:
+            wait_str = "Give me a moment. I'm looking for the video of the song on YouTube."
+            stop_str = "Press play when you're ready. Touch one of my sensors when you want me to stop."
+        self.animated_speech.say(self.voice_speed + wait_str, self.configuration)
 
         search_keyword = text.replace(" ", "+") + "+lyrics"
         html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
@@ -46,7 +56,7 @@ class MyClass(GeneratedClass):
         self.tablet_service.cleanWebview()
         self.tablet_service.loadUrl(str(my_url))
         self.tablet_service.showWebview()
-        self.animated_speech.say(self.voice_speed + "Press play when you're ready. Touch my head, my hands or my bumpers when you want to stop.", self.configuration)
+        self.animated_speech.say(self.voice_speed + stop_str, self.configuration)
 
         while self.isRunning:
             pass

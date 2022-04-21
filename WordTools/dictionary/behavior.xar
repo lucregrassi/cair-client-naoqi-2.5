@@ -3,6 +3,7 @@ import sys
 sys.path.append("/data/home/nao/.local/share/PackageManager/apps/wordtools/libs")
 from naoqi import ALProxy
 from PyDictionary import PyDictionary
+from mtranslate import translate
 
 class MyClass(GeneratedClass):
     def __init__(self):
@@ -16,6 +17,7 @@ class MyClass(GeneratedClass):
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.voice_speed = "\\RSPD=80\\"
+        self.language = self.memory.getData("CAIR/language")
         self.configuration = {"bodyLanguageMode": "contextual"}
 
 
@@ -44,10 +46,17 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "What word would you like me to search on the dictionary?", self.configuration)
+            if self.language == "it":
+                ask_def = "Coa vuoi che cerchi sul dizionario?"
+            else:
+                ask_def = "What word would you like me to search on the dictionary?"
+            self.animated_speech.say(self.voice_speed + ask_def, self.configuration)
 
             # Start speech recognition
-            self.sASR.startReco("English", False, True)
+            if self.language == "it":
+                self.sASR.startReco("Italian", False, True)
+            else:
+                self.sASR.startReco("English", False, True)
             self.setAutonomousAbilities(True, True, True, True, True)
 
             start_time_silence = time.time() + 1800
@@ -97,12 +106,20 @@ class MyClass(GeneratedClass):
             if dictionary.meaning(to_define):
                 definition = str(dictionary.meaning(to_define)['Noun'][0])
                 self.logger.info(definition)
-                self.animated_speech.say(self.voice_speed + "The definition of " + to_define + " is: " + definition, self.configuration)
+                if self.language == "it":
+                    definition_it = translate(definition, "it").encode('utf-8')
+                    outcome = "La definizione di " + to_define + " è: " + definition_it
+                else:
+                    outcome = "The definition of " + to_define + " is: " + definition
+                self.animated_speech.say(self.voice_speed + outcome, self.configuration)
             else:
                 raise Exeption("No definition")
         except:
-            definition = "I'm sorry, I can't find a definition for " + to_define + " on the dictionary."
-            self.animated_speech.say(self.voice_speed + definition, self.configuration)
+            if self.language == "it":
+                outcome = "Mi dispiace, non riesco a trovare la definizione di " + to_define + " sul dizionario."
+            else:
+                outcome = "I'm sorry, I can't find a definition for " + to_define + " on the dictionary."
+            self.animated_speech.say(self.voice_speed + outcome, self.configuration)
 
         self.memory.removeData("CAIR/dictionary")
         self.onStopped()

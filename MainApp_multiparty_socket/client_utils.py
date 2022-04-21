@@ -6,10 +6,10 @@ import requests
 import time
 import numpy as np
 
-registration_host = "130.251.13.118"
+registration_host = "130.251.13.108"
 registration_port = 9091
 
-server_IP = "130.251.13.118"
+server_IP = "130.251.13.108"
 BASE = "http://" + server_IP + ":5000/CAIR_hub"
 app_name = "mainapp_multiparty"
 language = "it"
@@ -20,6 +20,7 @@ class Utils(object):
         super(Utils, self).__init__()
         self.logger = logger
         self.al = ALProxy("ALAutonomousLife")
+        self.ba = ALProxy("ALBasicAwareness")
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
@@ -37,12 +38,15 @@ class Utils(object):
             self.memory.insertData("CAIR/voice_speed", 80)
             self.voice_speed = "\\RSPD=80\\"
 
-    def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
-        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
-        self.al.setAutonomousAbilityEnabled("BackgroundMovement", background)
-        self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
-        self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
-        self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
+    def setAwareness(self):
+        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", True)
+        self.al.setAutonomousAbilityEnabled("BackgroundMovement", True)
+        # Enabled by default when in solitary or interactive, not when disabled
+        self.al.setAutonomousAbilityEnabled("BasicAwareness", True)
+        self.al.setAutonomousAbilityEnabled("ListeningMovement", True)
+        self.al.setAutonomousAbilityEnabled("SpeakingMovement", True)
+        self.ba.setEngagementMode("Unengaged")
+        self.ba.setTrackingMode("Head")
 
     def compose_sentence(self, sentence_pieces):
         sentence = ""
@@ -142,9 +146,9 @@ class Utils(object):
 
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
         user_gender = user_gender.lower().strip('.,?!')
-        if "female" in user_gender or "femmina" in user_gender:
+        if "female" in user_gender or "femminile" in user_gender:
             user_gender = "f"
-        elif "male" in user_gender or "maschio" in user_gender:
+        elif "male" in user_gender or "maschile" in user_gender:
             user_gender = "m"
         else:
             user_gender = "nb"

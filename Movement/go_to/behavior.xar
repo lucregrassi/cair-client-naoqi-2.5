@@ -30,6 +30,10 @@ class MyClass(GeneratedClass):
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.voice_speed = "\\RSPD=80\\"
+        try:
+            self.language = self.memory.getData("CAIR/language")
+        except:
+            self.language = "en"
         self.gain = 0.2
         self.isRunning = True
 
@@ -81,7 +85,12 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "Where should I go?", self.configuration)
+            if self.language == "it":
+                to_say = "Dove vuoi che vada?"
+            else:
+                to_say = "Where should I go?"
+
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
             # Start speech recognition
             self.sASR.startReco("English", False, True)
@@ -163,7 +172,12 @@ class MyClass(GeneratedClass):
                 x_y_relative_dest = np.array([relative_destination[0], relative_destination[1]])
                 relative_movement = np.dot(rotation_matrix, x_y_relative_dest.T)
                 self.logger.info("Relative movement: " + str(relative_movement) + str(theta_rotation))
-                self.animated_speech.say(self.voice_speed + "I'm going to the " + where + ". Touch one of my sensors if you want me to stop.", self.configuration)
+                if self.language == "it":
+                    to_say = "Sto andando in " + where + ". Tocca uno dei miei sensori se vuoi che mi fermi."
+
+                else:
+                    to_say = "I'm going to the " + where + ". Touch one of my sensors if you want me to stop."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
                 ######### CHANGE WITH VELOCITIES ###########
                 self.motionProxy.moveTo(round(relative_movement[0], 2), round(relative_movement[1], 2), relative_destination[3])
@@ -184,13 +198,21 @@ class MyClass(GeneratedClass):
                 self.onInput_onStop()
 
             except:
-                self.animated_speech.say(self.voice_speed + "I need to know where I am with respect to the environment before I can go somewhere.", self.configuration)
+                if self.language == "it":
+                    to_say = "Ho bisogno di sapere dove sono rispetto all'ambiente prima che io possa andare da qualche parte."
+                else:
+                    to_say = "I need to know where I am with respect to the environment before I can go somewhere."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
                 self.memory.insertData("CAIR/go_to_outcome", False)
                 self.memory.removeData("CAIR/go_to")
                 self.onInput_onStop()
 
         else:
-            self.animated_speech.say(self.voice_speed + "I'm sorry I don't know where the " + where + " is.", self.configuration)
+             if self.language == "it":
+                to_say = "Mi dispiace non so dove sia " + where + "."
+            else:
+                to_say = "I'm sorry I don't know where the " + where + " is."
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             self.memory.insertData("CAIR/go_to_outcome", False)
             self.memory.removeData("CAIR/go_to")
             self.onInput_onStop()

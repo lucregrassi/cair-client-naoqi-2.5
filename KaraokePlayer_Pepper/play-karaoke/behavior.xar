@@ -23,6 +23,10 @@ class MyClass(GeneratedClass):
         self.al = ALProxy("ALAutonomousLife")
         self.isRunning = True
         self.isAlive = True
+        try:
+            self.language = self.memory.getData("CAIR/language")
+        except:
+            self.language = "en"
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
         self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
@@ -50,10 +54,20 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "Please, tell me the title of the song you want to sing.", self.configuration)
+            if self.language == "it":
+                ask_title = "Per favore, dimmi il titolo della canzone che vuoi cantare."
+                reco_language = "Italian"
+                wait_str = "Dammi un momento. Sto cercando la canzone su YouTube."
+                stop_str = "Premi play quando sei pronto per cantare. Tocca uno dei miei sensori quando hai finito!"
+            else:
+                ask_title = "Please, tell me the title of the song you want to sing."
+                reco_language = "English"
+                wait_str = "Give me a moment. I'm looking for the karaoke on YouTube."
+                stop_str = "Press play when you're ready to sing. Touch one of my sensors when you want to stop!"
+            self.animated_speech.say(self.voice_speed + ask_title, self.configuration)
 
             # Start speech recognition
-            self.sASR.startReco("English", False, True)
+            self.sASR.startReco(reco_language, False, True)
             self.setAutonomousAbilities(True, True, True, True, True)
 
             start_time_silence = time.time() + 1800
@@ -101,8 +115,7 @@ class MyClass(GeneratedClass):
 
         text = self.memory.getData("CAIR/karaoke_title")
         self.logger.info(str(text))
-
-        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the karaoke on YouTube.", self.configuration)
+        self.animated_speech.say(self.voice_speed + wait_str self.configuration)
 
         search_keyword = text.replace(" ", "+") + "+karaoke"
         html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
@@ -114,7 +127,8 @@ class MyClass(GeneratedClass):
         self.tablet_service.cleanWebview()
         self.tablet_service.loadUrl(str(my_url))
         self.tablet_service.showWebview()
-        self.animated_speech.say(self.voice_speed + "Press play when you're ready to sing. Touch my head, my hands or my bumpers when you want to stop.", self.configuration)
+
+        self.animated_speech.say(self.voice_speed + stop_str, self.configuration)
 
         while self.isRunning:
             pass

@@ -20,6 +20,7 @@ class MyClass(GeneratedClass):
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.voice_speed = "\\RSPD=80\\"
+        self.language = self.memory.getData("CAIR/language")
         self.configuration = {"bodyLanguageMode": "contextual"}
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):

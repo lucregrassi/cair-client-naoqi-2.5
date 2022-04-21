@@ -20,8 +20,6 @@
     <sentence lang="it_IT">Parliamo</sentence>
     <sentence lang="it_IT">Connettiti al cloud</sentence>
    </triggerSentences>
-   <loadingResponses/>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

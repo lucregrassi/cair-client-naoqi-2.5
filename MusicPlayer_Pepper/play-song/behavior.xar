@@ -18,6 +18,10 @@ class MyClass(GeneratedClass):
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.voice_speed = "\\RSPD=80\\"
+        try:
+            self.language = self.memory.getData("CAIR/language")
+        except:
+            self.language = "en"
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.speech_reco_event = "Audio/RecognizedWords"
 
@@ -28,7 +32,7 @@ class MyClass(GeneratedClass):
         # change the language to overcome vocabulary problem
         self.asr_service.setLanguage("Italian")
         self.asr_service.setLanguage("English")
-        vocabulary = ["yes", "no"]
+        vocabulary = ["yes", "sì", "si", "no"]
         self.asr_service.pause(True)
         self.asr_service.setVocabulary(vocabulary, False)
         self.asr_service.setAudioExpression(False)
@@ -56,10 +60,16 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "Please, tell me the title of the song you want to listen to.", self.configuration)
+            if self.language == "it":
+                ask_title = "Per favore, dimmi il titolo della canzone che vuoi ascoltare."
+                reco_language = "Italian"
+            else:
+                ask_title =  "Please, tell me the title of the song you want to listen to."
+                reco_language = "English"
+            self.animated_speech.say(self.voice_speed + ask_title, self.configuration)
 
             # Start speech recognition
-            self.sASR.startReco("English", False, True)
+            self.sASR.startReco(reco_language, False, True)
             self.setAutonomousAbilities(True, True, True, True, True)
 
             start_time_silence = time.time() + 1800
@@ -105,8 +115,12 @@ class MyClass(GeneratedClass):
             self.memory.insertData(self.speech_reco_event, [])
             self.memory.insertData("CAIR/song_title", str(sentence))
 
+        if self.language == "it":
+            ask_video = "Vuoi che ti mostri anche il video?"
+        else:
+            ask_video = "Do you want me to show you also the video?"
         # Once the parameter is obtained, ask the user if he/she wants to watch also the video
-        self.animated_speech.say(self.voice_speed + "Do you want me to show you also the video?", self.configuration)
+        self.animated_speech.say(self.voice_speed + ask_video, self.configuration)
 
         # Restart asr service
         self.asr_service.pause(False)

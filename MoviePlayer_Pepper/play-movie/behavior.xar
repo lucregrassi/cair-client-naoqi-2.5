@@ -17,6 +17,11 @@ class MyClass(GeneratedClass):
         except:
             self.voice_speed = "\\RSPD=80\\"
 
+        try:
+            self.language = self.memory.getData("CAIR/language")
+        except:
+            self.language = "en"
+
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.sASR = ALProxy("ASR2")
@@ -51,10 +56,16 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "Please, tell me the title of the movie.", self.configuration)
+            if self.language == "it"
+                to_say = "Per favore, dimmi il titolo del film"
+                reco_language = "Italian"
+            else:
+                to_say = "Please, tell me the title of the movie."
+                reco_language = "English"
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
             # Start speech recognition
-            self.sASR.startReco("English", False, True)
+            self.sASR.startReco(reco_language, False, True)
             self.setAutonomousAbilities(True, True, True, True, True)
 
             start_time_silence = time.time() + 1800
@@ -103,7 +114,11 @@ class MyClass(GeneratedClass):
         text = self.memory.getData("CAIR/movie_title")
         self.logger.info(str(text))
 
-        self.animated_speech.say(self.voice_speed + "Give me a moment. I'm looking for the trailer on YouTube.", self.configuration)
+        if self.language == "it":
+            to_say = "Dammi un momento. Sto cercando il trailer su YouTube."
+        else:
+            to_say = "Give me a moment. I'm looking for the trailer on YouTube."
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
         search_keyword = text.replace(" ", "+") + "+official+trailer"
         html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
@@ -116,7 +131,11 @@ class MyClass(GeneratedClass):
             self.tablet_service.cleanWebview()
             self.tablet_service.loadUrl(str(my_url))
             self.tablet_service.showWebview()
-            self.animated_speech.say(self.voice_speed + "Press play when you're ready to watch the trailer. Touch my head, my hands or my bumpers when you want to stop.", self.configuration)
+            if self.language == "it":
+                to_say = "Premi play quando sei pronto per guardare il trailer. Tocca uno dei miei sensori quando vuoi uscire."
+            else:
+                to_say = "Press play when you're ready to watch the trailer. Touch one of my sensors when you want to stop."
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
             while self.isRunning:
                 pass
@@ -125,7 +144,11 @@ class MyClass(GeneratedClass):
             self.tablet_service.hideWebview()
 
         except:
-            self.animated_speech.say(self.voice_speed + "I'm sorry I didn't find what you asked for.", self.configuration)
+            if self.language == "it":
+                to_say = "Mi dispaice, non ho trovato il trailer del film che mi hai chiesto."
+            else:
+                to_say = "I'm sorry, I didn't find the trailer of the movie you asked."
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
         self.memory.removeData("CAIR/movie_title")
         self.onInput_onStop()

@@ -20,6 +20,7 @@ class MyClass(GeneratedClass):
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.voice_speed = "\\RSPD=80\\"
+        self.language = self.memory.getData("CAIR/language")
         self.configuration = {"bodyLanguageMode": "contextual"}
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
@@ -47,7 +48,11 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "Of which city do you want to know the weather forecast?", self.configuration)
+            if self.language == "it":
+                ask_city = "Di quale città vuoi sapere le previsioni?"
+            else:
+                ask_city = "Of which city do you want to know the weather forecast?"
+            self.animated_speech.say(self.voice_speed + ask_city, self.configuration)
 
             # Start speech recognition
             self.sASR.startReco("English", False, True)
@@ -117,12 +122,18 @@ class MyClass(GeneratedClass):
             pressure = main['pressure']
             # weather report
             report = data['weather']
-            reply = "Today in " + city + " there are " + str(temperature) + " degrees with " + str(report[0]['description']) + ". During the day the minimum temperature will be " + str(temp_min) + " and the maximum temperature will be " + str(temp_max) + "."
+            if self.language == "it":
+                reply = "Oggi a " + city + " ci sono " + str(temperature) + "gradi con " + str(report[0]['description']) + ". Durante la giornata, la temperatura minima sarà di " str(temp_min) + " e la massima sarà di " + str(temp_max) + " gradi Celsius."
+            reply = "Today in " + city + " there are " + str(temperature) + " degrees with " + str(report[0]['description']) + ". During the day the minimum temperature will be " + str(temp_min) + " and the maximum temperature will be " + str(temp_max) + " degrees Celsius."
             self.logger.info(str(reply))
             self.animated_speech.say(self.voice_speed + str(reply), self.configuration)
         else:
             # showing the error message
-            self.animated_speech.say(self.voice_speed + "I'm sorry, the weather forecast for " + city + " is not available.", self.configuration)
+            if self.language == "it":
+                error_msg = "Mi dispiace, le previsioni per " + city + " non sono disponibili."
+            else:
+                error_msg = "I'm sorry, the weather forecast for " + city + " is not available."
+            self.animated_speech.say(self.voice_speed + error_msg, self.configuration)
 
         self.memory.removeData("CAIR/weather_city")
         self.onInput_onStop()

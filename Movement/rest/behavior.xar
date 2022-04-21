@@ -15,6 +15,10 @@ class MyClass(GeneratedClass):
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.voice_speed = "\\RSPD=80\\"
+        try:
+            self.language = self.memory.getData("CAIR/language")
+        except:
+            self.language = "en"
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
         self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
@@ -33,14 +37,26 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         self.setAutonomousAbilities(False, False, False, False, False)
-        self.animated_speech.say(self.voice_speed + "I'm looking for my docking station.", self.configuration)
+        if self.language == "it":
+            to_say = "Sto cercando la mia docking station."
+        else:
+            to_say = "I'm looking for my docking station."
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         try:
             success = self.recharge.goToStation()
             if success != 0:
                 self.logger.info(success)
-                self.animated_speech.say(self.voice_speed + "I'm sorry, something went wrong.", self.configuration)
+                if self.language == "it":
+                    to_say = "Mi dispiace, qualcosa è andato storto."
+                else:
+                    to_say = "I'm sorry, something went wrong"
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             else:
-                self.animated_speech.say(self.voice_speed + "I'm successfully docked.", self.configuration)
+                if self.language == "it":
+                    to_say = "Ora sono sulla docking station."
+                else:
+                    to_say = "I'm successfully docked."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         except:
             pass
 
