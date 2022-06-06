@@ -20,6 +20,11 @@
     <sentence lang="it_IT">Parliamo</sentence>
     <sentence lang="it_IT">Connettiti al cloud</sentence>
    </triggerSentences>
+   <loadingResponses>
+    <sentence lang="it_IT">Va bene, dammi solo un attimo.</sentence>
+    <sentence lang="it_IT">Certo! Avvio subito il client per CAIR.</sentence>
+   </loadingResponses>
+   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIR client" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="333" y="156"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[#!usr/bin/python -tt
 # -*- coding: utf-8 -*-
 import qi
+from naoqi import ALProxy
 import sys
 sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_multiparty/libs/")
 sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_multiparty/")
-from naoqi import ALProxy
-import threading
+from cairlib.DialogueStatistics import DialogueStatistics
+from cairlib.DialogueTurn import DialogueTurn
+from cairlib.DialogueState import DialogueState
+from cairlib.CAIRclient_SoftBank_utils import Utils
+from cairlib.CAIRclient_SoftBank_actions import ActionManager
 import xml.etree.ElementTree as ET
 import re
+import xml
 import requests
 import os
 import json
 import socket
 import zlib
-import manage_actions
-import client_utils
 
 
-audio_recorder_host = "130.251.13.108"
-audio_recorder_port = 9090
+audio_recorder_ip = "130.251.13.107"
+server_ip = "130.251.13.107"
+registration_ip = "130.251.13.107"
 
-server_IP = "130.251.13.108"
-BASE = "http://" + server_IP + ":5000/CAIR_hub"
-speakers_moving_window_size = 10
 app_name = "mainapp_multiparty"
 language = "it"
+
 
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
         # Instances of the classes of the other files in the libs folder containing functions needed here
-        reload(sys)
-        sys.setdefaultencoding('UTF8')
-        self.logger.info(str(sys.getdefaultencoding()))
-        self.plans = manage_actions.ActionManager(self.logger.info)
-        self.utils = client_utils.Utils(self.logger.info)
+        self.plans = ActionManager(self.logger.info)
+        self.utils = Utils(self.logger.info, app_name, language, server_ip, registration_ip)
+        self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
-        self.exit_keywords = ["stop talking", "quit the application", "esci dall'app"]
-        self.repeat_keywords = ["repeat", "say it again", "ripeti", "puoi ripetere"]
+        self.exit_keywords = ["stop talking", "esci dallapp", "esci dallapplicazione", "quit the application"]
+        self.repeat_keywords = ["repeat", "say it again"]
         self.memory = ALProxy("ALMemory")
         self.speech_reco_event = "Audio/RecognizedWords"
         self.al = ALProxy("ALAutonomousLife")
@@ -45,12 +45,10 @@ class MyClass(GeneratedClass):
         self.tts = ALProxy("ALTextToSpeech")
         if language == "it":
             self.tts.setLanguage("Italian")
-            self.memory.insertData("CAIR/language", language)
             self.not_installed_behavior = "Mi dispiace, non sono ancora capace di svolgere questa azione."
         else:
             self.tts.setLanguage("English")
             self.not_installed_behavior = "I'm sorry, I am not yet able to perform this task."
-        self.memory.insertData("CAIR/language", language)
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.behavior_manager = ALProxy("ALBehaviorManager")
@@ -59,8 +57,8 @@ class MyClass(GeneratedClass):
                                         "dialogue_state.json"
         self.speakers_info_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
                                        "speakers_info.json"
-        self.speakers_stats_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
-                                        "speakers_stats.json"
+        self.dialogue_statistics_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                             "dialogue_statistics.json"
         # To store the previous sentence said by the robot
         self.previous_sentence = ""
         # This variable tells if the user want the robot to repeat a sentence
@@ -79,7 +77,8 @@ class MyClass(GeneratedClass):
         self.logger.info("Setting voice speed")
         try:
             self.voice_speed = "\\RSPD=100\\"
-            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+            self.memory.insertData("CAIR/voice_speed", 100)
+            # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.memory.insertData("CAIR/voice_speed", 100)
             self.voice_speed = "\\RSPD=100\\"
@@ -90,6 +89,7 @@ class MyClass(GeneratedClass):
         self.audio_device.setOutputVolume(50)
 
         self.asr_service = ALProxy("ALSpeechRecognition")
+        self.asr_service.setAudioExpression(False)
 
     # def get_sensor_data_thread(self):
     #     while self.isAlive:
@@ -98,7 +98,7 @@ class MyClass(GeneratedClass):
     #         data = {"sentence": "", "dialogue_states": "", "sensor_data": {"people": self.people}}
     #         encoded_data = json.dumps(data)
     #         compressed_data = zlib.compress(encoded_data)
-    #         response = requests.get(BASE, data=compressed_data, verify=False)
+    #         response = requests.put(BASE, data=compressed_data, verify=False)
     #         self.logger.info("Server response:" + str(response.json()['reply']))
     #         time.sleep(1)
 
@@ -106,32 +106,29 @@ class MyClass(GeneratedClass):
     #    self.behavior_manager.stopBehavior("sensordata/people_perception")
 
     def onInput_onStart(self):
+        # Try connecting to the socket that records the audio
+        self.logger.info("Trying to connect to the audio recorder socket.")
+        try:
+            self.client_socket.connect((audio_recorder_ip, 9090))
+        except:
+            if language == "it":
+                self.animated_speech.say(self.voice_speed + "Mi dispiace, non riesco a connettermi alla socket. Riprova più tardi.",
+                                         self.configuration)
+            else:
+                self.animated_speech.say(self.voice_speed + "I'm sorry, I can't connect to the socket. Try again later.",
+                                         self.configuration)
+            self.onInput_onStop()
+
         try:
             if self.al.getState() != "disabled":
-                # self.animated_speech.say(self.voice_speed + "Give me a moment. I need to disable Autonomous Life before we start.", self.configuration)
+                # self.animated_speech.say(self.voice_speed + "Give me a moment. I need to disable Autonomous Life
+                # before we start.", self.configuration)
                 self.al.setState("disabled")
         except:
             pass
 
-        # Set all the awarenesses
-        self.utils.setAwareness()
-
         # Wake the robot up if not already up
         self.motion.wakeUp()
-
-        # Disable beep
-        self.asr_service.setAudioExpression(False)
-
-        # Try connecting to the socket that records the audio
-        self.logger.info("Trying to connect to the audio recorder socket.")
-        try:
-            self.client_socket.connect((audio_recorder_host, audio_recorder_port))
-        except:
-            if language == "it":
-                self.animated_speech.say(self.voice_speed + "Mi dispiace, non riesco a connettermi alla socket. Riprova più tardi.", self.configuration)
-            else:
-                self.animated_speech.say(self.voice_speed + "I'm sorry, I can't connect to the socket. Try again later.", self.configuration)
-            self.onInput_onStop()
 
         # With Pepper robot, preload the images to be set on the tablet during the conversation
         if self.tablet:
@@ -149,7 +146,7 @@ class MyClass(GeneratedClass):
             self.logger.info("First user!")
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
-            welcome_sentence_str, _, _, _ = self.utils.acquire_initial_state()
+            welcome_sentence_str = self.utils.acquire_initial_state()
             if language == "it":
                 welcome_msg = "Benvenuto! "
             else:
@@ -177,7 +174,7 @@ class MyClass(GeneratedClass):
 
         # Retrieve the states of the users and save them in a dictionary
         with open(self.dialogue_state_file_path) as f:
-            dialogue_state = json.load(f)
+            dialogue_state = DialogueState(d=json.load(f))
 
         # Retrieve the info of the users and store them in a dictionary
         with open(self.speakers_info_file_path) as f:
@@ -187,11 +184,10 @@ class MyClass(GeneratedClass):
         # last n speakers:
         # "same_interaction", "successive_interaction", "same_interaction_prob", "successive_interaction_prob",
         # "mapping_index_speaker", "speakers_turns", "a_priori_prob", "speakers_moving_window",
-        with open(self.speakers_stats_file_path) as f:
-            speakers_stats = json.load(f)
+        with open(self.dialogue_statistics_file_path) as f:
+            dialogue_statistics = DialogueStatistics(d=json.load(f))
 
-        prev_interaction_last_speaker = ""
-        same_interaction_last_speaker = ""
+        prev_turn_last_speaker = ""
         prev_speaker_topic = ""
 
         while self.isAlive:
@@ -208,76 +204,30 @@ class MyClass(GeneratedClass):
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
                 self.onInput_onStop()
 
-            # Transform the xml string to an Element Tree
-            tree = ET.ElementTree(ET.fromstring(xml_string))
+            # Do not proceed until the xml string is complete and all tags are closed
+            proceed = False
+            while not proceed:
+                try:
+                    ET.ElementTree(ET.fromstring(xml_string))
+                    proceed = True
+                except xml.etree.ElementTree.ParseError:
+                    # If the xml is not complete, read again from the socket
+                    print("The XML is not complete.")
+                    xml_string = xml_string + self.client_socket.recv(1024).decode('utf-8')
 
-            # Stats about the user talking have already been added during the registration, so here we should just
-            # increment the elements of the matrices and recompute the probabilities
-            # -> Loop through the tags in the xml sentence and update the matrices to keep track of who spoke after whom
-            xml_profile_tags = tree.findall('profile_id')
-            for i in range(len(xml_profile_tags)):
-                profile_id = xml_profile_tags[i].attrib["value"]
-                # Do not consider generic user in the moving window of the speakers!
-                if profile_id != "00000000-0000-0000-0000-000000000000":
-                    speakers_stats["speakers_moving_window"].append(profile_id)
-                    if len(speakers_stats["speakers_moving_window"]) > speakers_moving_window_size:
-                        del speakers_stats["speakers_moving_window"][0]
-                # Increase the number of times that the previous speaker said something (including unknown speaker)
-                speaker_index = speakers_stats["mapping_index_speaker"].index(profile_id)
-                n_turns = speakers_stats["speakers_turns"][speaker_index]
-                speakers_stats["speakers_turns"][speaker_index] = n_turns + 1
-
-                # If it's the first speaker of the interaction (and it is not the first interaction),
-                # check if the speaker is the same as the last one of the previous interaction
-                if i == 0:
-                    if prev_interaction_last_speaker != "":
-                        # Increment the element of the "successive_interaction" matrix with the indexes mapped to
-                        # row = prev_interaction_last_speaker, column = profile_id
-                        row = speakers_stats["mapping_index_speaker"].index(prev_interaction_last_speaker)
-                        column = speakers_stats["mapping_index_speaker"].index(profile_id)
-                        speakers_stats["successive_interaction"][row][column] = \
-                            speakers_stats["successive_interaction"][row][column] + 1
-                        # Recompute the probabilities of the users talking after the previous one
-                        for c in range(len(speakers_stats["mapping_index_speaker"])):
-                            speakers_stats["successive_interaction_prob"][row][c] = \
-                                speakers_stats["successive_interaction"][row][c] / \
-                                speakers_stats["speakers_turns"][row]
-                else:
-                    # Increment the element of the "same_interaction" matrix with th indexes mapped to
-                    # row = same_interaction_last_speaker, column = profile_id
-                    row = speakers_stats["mapping_index_speaker"].index(same_interaction_last_speaker)
-                    column = speakers_stats["mapping_index_speaker"].index(profile_id)
-                    speakers_stats["same_interaction"][row][column] = \
-                        speakers_stats["same_interaction"][row][column] + 1
-                    for c in range(len(speakers_stats["mapping_index_speaker"])):
-                        speakers_stats["same_interaction_prob"][row][c] = \
-                            speakers_stats["same_interaction"][row][c] / \
-                            speakers_stats["speakers_turns"][row]
-                # Update the last speaker of the interaction
-                same_interaction_last_speaker = profile_id
-
-            # Compute the total number of turns of all users
-            tot_turns = 0
-            for elem in speakers_stats["speakers_turns"]:
-                tot_turns = tot_turns + elem
-
-            # Recompute all the a priori probabilities with the updated number of turns
-            for i in range(len(speakers_stats["mapping_index_speaker"])):
-                # Get the number of turns of that user
-                speaker_turns = speakers_stats["speakers_turns"][i]
-                # Compute the a priori probability and update the value in the array
-                speakers_stats["a_priori_prob"][i] = speaker_turns / tot_turns
+            # Create a dialogue turn object starting from the xml
+            dialogue_turn = DialogueTurn(xml_string)
+            dialogue_statistics.update_statistics(dialogue_turn, prev_turn_last_speaker)
+            # print("Recent turn pieces total time:", dialogue_statistics.get_moving_window_time())
 
             # Update content of the speaker stats file after having updated them after someone talked
-            with open("speakers_stats.json", 'w') as cl_state:
-                json.dump(speakers_stats, cl_state, indent=4)
+            with open(self.dialogue_statistics_file_path, 'w') as cl_state:
+                json.dump(dialogue_statistics.to_dict(), cl_state, ensure_ascii=False, indent=4)
 
             # Parse the xml string and extract the first sentence and the first speaker
             tree = ET.ElementTree(ET.fromstring(xml_string))
             sentence = tree.findall('profile_id')[0].text.strip('.,!?')
             self.logger.info(str(sentence))
-            profile_id = tree.findall("profile_id")[0].attrib["value"]
-            print(speakers_info[profile_id]["name"] + ":", sentence)
 
             # Check if the user wants to exit or wants the robot to repeat the previous sentence
             sentence = sentence.replace(".", "")
@@ -285,7 +235,7 @@ class MyClass(GeneratedClass):
             self.repeat = False
 
             # If the user said one of the "Exit Application keywords"
-            if sentence.lower() in self.exit_keywords:
+            if any(exit_sent in sentence for exit_sent in self.exit_keywords):
                 self.isAlive = False
                 if language == "it":
                     goodbye_msg = "Ok, grazie per aver parlato con me! A presto!"
@@ -315,32 +265,33 @@ class MyClass(GeneratedClass):
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat:
+
                 # Compose the payload of the message to be sent to the server
-                data = {"client_sentence": xml_string, "dialogue_state": dialogue_state, "speakers_stats": speakers_stats,
-                        "prev_speaker_info": {"id": prev_interaction_last_speaker, "topic": prev_speaker_topic}}
+                data = {"client_sentence": xml_string, "dialogue_state": dialogue_state.to_dict(),
+                        "dialogue_statistics": dialogue_statistics.to_dict(), "prev_speaker_info":
+                            {"id": prev_turn_last_speaker, "topic": prev_speaker_topic}}
 
                 # Update the info about id and topic of previous speaker to the current one
-                prev_interaction_last_speaker = same_interaction_last_speaker
-                prev_speaker_topic = dialogue_state["topic"]
-
+                prev_turn_last_speaker = dialogue_turn.turn_pieces[-1].profile_id
+                prev_speaker_topic = dialogue_state.topic
                 encoded_data = json.dumps(data).encode('utf-8')
                 compressed_data = zlib.compress(encoded_data)
-                hub_response = requests.get(BASE, data=compressed_data, verify=False)
+                hub_response = requests.put("http://" + server_ip + ":5000/CAIR_hub", data=compressed_data, verify=False)
 
                 # If the Hub cannot contact the dialogue service, the response will be empty
                 if hub_response:
                     # Overwrite the array containing the states of the profiles with those contained in the Hub response
                     # The speakers info are not sent to the Hub.
-                    dialogue_state = hub_response.json()['dialogue_state']
-                    speakers_stats = hub_response.json()["speakers_stats"]
+                    dialogue_state = DialogueState(d=hub_response.json()['dialogue_state'])
+                    dialogue_statistics = DialogueStatistics(d=hub_response.json()["dialogue_statistics"])
 
                     # Store the updated dialogue state in the file
                     with open(self.dialogue_state_file_path, 'w') as f:
-                        json.dump(dialogue_state, f, indent=4)
+                        json.dump(dialogue_state.to_dict(), f, ensure_ascii=False, indent=4)
 
                     # The hub updates the average topic distance matrix, hence it should be written on the file
-                    with open(self.speakers_stats_file_path, 'w') as f:
-                        json.dump(speakers_stats, f, indent=4)
+                    with open(self.dialogue_statistics_file_path, 'w') as f:
+                        json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
                 else:
                     self.logger.info("No response received from the Hub!")
                     self.onInput_onStop()
@@ -355,11 +306,11 @@ class MyClass(GeneratedClass):
                     gender = speakers_info[elem[2]]["gender"]
                     if "$" in elem[1]:
                         elem[1] = elem[1].replace("$" + elem[2], speakers_info[elem[2]]["name"])
-                    if 'ə' in elem[1]:
+                    if "ə" in elem[1]:
                         if gender == "f":
-                            elem[1] = elem[1].replace('ə', "a")
+                            elem[1] = elem[1].replace("ə", "a")
                         elif gender == "m":
-                            elem[1] = elem[1].replace('ə', "o")
+                            elem[1] = elem[1].replace("ə", "o")
 
                 dialogue_sentence_str = self.utils.compose_sentence(dialogue_sentence)
                 # Substitute the speaker name in place of the user id
@@ -379,7 +330,6 @@ class MyClass(GeneratedClass):
                         for prof_id in speakers_info:
                             if prof_id in plan_sentence:
                                 plan_sentence = plan_sentence.replace("$" + prof_id, speakers_info[prof_id]["name"])
-
                     # Say the plan sentence
                     self.animated_speech.say(self.voice_speed + str(plan_sentence), self.configuration)
 
@@ -393,7 +343,7 @@ class MyClass(GeneratedClass):
                         if action == "registration":
                             # The function that manages the registration, updates the files and returns the updated
                             # dictionaries, so that we don't have to read from the files at each turn.
-                            speakers_info, speakers_stats = self.utils.registration_procedure()
+                            speakers_info, dialogue_statistics = self.utils.registration_procedure()
                         else:
                             item = item.encode('utf-8')
                             self.plans.perform_action(item)
@@ -406,10 +356,14 @@ class MyClass(GeneratedClass):
                 self.animated_speech.say(self.voice_speed + str(dialogue_sentence_str), self.configuration)
                 self.previous_sentence = dialogue_sentence_str
 
+    def onUnload(self):
+        pass
+
     def onInput_onStop(self):
         if self.tablet:
             self.tablet_service.hideImage()
-        # self.al.setState("solitary")
+        self.al.setState("interactive")
+        self.utils.setAutonomousAbilities(True, True, True, True, True)
         # If present, delete the transformation - if the robot moves outside CAIR it is no more valid
         try:
             self.memory.removeData("CAIR/transformation_matrix")
@@ -417,4 +371,6 @@ class MyClass(GeneratedClass):
         except:
             self.logger.info("No transformation to delete in memory.")
             pass
+        self.onUnload()
+        self.onStopped()
         sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
