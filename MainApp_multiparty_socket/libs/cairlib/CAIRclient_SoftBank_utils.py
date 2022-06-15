@@ -42,6 +42,16 @@ class Utils(object):
         self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
         self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
         self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
+        
+    def setAwareness(self):
+        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", True)
+        self.al.setAutonomousAbilityEnabled("BackgroundMovement", True)
+        # Enabled by default when in solitary or interactive, not when disabled
+        self.al.setAutonomousAbilityEnabled("BasicAwareness", True)
+        self.al.setAutonomousAbilityEnabled("ListeningMovement", True)
+        self.al.setAutonomousAbilityEnabled("SpeakingMovement", True)
+        self.ba.setEngagementMode("Unengaged")
+        self.ba.setTrackingMode("Head")
 
     def compose_sentence(self, sentence_pieces):
         sentence = ""

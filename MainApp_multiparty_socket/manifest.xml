@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="mainapp_multiparty" version="0.0.0">
+<package version="0.0.0" uuid="mainapp_multiparty">
  <names>
   <name lang="en_US">MainApp_multiparty</name>
  </names>
@@ -24,7 +24,6 @@
     <sentence lang="it_IT">Va bene, dammi solo un attimo.</sentence>
     <sentence lang="it_IT">Certo! Avvio subito il client per CAIR.</sentence>
    </loadingResponses>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

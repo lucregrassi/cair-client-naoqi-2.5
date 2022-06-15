@@ -13,13 +13,13 @@ import json
 import os
 import re
 import zlib
-import carlo
+import utils
 
 
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
-        self.utils = carlo.Utils(self.logger.info)
+        self.utils = utils.Utils(self.logger.info)
         self.isAlive = True
         self.memory = ALProxy("ALMemory")
         self.sASR = ALProxy("ASR2")

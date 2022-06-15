@@ -37,7 +37,7 @@
         <File name="ExecutionMode" src="html/img/ExecutionMode.png" />
         <File name="PrivacyMode" src="html/img/PrivacyMode.png" />
         <File name="DialogueMode" src="html/img/DialogueMode.png" />
-        <File name="utility" src="carlo.py" />
+        <File name="utility" src="utils.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

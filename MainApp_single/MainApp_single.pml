@@ -37,8 +37,9 @@
         <File name="testing" src="libs/flask/testing.py" />
         <File name="views" src="libs/flask/views.py" />
         <File name="wrappers" src="libs/flask/wrappers.py" />
-        <File name="utils" src="client_utils.py" />
-        <File name="manage_actions" src="manage_actions.py" />
+        <File name="CAIRclient_SoftBank_actions" src="libs/cairlib_single/CAIRclient_SoftBank_actions.py" />
+        <File name="CAIRclient_SoftBank_utils" src="libs/cairlib_single/CAIRclient_SoftBank_utils.py" />
+        <File name="__init__" src="libs/cairlib_single/__init__.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

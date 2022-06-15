@@ -46,14 +46,6 @@
         <File name="DialogueTurn" src="libs/cairlib/DialogueTurn.py" />
         <File name="SpeakerInfo" src="libs/cairlib/SpeakerInfo.py" />
         <File name="__init__" src="libs/cairlib/__init__.py" />
-        <File name="CAIRclient_SoftBank_actions.cpython-39" src="libs/cairlib/__pycache__/CAIRclient_SoftBank_actions.cpython-39.pyc" />
-        <File name="CAIRclient_SoftBank_utils.cpython-39" src="libs/cairlib/__pycache__/CAIRclient_SoftBank_utils.cpython-39.pyc" />
-        <File name="CAIRclient_utils.cpython-39" src="libs/cairlib/__pycache__/CAIRclient_utils.cpython-39.pyc" />
-        <File name="DialogueState.cpython-39" src="libs/cairlib/__pycache__/DialogueState.cpython-39.pyc" />
-        <File name="DialogueStatistics.cpython-39" src="libs/cairlib/__pycache__/DialogueStatistics.cpython-39.pyc" />
-        <File name="DialogueTurn.cpython-39" src="libs/cairlib/__pycache__/DialogueTurn.cpython-39.pyc" />
-        <File name="SpeakerInfo.cpython-39" src="libs/cairlib/__pycache__/SpeakerInfo.cpython-39.pyc" />
-        <File name="__init__.cpython-39" src="libs/cairlib/__pycache__/__init__.cpython-39.pyc" />
     </Resources>
     <Topics />
     <IgnoredPaths />

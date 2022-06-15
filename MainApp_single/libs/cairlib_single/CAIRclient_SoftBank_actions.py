@@ -3,15 +3,15 @@ from naoqi import ALProxy
 import threading
 import time
 import re
-import client_utils
 
 
 class ActionManager(object):
     def __init__(self, logger):
         super(ActionManager, self).__init__()
         self.logger = logger
-        self.utils = client_utils.Utils(self.logger)
         self.behavior_manager = ALProxy("ALBehaviorManager")
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory = ALProxy("ALMemory")
         self.tablet = True
         try:
