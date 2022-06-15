@@ -53,7 +53,7 @@ class Utils(object):
     def acquire_initial_state(self):
         # Registration of the first "unknown" user
         # Try to contact the server
-        resp = requests.put("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+        resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
 
@@ -66,7 +66,7 @@ class Utils(object):
             self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
-                resp = requests.put("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+                resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)
         # Store the dialogue state in the corresponding file
@@ -74,4 +74,4 @@ class Utils(object):
             json.dump(dialogue_state, f, ensure_ascii=False, indent=4)
 
         self.logger("The dialogue state for a generic user has been saved in the file.")
-        return first_dialogue_sentence, dialogue_state
+        return first_dialogue_sentence

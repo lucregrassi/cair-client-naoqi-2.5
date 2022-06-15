@@ -16,8 +16,7 @@ import zlib
 from cairlib_single.CAIRclient_SoftBank_actions import ActionManager
 from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
-audio_recorder_host = "130.251.13.107"
-audio_recorder_port = 9090
+audio_recorder_ip = "130.251.13.107"
 
 server_ip = "130.251.13.107"
 BASE = "http://" + server_ip + ":5000/CAIR_hub"
@@ -33,7 +32,7 @@ class MyClass(GeneratedClass):
         self.utils = Utils(self.logger.info, app_name, language, server_ip)
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
-        self.exit_keywords = ["stop talking", "esci dallapp", "esci dallapplicazione", "quit the application"]
+        self.exit_keywords = ["stop talking", "quit the application", "esci dall'app", "esci dallapp", "esci dallapplicazione"]
         self.repeat_keywords = ["repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]
         self.memory = ALProxy("ALMemory")
         self.speech_reco_event = "Audio/RecognizedWords"
@@ -146,6 +145,7 @@ class MyClass(GeneratedClass):
                 welcome_msg = "Benvenuto! "
             else:
                 welcome_msg = "Welcome! "
+
             self.logger.info(welcome_msg + str(welcome_sentence_str))
             self.animated_speech.say(self.voice_speed + welcome_msg + str(welcome_sentence_str), self.configuration)
             self.previous_sentence = welcome_msg + welcome_sentence_str
