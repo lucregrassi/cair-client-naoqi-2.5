@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIR client single speaker" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="309" y="152"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIRclient single" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="309" y="152"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import qi
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
-sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_single/libs/")
-sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_single/")
 from naoqi import ALProxy
 import threading
 import requests
@@ -16,12 +14,15 @@ import zlib
 from cairlib_single.CAIRclient_SoftBank_actions import ActionManager
 from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
-audio_recorder_ip = "130.251.13.107"
+server_ip = "130.251.13.134"
+audio_recorder_ip = "130.251.13.134"
+registration_ip = "130.251.13.134"
+request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
-server_ip = "130.251.13.107"
-BASE = "http://" + server_ip + ":5000/CAIR_hub"
-app_name = "mainapp_single"
 language = "it"
+app_name = "cairclient_single"
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/libs/")
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/")
 
 
 class MyClass(GeneratedClass):
@@ -228,7 +229,7 @@ class MyClass(GeneratedClass):
                 data = {"client_sentence": sentence, "dialogue_state": dialogue_state}
                 encoded_data = json.dumps(data).encode('utf-8')
                 compressed_data = zlib.compress(encoded_data)
-                hub_response = requests.put(BASE, data=compressed_data, verify=False)
+                hub_response = requests.put(request_uri, data=compressed_data, verify=False)
                 # If the Hub cannot contact the dialogue service, the response will be empty
                 if hub_response:
                     # Overwrite the array containing the states of the profiles with those contained in the Hub response

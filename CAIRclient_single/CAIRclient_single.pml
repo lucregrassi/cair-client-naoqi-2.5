@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Package name="MainApp" format_version="4">
+<Package name="CAIRclient_single" format_version="4">
     <Manifest src="manifest.xml" />
     <BehaviorDescriptions>
         <BehaviorDescription name="behavior" src="cairclient" xar="behavior.xar" />
@@ -37,20 +37,13 @@
         <File name="testing" src="libs/flask/testing.py" />
         <File name="views" src="libs/flask/views.py" />
         <File name="wrappers" src="libs/flask/wrappers.py" />
-        <File name="gzip" src="libs/gzip.py" />
-        <File name="CAIRclient_SoftBank_actions" src="libs/cairlib/CAIRclient_SoftBank_actions.py" />
-        <File name="CAIRclient_SoftBank_utils" src="libs/cairlib/CAIRclient_SoftBank_utils.py" />
-        <File name="CAIRclient_utils" src="libs/cairlib/CAIRclient_utils.py" />
-        <File name="DialogueState" src="libs/cairlib/DialogueState.py" />
-        <File name="DialogueStatistics" src="libs/cairlib/DialogueStatistics.py" />
-        <File name="DialogueTurn" src="libs/cairlib/DialogueTurn.py" />
-        <File name="SpeakerInfo" src="libs/cairlib/SpeakerInfo.py" />
-        <File name="__init__" src="libs/cairlib/__init__.py" />
+        <File name="CAIRclient_SoftBank_actions" src="libs/cairlib_single/CAIRclient_SoftBank_actions.py" />
+        <File name="CAIRclient_SoftBank_utils" src="libs/cairlib_single/CAIRclient_SoftBank_utils.py" />
+        <File name="__init__" src="libs/cairlib_single/__init__.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />
     <Translations auto-fill="en_US">
         <Translation name="translation_en_US" src="translations/translation_en_US.ts" language="en_US" />
-        <Translation name="translation_it_IT" src="translations/translation_it_IT.ts" language="it_IT" />
     </Translations>
 </Package>

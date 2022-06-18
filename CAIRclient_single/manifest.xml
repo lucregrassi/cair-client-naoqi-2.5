@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="cairclient_single" version="0.0.0">
+<package version="0.0.0" uuid="cairclient_single">
  <names>
   <name lang="en_US">CAIRclient_single</name>
  </names>
@@ -12,9 +12,6 @@
  <contents>
   <behaviorContent path="cairclient">
    <nature>interactive</nature>
-   <triggerSentences/>
-   <loadingResponses/>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

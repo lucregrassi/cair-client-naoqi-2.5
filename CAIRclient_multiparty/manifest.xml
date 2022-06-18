@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="mainapp_multiparty">
+<package version="0.0.0" uuid="cairclient_multiparty">
  <names>
-  <name lang="en_US">MainApp_multiparty</name>
+  <name lang="en_US">CAIRclient_multiparty</name>
  </names>
  <supportedLanguages>
   <language>en_US</language>

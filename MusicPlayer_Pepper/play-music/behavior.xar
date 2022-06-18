@@ -5,8 +5,6 @@ import urllib2
 import base64
 from naoqi import ALProxy
 
-server_IP = "130.251.13.108"
-BASE = "http://" + server_IP + ":5003/"
 
 class MyClass(GeneratedClass):
     def __init__(self):
@@ -26,6 +24,7 @@ class MyClass(GeneratedClass):
         self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
         self.isRunning = True
         self.audio_player_service = ALProxy("ALAudioPlayer")
+        self.server_ip = self.memory.getData("CAIR/server_ip")
 
     def onTouched(self, strVarName, value):
         self.logger.info("touched")
@@ -39,6 +38,17 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
+        if self.server_ip == "":
+            if self.language == "it":
+                to_say = "Mi dispiace, non riesco a contattare il server per scaricare la canzone."
+            else:
+                to_say = "I'm sorry, I cannot reach the server to download the song."
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+            self.onInput_onStop()
+            sys.exit(0)
+        else:
+            self.memory.insertData("CAIR/server_ip", "")
+
         text = self.memory.getData("CAIR/song_title")
         self.logger.info(str(text))
 
@@ -51,7 +61,7 @@ class MyClass(GeneratedClass):
         self.animated_speech.say(self.voice_speed + wait_str, self.configuration)
         text = text.replace(" ", "+")
 
-        response = requests.get(BASE + "CAIR_music/" + str(text), verify=False)
+        response = requests.put("http://" + self.server_ip + ":5003/CAIR_music/" + str(text), verify=False)
         encoded_string = response.json()['mp3']
         wav_file = open(self.app_path + '/song.mp3', 'wb')
         decoded_string = base64.b64decode(encoded_string)
@@ -69,7 +79,7 @@ class MyClass(GeneratedClass):
         while self.isRunning and abs(currentPos - file_length) > 1e-09:
             currentPos = self.audio_player_service.getCurrentPosition(fileId)
 
-        self.onInput_onStop()
+
 
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped

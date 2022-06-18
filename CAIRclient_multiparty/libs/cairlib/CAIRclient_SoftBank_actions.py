@@ -6,9 +6,10 @@ import re
 
 
 class ActionManager(object):
-    def __init__(self, logger):
+    def __init__(self, logger, server_ip):
         super(ActionManager, self).__init__()
         self.logger = logger
+        self.server_ip = server_ip
         self.behavior_manager = ALProxy("ALBehaviorManager")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
@@ -141,15 +142,16 @@ class ActionManager(object):
                 self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "playsong":
-            if self.behavior_manager.isBehaviorInstalled("musicplayer/play-song"):
+            if self.behavior_manager.isBehaviorInstalled("musicplayer/play-video"):
                 if self.tablet:
                     self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
                                                   "/apps/cairclient/img/ExecutionMode.png")
                 title = re.findall("title=(.*)", item)[0]
                 self.logger(title)
                 self.memory.insertData("CAIR/song_title", title)
-                self.behavior_manager.runBehavior("musicplayer/play-song")
-                while self.behavior_manager.isBehaviorRunning("musicplayer/play-song"):
+                self.memory.insertData("CAIR/server_ip", self.server_ip)
+                self.behavior_manager.runBehavior("musicplayer/play-video")
+                while self.behavior_manager.isBehaviorRunning("musicplayer/play-video"):
                     time.sleep(0.1)
             else:
                 self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)

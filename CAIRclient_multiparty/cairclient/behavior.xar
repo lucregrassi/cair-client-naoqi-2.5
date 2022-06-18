@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIR client" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="333" y="156"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[#!usr/bin/python -tt
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIRclient multiparty" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="333" y="156"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[#!usr/bin/python -tt
 # -*- coding: utf-8 -*-
 import qi
 from naoqi import ALProxy
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
-sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_multiparty/libs/")
-sys.path.append("/data/home/nao/.local/share/PackageManager/apps/mainapp_multiparty/")
 from cairlib.DialogueStatistics import DialogueStatistics
 from cairlib.DialogueTurn import DialogueTurn
 from cairlib.DialogueState import DialogueState
@@ -21,20 +19,23 @@ import json
 import socket
 import zlib
 
-server_ip = "130.251.13.107"
-audio_recorder_ip = "130.251.13.107"
-registration_ip = "130.251.13.107"
+server_ip = "130.251.13.134"
+audio_recorder_ip = "130.251.13.134"
+registration_ip = "130.251.13.134"
+request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
-app_name = "mainapp_multiparty"
-language = "it"
-min_registered_users_number = 1
+language = "en"
+app_name = "cairclient_multiparty"
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/libs/")
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/")
+min_registered_users_number = 2
 
 
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
         # Instances of the classes of the other files in the libs folder containing functions needed here
-        self.plans = ActionManager(self.logger.info)
+        self.plans = ActionManager(self.logger.info, server_ip)
         self.utils = Utils(self.logger.info, app_name, language, server_ip, registration_ip)
         self.isAlive = True
         self.exit_keywords = ["stop talking", "esci dallapp", "esci dallapplicazione", "quit the application"]
@@ -104,11 +105,8 @@ class MyClass(GeneratedClass):
                 to_say = "I'm sorry, I can't connect to external microphone. Check the IP address and try again."
             self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             self.onInput_onStop()
-
         try:
             if self.al.getState() != "disabled":
-                # self.animated_speech.say(self.voice_speed + "Give me a moment. I need to disable Autonomous Life
-                # before we start.", self.configuration)
                 self.al.setState("disabled")
         except:
             pass
@@ -146,8 +144,7 @@ class MyClass(GeneratedClass):
                 welcome_back_msg = "È bello rivederti! Di cosa vorresti parlare?"
             else:
                 welcome_back_msg = "I missed you! What would you like to talk about?"
-            self.animated_speech.say(self.voice_speed + welcome_back_msg,
-                                     self.configuration)
+            self.animated_speech.say(self.voice_speed + welcome_back_msg, self.configuration)
             self.previous_sentence = welcome_back_msg
 
         # Start the behavior that senses people
@@ -198,7 +195,7 @@ class MyClass(GeneratedClass):
                     proceed = True
                 except xml.etree.ElementTree.ParseError:
                     # If the xml is not complete, read again from the socket
-                    print("The XML is not complete.")
+                    self.logger.info("The XML is not complete.")
                     xml_string = xml_string + self.client_socket.recv(1024).decode('utf-8')
 
             # Create a dialogue turn object starting from the xml
@@ -253,7 +250,6 @@ class MyClass(GeneratedClass):
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat:
-
                 # Compose the payload of the message to be sent to the server
                 data = {"client_sentence": xml_string, "dialogue_state": dialogue_state.to_dict(),
                         "dialogue_statistics": dialogue_statistics.to_dict(), "prev_speaker_info":
@@ -264,7 +260,7 @@ class MyClass(GeneratedClass):
                 prev_speaker_topic = dialogue_state.topic
                 encoded_data = json.dumps(data).encode('utf-8')
                 compressed_data = zlib.compress(encoded_data)
-                hub_response = requests.put("http://" + server_ip + ":5000/CAIR_hub", data=compressed_data, verify=False)
+                hub_response = requests.put(request_uri, data=compressed_data, verify=False)
 
                 # If the Hub cannot contact the dialogue service, the response will be empty
                 if hub_response:
