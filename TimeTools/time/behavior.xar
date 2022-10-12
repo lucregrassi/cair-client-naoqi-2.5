@@ -23,7 +23,7 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        self.animated_speech.say(self.voice_speed + "It's " + str(datetime.datetime.now().hour + 2) + ":" + str(datetime.datetime.now().minute))
+        self.animated_speech.say(self.voice_speed + "It's " + str(datetime.datetime.now().hour +11) + ":" + str(datetime.datetime.now().minute + 26.5))
         self.onStopped()
 
     def onInput_onStop(self):

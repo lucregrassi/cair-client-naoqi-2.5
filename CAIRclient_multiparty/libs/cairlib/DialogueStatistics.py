@@ -1,6 +1,7 @@
 import numpy as np
 import copy
-moving_window_time = 5*60
+
+moving_window_time = 5 * 60
 
 
 class DialogueStatistics:
@@ -8,8 +9,6 @@ class DialogueStatistics:
         if profile_id:
             self.same_turn = [[0]]
             self.successive_turn = [[0]]
-            self.same_turn_prob = [[0.0]]
-            self.successive_turn_prob = [[0.0]]
             self.average_topic_distance = [[0.0]]
             self.mapping_index_speaker = [profile_id]
             self.speakers_turns = [0]
@@ -55,20 +54,13 @@ class DialogueStatistics:
                     column = self.mapping_index_speaker.index(profile_id)
                     old_value = self.successive_turn[row][column]
                     self.successive_turn[row][column] = old_value + 1
-                    # Recompute the probabilities of the users talking after the previous one
-                    for c in range(len(self.mapping_index_speaker)):
-                        self.successive_turn_prob[row][c] = self.successive_turn[row][c] / self.speakers_turns[row]
             else:
                 # Increment the element of the "same_interaction" matrix with th indexes mapped to
                 # row = same_interaction_last_speaker, column = profile_id
-                row = self.mapping_index_speaker.index(dialogue_turn.turn_pieces[i-1].profile_id)
+                row = self.mapping_index_speaker.index(dialogue_turn.turn_pieces[i - 1].profile_id)
                 column = self.mapping_index_speaker.index(profile_id)
                 old_value = self.same_turn[row][column]
                 self.same_turn[row][column] = old_value + 1
-                for c in range(len(self.mapping_index_speaker)):
-                    self.same_turn_prob[row][c] = \
-                        self.same_turn[row][c] / \
-                        self.speakers_turns[row]
 
         # Compute the total number of turns of all users
         tot_turns = 0
@@ -80,7 +72,7 @@ class DialogueStatistics:
             # Get the number of turns of that user
             speaker_turns = self.speakers_turns[i]
             # Compute the a priori probability and update the value in the array
-            self.a_priori_prob[i] = speaker_turns / tot_turns
+            self.a_priori_prob[i] = float(speaker_turns) / float(tot_turns)
 
     # This method increases the size of a specific matrix, passed as a parameter
     def increase_matrix_size(self, matrix, value_type):
@@ -96,8 +88,6 @@ class DialogueStatistics:
         # For each element in the speakers_stats dictionary, add the new elements
         self.same_turn = self.increase_matrix_size(self.same_turn, int)
         self.successive_turn = self.increase_matrix_size(self.successive_turn, int)
-        self.same_turn_prob = self.increase_matrix_size(self.same_turn_prob, float)
-        self.successive_turn_prob = self.increase_matrix_size(self.successive_turn_prob, float)
         self.average_topic_distance = self.increase_matrix_size(self.average_topic_distance, float)
         self.mapping_index_speaker.append(profile_id)
         self.speakers_turns.append(0)
@@ -109,6 +99,13 @@ class DialogueStatistics:
         for elem in self.speakers_turns:
             total_turns = total_turns + int(elem)
         return total_turns
+
+    def get_registered_speakers_turns(self):
+        registered_speakers_turns = 0
+        if len(self.speakers_turns) > 1:
+            for elem in self.speakers_turns[1:]:
+                registered_speakers_turns = registered_speakers_turns + int(elem)
+        return registered_speakers_turns
 
     # This method returns the number of times a specific speaker has spoken in the moving window
     def get_moving_window_speaker_turns(self, profile_id):

@@ -1,10 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIRclient multiparty" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="333" y="156"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[#!usr/bin/python -tt
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIRclient multiparty" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="320" y="123"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[#!usr/bin/python -tt
 # -*- coding: utf-8 -*-
 import qi
 from naoqi import ALProxy
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
+app_name = "cairclient_multiparty"
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/libs/")
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/")
 from cairlib.DialogueStatistics import DialogueStatistics
 from cairlib.DialogueTurn import DialogueTurn
 from cairlib.DialogueState import DialogueState
@@ -19,16 +22,13 @@ import json
 import socket
 import zlib
 
-server_ip = "130.251.13.134"
-audio_recorder_ip = "130.251.13.134"
-registration_ip = "130.251.13.134"
+server_ip = "130.251.13.126"
+audio_recorder_ip = "130.251.13.126"
+registration_ip = "130.251.13.126"
 request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
-language = "en"
-app_name = "cairclient_multiparty"
-sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/libs/")
-sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/")
-min_registered_users_number = 2
+language = "it"
+min_registered_users_number = 3
 
 
 class MyClass(GeneratedClass):
@@ -39,7 +39,7 @@ class MyClass(GeneratedClass):
         self.utils = Utils(self.logger.info, app_name, language, server_ip, registration_ip)
         self.isAlive = True
         self.exit_keywords = ["stop talking", "esci dallapp", "esci dallapplicazione", "quit the application"]
-        self.repeat_keywords = ["repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]
+        self.repeat_keywords = ["repeat", "can you repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]
         self.memory = ALProxy("ALMemory")
         self.speech_reco_event = "Audio/RecognizedWords"
         self.al = ALProxy("ALAutonomousLife")
@@ -47,10 +47,10 @@ class MyClass(GeneratedClass):
         self.tts = ALProxy("ALTextToSpeech")
         if language == "it":
             self.tts.setLanguage("Italian")
-            self.not_installed_behavior = "Mi dispiace, non sono ancora capace di svolgere questa azione."
+            self.not_installed_behavior = "Mi dispiace, non sono ancora capace di svolgere questa azione perché l'applicazione non è installata."
         else:
             self.tts.setLanguage("English")
-            self.not_installed_behavior = "I'm sorry, I am not yet able to perform this task."
+            self.not_installed_behavior = "I'm sorry, I am not able to perform this task as the application is not installed."
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.behavior_manager = ALProxy("ALBehaviorManager")
@@ -78,8 +78,8 @@ class MyClass(GeneratedClass):
 
         self.logger.info("Setting voice speed")
         try:
-            self.voice_speed = "\\RSPD=100\\"
-            self.memory.insertData("CAIR/voice_speed", 100)
+            self.voice_speed = "\\RSPD=80\\"
+            self.memory.insertData("CAIR/voice_speed", 80)
             # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.memory.insertData("CAIR/voice_speed", 100)
@@ -134,7 +134,7 @@ class MyClass(GeneratedClass):
             if language == "it":
                 welcome_msg = "Benvenuto! "
             else:
-                welcome_msg = "Welcome! "
+                welcome_msg = "Welcome, it's nice to meet you! "
             self.logger.info(welcome_msg + str(welcome_sentence_str))
             self.animated_speech.say(self.voice_speed + welcome_msg + str(welcome_sentence_str), self.configuration)
             self.previous_sentence = welcome_msg + welcome_sentence_str
@@ -143,7 +143,7 @@ class MyClass(GeneratedClass):
             if language == "it":
                 welcome_back_msg = "È bello rivederti! Di cosa vorresti parlare?"
             else:
-                welcome_back_msg = "I missed you! What would you like to talk about?"
+                welcome_back_msg = "Welcome back! I missed you. What would you like to talk about?"
             self.animated_speech.say(self.voice_speed + welcome_back_msg, self.configuration)
             self.previous_sentence = welcome_back_msg
 
@@ -165,8 +165,7 @@ class MyClass(GeneratedClass):
 
         # Retrieve the json containing the matrices of the speakers stats, the mapping, and the moving window of the
         # last n speakers:
-        # "same_interaction", "successive_interaction", "same_interaction_prob", "successive_interaction_prob",
-        # "mapping_index_speaker", "speakers_turns", "a_priori_prob", "speakers_moving_window",
+        # "same_interaction", "successive_interaction", "mapping_index_speaker", "speakers_turns", "a_priori_prob", "speakers_moving_window",
         with open(self.dialogue_statistics_file_path) as f:
             dialogue_statistics = DialogueStatistics(d=json.load(f))
 
@@ -183,7 +182,7 @@ class MyClass(GeneratedClass):
                 if language == "it":
                     to_say = "Mi dispiace, c'è stato qualche problema con la connessione al microfono esterno."
                 else:
-                    to_say = "I'm sorry, something went wrong with the connection to the external microphone."
+                    to_say = "I'm sorry, there was a problem with the connection to the external microphone."
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
                 self.onInput_onStop()
 
@@ -223,9 +222,9 @@ class MyClass(GeneratedClass):
             if any(exit_sent in sentence for exit_sent in self.exit_keywords):
                 self.isAlive = False
                 if language == "it":
-                    goodbye_msg = "Ok, grazie per aver parlato con me! A presto!"
+                    goodbye_msg = "Ok, è stato un piacere parlare con te! A presto!"
                 else:
-                    goodbye_msg = "Ok, thank you for talking with me! Goodbye."
+                    goodbye_msg = "Ok, it was a pleasure talking with you! Goodbye."
                 self.animated_speech.say(self.voice_speed + goodbye_msg, self.configuration)
                 self.memory.insertData(self.speech_reco_event, [])
                 self.onInput_onStop()

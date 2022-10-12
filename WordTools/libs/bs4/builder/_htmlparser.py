@@ -226,7 +226,7 @@ class BeautifulSoupHTMLParser(HTMLParser):
                 data = unichr(real_name)
             except (ValueError, OverflowError), e:
                 pass
-        data = data or u"\N{REPLACEMENT CHARACTER}"
+        data = data
         self.handle_data(data)
 
     def handle_entityref(self, name):

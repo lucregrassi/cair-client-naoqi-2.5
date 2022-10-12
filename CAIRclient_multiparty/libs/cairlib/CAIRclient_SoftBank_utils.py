@@ -33,8 +33,8 @@ class Utils(object):
             # self.voice_speed = "\\RSPD=100\\"
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
-            self.memory.insertData("CAIR/voice_speed", 80)
-            self.voice_speed = "\\RSPD=80\\"
+            self.memory.insertData("CAIR/voice_speed", 100)
+            self.voice_speed = "\\RSPD=100\\"
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
         self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
