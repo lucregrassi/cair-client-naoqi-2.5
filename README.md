@@ -1,7 +1,7 @@
 # CAIR client for Nao and Pepper
 This repository contains the CAIR applications, available for the SoftBank robots Pepper and Nao.
 
-If you want to use the internal microphone of the robots you have to install the ASR application as first thing.
+If you want to use the internal microphone of the robots you have to install the ASR2 application as a first thing.
 
 To interact with the CAIR system, open the CAIRclient_single_ASR application folder in Choregraphe, deploy it on the robot and launch it using one of the following trigger sentences:
 
