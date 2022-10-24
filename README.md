@@ -3,13 +3,13 @@ This repository contains the CAIR applications, available for the SoftBank robot
 
 If you want to use the internal microphone of the robots you have to install the ASR application as first thing.
 
-To interact with the CAIR system, open the MainApp_single_ASR application folder in Choregraphe, deploy it on the robot and launch it using one of the following trigger sentences:
+To interact with the CAIR system, open the CAIRclient_single_ASR application folder in Choregraphe, deploy it on the robot and launch it using one of the following trigger sentences:
 
 * Let's talk
 * Talk with me
 
 The application can also be launched directly from Choregraphe.
-Please note that the other version of the MainApp application are for research purposes and are still under testing. 
+Please note that the other version of the CAIRclient application are for research purposes and are still under testing. 
 
 Once started, the application allows interacting with the CAIR Cloud.
 
