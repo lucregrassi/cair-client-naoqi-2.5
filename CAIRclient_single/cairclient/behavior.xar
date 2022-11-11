@@ -2,6 +2,9 @@
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
+app_name = "cairclient_single"
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/libs/")
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/")
 from naoqi import ALProxy
 import threading
 import requests
@@ -20,9 +23,6 @@ registration_ip = "130.251.13.134"
 request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
 language = "it"
-app_name = "cairclient_single"
-sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/libs/")
-sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/")
 
 
 class MyClass(GeneratedClass):
