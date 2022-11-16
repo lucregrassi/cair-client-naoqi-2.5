@@ -33,8 +33,8 @@ class Utils(object):
             # self.voice_speed = "\\RSPD=100\\"
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
-            self.memory.insertData("CAIR/voice_speed", 100)
-            self.voice_speed = "\\RSPD=100\\"
+            self.memory.insertData("CAIR/voice_speed", 80)
+            self.voice_speed = "\\RSPD=80\\"
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
         self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
@@ -42,16 +42,6 @@ class Utils(object):
         self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
         self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
         self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
-        
-    def setAwareness(self):
-        self.al.setAutonomousAbilityEnabled("AutonomousBlinking", True)
-        self.al.setAutonomousAbilityEnabled("BackgroundMovement", True)
-        # Enabled by default when in solitary or interactive, not when disabled
-        self.al.setAutonomousAbilityEnabled("BasicAwareness", True)
-        self.al.setAutonomousAbilityEnabled("ListeningMovement", True)
-        self.al.setAutonomousAbilityEnabled("SpeakingMovement", True)
-        self.ba.setEngagementMode("Unengaged")
-        self.ba.setTrackingMode("Head")
 
     def compose_sentence(self, sentence_pieces):
         sentence = ""
@@ -113,7 +103,7 @@ class Utils(object):
             json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
 
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
-        user_gender = ''.join(c for c in new_speaker_info.gender if c not in string.punctuation).lower()
+        user_gender = new_speaker_info.gender.translate(str.maketrans('', '', string.punctuation)).lower()
         female_list = ["female", "femmina", "femminile", "donna"]
         male_list = ["male", "maschio", "maschile", "uomo"]
         if any(word in user_gender for word in female_list):
@@ -147,8 +137,7 @@ class Utils(object):
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         client_registration_socket.send(b"new_profile_name")
         new_profile_name = client_registration_socket.recv(256).decode('utf-8')
-        self.logger("Name: " + str(new_profile_name))
-        
+
         # ** STEP 3 ** Ask the gender to the user
         if self.language == "it":
             to_say = "Per favore, dimmi quale pronome di genere vuoi che usi quando parlo con te: femminile, maschile o neutro?"
@@ -157,8 +146,7 @@ class Utils(object):
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         client_registration_socket.send(b"new_profile_gender")
         new_profile_gender = client_registration_socket.recv(256).decode('utf-8')
-        self.logger("Gender:" + str(new_profile_name))
-        
+
         # ** STEP 4 ** Ask the user to talk for 20 seconds
         if self.language == "it":
             to_say = "Per favore, parla per 20 secondi in modo che io possa imparare a riconoscere la tua voce."
@@ -170,12 +158,10 @@ class Utils(object):
         self.logger("*** Listening ***")
         client_registration_socket.recv(1024).decode('utf-8')
         if self.language == "it":
-            to_say = "Grazie per aver completato la registrazione " + str(new_profile_name) + "! D'ora in poi riconoscerò la tua voce!"
+            to_say = "Grazie per aver completato la registrazione " + new_profile_name + "! D'ora in poi riconoscerò la tua voce!"
         else:
-            to_say = "Thank you for registering " + str(new_profile_name) + "! From now on I will recognize your voice."
-        self.logger(to_say)
+            to_say = "Thank you for registering " + new_profile_name + "! From now on I will recognize your voice."
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-        
         new_speaker_info = SpeakerInfo(new_profile_id, new_profile_name, new_profile_gender)
         # This function updates the info and the statistics of the users, adding the new profile id and the name to the
         # speakers_info and increasing the dimensions of the structures contained in the dialogue statistics.

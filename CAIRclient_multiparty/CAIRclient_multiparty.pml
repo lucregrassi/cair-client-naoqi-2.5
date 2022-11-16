@@ -46,6 +46,7 @@
         <File name="DialogueTurn" src="libs/cairlib/DialogueTurn.py" />
         <File name="SpeakerInfo" src="libs/cairlib/SpeakerInfo.py" />
         <File name="__init__" src="libs/cairlib/__init__.py" />
+        <File name="DialogueSentencePiece" src="libs/cairlib/DialogueSentencePiece.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

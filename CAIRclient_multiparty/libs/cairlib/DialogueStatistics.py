@@ -1,19 +1,30 @@
+import numpy
 import numpy as np
 import copy
 
 moving_window_time = 5 * 60
+community_turns = 20
 
 
 class DialogueStatistics:
     def __init__(self, profile_id=None, d=None):
         if profile_id:
-            self.same_turn = [[0]]
-            self.successive_turn = [[0]]
-            self.average_topic_distance = [[0.0]]
+            # Mapping between indexes of the matrices/vectors and the id of the speaker
             self.mapping_index_speaker = [profile_id]
+            # Matrix containing who talked after who in the same turn
+            self.same_turn = [[0]]
+            # Matrix containing who talked after who in successive turns
+            self.successive_turn = [[0]]
+            # Matrix containing the average topic distance between two speakers
+            self.average_topic_distance = [[0.0]]
+            # Total number of turns for each speaker
             self.speakers_turns = [0]
+            # A priori probability that a speaker talks
             self.a_priori_prob = [0.0]
+            # Moving window containing the information about the turns in the last n minutes
             self.moving_window = []
+            # List of IDs of the last m speakers who talked (used to identify communities)
+            self.latest_turns = []
         if d:
             self.__dict__ = copy.deepcopy(d)
 
@@ -24,6 +35,7 @@ class DialogueStatistics:
 
     # This method updates the statistics based on who spoke in the last turn
     def update_statistics(self, dialogue_turn, prev_turn_last_speaker):
+        print("Updating dialogue statistics")
         for i, turn_piece in enumerate(dialogue_turn.turn_pieces):
             profile_id = turn_piece.profile_id
             # Do not consider generic user in the moving window
@@ -43,6 +55,12 @@ class DialogueStatistics:
             speaker_index = self.mapping_index_speaker.index(profile_id)
             n_turns = self.speakers_turns[speaker_index]
             self.speakers_turns[speaker_index] = n_turns + 1
+            # Ensure that the length of the latest turns array does not exceed the maximum one
+            while len(self.latest_turns) > community_turns:
+                self.latest_turns.pop(0)
+            # Add the id of the last speaker at the end of the list
+            print("Adding", profile_id, "to latest turns")
+            self.latest_turns.append(profile_id)
 
             # If it's the first speaker of the turn (and it is not the first interaction),
             # check if the speaker is the same as the last one of the previous turn
@@ -107,6 +125,24 @@ class DialogueStatistics:
                 registered_speakers_turns = registered_speakers_turns + int(elem)
         return registered_speakers_turns
 
+    def update_average_topic_distance(self, prev_speaker_id, prev_speaker_topic, current_speaker_id,
+                                      current_speaker_topic, ontology):
+        # Compute the distance between the new conversation topic of the speaker who talked now and the conversation
+        # topic of the previous speaker - update the matrix before sending it back to the client
+        row = self.mapping_index_speaker.index(prev_speaker_id)
+        col = self.mapping_index_speaker.index(current_speaker_id)
+        successive_turns = self.successive_turn[row][col]
+
+        # Compute the distance between the two topics
+        topic_distance = ontology.distance_between_two_topics(prev_speaker_topic, current_speaker_topic)
+        print("Distance from previous topic:", topic_distance)
+        # Previous average topic distance of the two speakers
+        prev_avg_topic_distance = self.average_topic_distance[row][col]
+        # Update average topic distance by multiplying the previous average for the number of successive turns
+        # minus one, then adding the computed topic distance, and dividing for the number of successive turns
+        self.average_topic_distance[row][col] = \
+            ((prev_avg_topic_distance * (successive_turns - 1)) + topic_distance) / successive_turns
+
     # This method returns the number of times a specific speaker has spoken in the moving window
     def get_moving_window_speaker_turns(self, profile_id):
         speaker_turns = 0
@@ -165,20 +201,17 @@ class DialogueStatistics:
             number_of_words_ratio.append(speaker_words / total_words)
         return number_of_words_ratio
 
-    def update_average_topic_distance(self, prev_speaker_id, prev_speaker_topic, current_speaker_id,
-                                      current_speaker_topic, ontology):
-        # Compute the distance between the new conversation topic of the speaker who talked now and the conversation
-        # topic of the previous speaker - update the matrix before sending it back to the client
-        row = self.mapping_index_speaker.index(prev_speaker_id)
-        col = self.mapping_index_speaker.index(current_speaker_id)
-        successive_turns = self.successive_turn[row][col]
-
-        # Compute the distance between the two topics
-        topic_distance = ontology.distance_between_two_topics(prev_speaker_topic, current_speaker_topic)
-        print("Distance from previous topic:", topic_distance)
-        # Previous average topic distance of the two speakers
-        prev_avg_topic_distance = self.average_topic_distance[row][col]
-        # Update average topic distance by multiplying the previous average for the number of successive turns
-        # minus one, then adding the computed topic distance, and dividing for the number of successive turns
-        self.average_topic_distance[row][col] = \
-            ((prev_avg_topic_distance * (successive_turns - 1)) + topic_distance) / successive_turns
+    # This method returns the matrix containing successive turns in the latest turns (called in community detector)
+    def get_latest_turns_successive_turn_matrix(self):
+        matrix_size = len(self.mapping_index_speaker)
+        # Initialize the matrix to the correct size and fill it with zeros
+        successive_turn = np.zeros((matrix_size, matrix_size))
+        # Increase the number of successive turns of the users in the latest turns
+        for i, speaker_id in enumerate(self.latest_turns):
+            # Do it only if it is not the first element
+            if i != 0:
+                speaker_index = self.mapping_index_speaker.index(speaker_id)
+                prev_speaker_index = self.mapping_index_speaker.index(self.latest_turns[i-1])
+                successive_turn[prev_speaker_index][speaker_index] = \
+                    successive_turn[prev_speaker_index][speaker_index] + 1
+        return successive_turn
