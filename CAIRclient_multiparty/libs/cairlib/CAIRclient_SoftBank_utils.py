@@ -103,7 +103,7 @@ class Utils(object):
             json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
 
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
-        user_gender = new_speaker_info.gender.translate(str.maketrans('', '', string.punctuation)).lower()
+        user_gender = ''.join(c for c in new_speaker_info.gender if c not in string.punctuation).lower()
         female_list = ["female", "femmina", "femminile", "donna"]
         male_list = ["male", "maschio", "maschile", "uomo"]
         if any(word in user_gender for word in female_list):
@@ -158,10 +158,10 @@ class Utils(object):
         self.logger("*** Listening ***")
         client_registration_socket.recv(1024).decode('utf-8')
         if self.language == "it":
-            to_say = "Grazie per aver completato la registrazione " + new_profile_name + "! D'ora in poi riconoscerò la tua voce!"
+            to_say = "Grazie per aver completato la registrazione " + str(new_profile_name) + "! D'ora in poi riconoscerò la tua voce!"
         else:
-            to_say = "Thank you for registering " + new_profile_name + "! From now on I will recognize your voice."
-        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+            to_say = "Thank you for registering " + str(new_profile_name) + "! From now on I will recognize your voice."
+        self.animated_speech.say(self.voice_speed + str(to_say), self.configuration)
         new_speaker_info = SpeakerInfo(new_profile_id, new_profile_name, new_profile_gender)
         # This function updates the info and the statistics of the users, adding the new profile id and the name to the
         # speakers_info and increasing the dimensions of the structures contained in the dialogue statistics.

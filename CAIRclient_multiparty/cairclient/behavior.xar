@@ -22,13 +22,14 @@ import json
 import socket
 import zlib
 
-server_ip = "130.251.13.108"
-audio_recorder_ip = "130.251.13.108"
-registration_ip = "130.251.13.108"
+ip = "130.251.13.108"
+server_ip = ip
+audio_recorder_ip = ip
+registration_ip = ip
 request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
 language = "it"
-min_registered_users_number = 3
+min_registered_users_number = 2
 
 
 class MyClass(GeneratedClass):
