@@ -92,20 +92,6 @@ class MyClass(GeneratedClass):
         self.audio_device = ALProxy("ALAudioDevice")
         self.audio_device.setOutputVolume(50)
 
-         # To recognize intention of switching the mic on
-        self.speech_reco_event = "Audio/RecognizedWords"
-        self.asr_service = ALProxy("ALSpeechRecognition")
-        # asr needs to be paused before changing the language and setting the vocabulary
-        self.asr_service.pause(True)
-        # change the language to overcome vocabulary problem
-        self.asr_service.setLanguage("Italian")
-        self.asr_service.setLanguage("English")
-        self.vocabulary = ["ascolta", "ascoltami", "si", "no", "ciao", "ok"]
-        self.asr_service.pause(True)
-        self.asr_service.setVocabulary(self.vocabulary, False)
-        self.asr_service.setAudioExpression(False)
-        self.asr_service.setParameter("Sensitivity", 0.1)
-
 
     def onInput_onStart(self):
         # Try connecting to the socket that records the audio
