@@ -113,20 +113,28 @@ class MyClass(GeneratedClass):
         search_keyword = text.replace(" ", "+") + "+tutorial"
         html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode('utf-8'))
-        my_url = "https://www.youtube.com/watch?v=" + video_ids[0]
-        self.logger.info(str(my_url))
+        try:
+            my_url = "https://www.youtube.com/watch?v=" + video_ids[0]
+            self.logger.info(str(my_url))
 
-        # Start the application on tablet
-        self.tablet_service.cleanWebview()
-        self.tablet_service.loadUrl(str(my_url))
-        self.tablet_service.showWebview()
-        self.animated_speech.say(self.voice_speed + stop_msg, self.configuration)
+            # Start the application on tablet
+            self.tablet_service.cleanWebview()
+            self.tablet_service.loadUrl(str(my_url))
+            self.tablet_service.showWebview()
+            self.animated_speech.say(self.voice_speed + stop_msg, self.configuration)
 
-        while self.isRunning:
-            pass
+            while self.isRunning:
+                pass
 
-        self.tablet_service.cleanWebview()
-        self.tablet_service.hideWebview()
+            self.tablet_service.cleanWebview()
+            self.tablet_service.hideWebview()
+        except IndexError as e:
+            if self.language == "it":
+                error_msg = "Mi dispiace non ho trovato il video su YouTube"
+            else:
+                error_msg = "I'm sorry I didn't find the video on YouTube"
+            self.animated_speech.say(self.voice_speed + error_msg, self.configuration)
+            print(e)
 
         self.memory.removeData("CAIR/instructions")
         self.onInput_onStop()

@@ -1,4 +1,5 @@
-# encoding: utf-8
+#!usr/bin/python -tt
+# -*- coding: utf-8 -*-
 """Helper classes for tests."""
 
 # Use of this source code is governed by the MIT license.

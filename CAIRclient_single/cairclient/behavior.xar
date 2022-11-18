@@ -17,9 +17,9 @@ import zlib
 from cairlib_single.CAIRclient_SoftBank_actions import ActionManager
 from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
-server_ip = "172.20.10.4"
-audio_recorder_ip = "172.20.10.4"
-registration_ip = "172.20.10.4"
+server_ip = "130.251.13.108"
+audio_recorder_ip = "130.251.13.108"
+registration_ip = "130.251.13.108"
 request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
 language = "it"
@@ -33,8 +33,6 @@ class MyClass(GeneratedClass):
         self.utils = Utils(self.logger.info, app_name, language, server_ip)
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
-        self.exit_keywords = ["stop talking", "quit the application", "esci dall'app", "esci dallapp", "esci dallapplicazione"]
-        self.repeat_keywords = ["repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]
         self.memory = ALProxy("ALMemory")
         self.speech_reco_event = "Audio/RecognizedWords"
         self.al = ALProxy("ALAutonomousLife")
@@ -60,6 +58,10 @@ class MyClass(GeneratedClass):
         self.previous_sentence = ""
         # This variable tells if the user want the robot to repeat a sentence
         self.repeat = False
+        self.stop_recording = False
+        self.exit_keywords = ["stop talking", "quit the application", "esci dall'app", "esci dallapp", "esci dallapplicazione"]
+        self.repeat_keywords = ["repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]
+        self.stop_recording_keywords = ["smetti di ascoltare", "spegni il microfono"]
 
         # Store the number of people in front of the robot, coming from the sensor readings
         self.people = 0
@@ -85,22 +87,19 @@ class MyClass(GeneratedClass):
         self.audio_device = ALProxy("ALAudioDevice")
         self.audio_device.setOutputVolume(50)
 
+        # To recognize intention of switching the mic on
+        self.speech_reco_event = "Audio/RecognizedWords"
         self.asr_service = ALProxy("ALSpeechRecognition")
+        # asr needs to be paused before changing the language and setting the vocabulary
+        self.asr_service.pause(True)
+        # change the language to overcome vocabulary problem
+        self.asr_service.setLanguage("Italian")
+        self.asr_service.setLanguage("English")
+        self.vocabulary = ["ascolta", "ascoltami", "si", "no", "ciao", "ok"]
+        self.asr_service.pause(True)
+        self.asr_service.setVocabulary(self.vocabulary, False)
         self.asr_service.setAudioExpression(False)
-
-    # def get_sensor_data_thread(self):
-    #     while self.isAlive:
-    #         self.logger.info("Thread reading sensor data")
-    #         self.people = self.memory.getData("SensorData/People")
-    #         data = {"sentence": "", "dialogue_states": "", "sensor_data": {"people": self.people}}
-    #         encoded_data = json.dumps(data)
-    #         compressed_data = zlib.compress(encoded_data)
-    #         response = requests.get(BASE, data=compressed_data, verify=False)
-    #         self.logger.info("Server response:" + str(response.json()['dialogue_sentence']))
-    #         time.sleep(1)
-
-    #    self.logger.info("Exiting sensor data thread")
-    #    self.behavior_manager.stopBehavior("sensordata/people_perception")
+        self.asr_service.setParameter("Sensitivity", 0.1)
 
     def onInput_onStart(self):
         # Try connecting to the socket that records the audio
@@ -123,7 +122,6 @@ class MyClass(GeneratedClass):
 
         # Wake the robot up if not already up
         self.motion.wakeUp()
-
 
         # With Pepper robot, preload the images to be set on the tablet during the conversation
         if self.tablet:
@@ -160,14 +158,6 @@ class MyClass(GeneratedClass):
                                      self.configuration)
             self.previous_sentence = welcome_back_msg
 
-        # Start the behavior that senses people
-        # if self.behavior_manager.isBehaviorInstalled("sensordata/people_perception"):
-        #    if not self.behavior_manager.isBehaviorRunning("sensordata/people_perception"):
-        #        self.behavior_manager.runBehavior("sensordata/people_perception")
-
-        # sensor_data_thread = threading.Thread(target=self.get_sensor_data_thread)
-        # sensor_data_thread.start()
-
         # Retrieve the states of the users and save them in a dictionary
         with open(self.dialogue_state_file_path) as f:
             dialogue_state = json.load(f)
@@ -192,6 +182,7 @@ class MyClass(GeneratedClass):
             sentence = sentence.replace("?", "")
             # Reset repeat to false, otherwise it will always repeat the previous sentence
             self.repeat = False
+            self.stop_recording = False
 
             # If the user said one of the "Exit Application keywords"
             if sentence.lower() in self.exit_keywords:
@@ -222,8 +213,33 @@ class MyClass(GeneratedClass):
                         repeat_msg = "I'm sorry, I have nothing to repeat."
                     self.animated_speech.say(self.voice_speed + repeat_msg, self.configuration)
 
+            elif sentence.lower() in self.stop_recording_keywords:
+                self.stop_recording = True
+                self.animated_speech.say(self.voice_speed + "Ok, non ti ascolterò più. Ricomincerò ad ascoltarti solo quando dirai ascoltami.", self.configuration)
+                user_input = ""
+                while True:
+                    # Restart asr service
+                    self.asr_service.pause(False)
+                    self.asr_service.subscribe("Test_ASR")
+                    time.sleep(5)
+                    try:
+                        answer = self.memory.getData("WordRecognized")[0]
+                    except IndexError as e:
+                        print(e)
+                        answer = ""
+                    self.asr_service.pause(True)
+                    self.asr_service.unsubscribe("Test_ASR")
+                    self.logger.info(answer)
+
+                    # Exit
+                    if answer == "ascoltami":
+                        self.animated_speech.say(self.voice_speed + "Ok, ti sto ascoltando.", self.configuration)
+                        break
+                    else:
+                        self.memory.insertData("WordRecognized", [])
+
             # If the user did not ask to exit or to repeat something, send the sentence to the server
-            if not self.repeat:
+            if not self.repeat and not self.stop_recording:
                 self.logger.info(str(sentence))
                 # Compose the payload of the message to be sent to the server
                 data = {"client_sentence": sentence, "dialogue_state": dialogue_state}

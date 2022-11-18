@@ -39,7 +39,7 @@ class MyClass(GeneratedClass):
         self.logger.info(str(text))
 
         if self.language == "it":
-            wait_str = "Dammi un momento. Sto cercando il video della canzone su YouTube."
+            wait_str = "Dammi un momento. Sto cercando il video della canzone."
             stop_str = "Premi play quando vuoi guardare il video. Tocca uno dei miei sensori quando vuoi uscire."
         else:
             wait_str = "Give me a moment. I'm looking for the video of the song on YouTube."
@@ -49,17 +49,25 @@ class MyClass(GeneratedClass):
         search_keyword = text.replace(" ", "+") + "+lyrics"
         html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode('utf-8'))
-        my_url = "https://www.youtube.com/watch?v=" + video_ids[0]
-        self.logger.info(str(my_url))
+        try:
+            my_url = "https://www.youtube.com/watch?v=" + video_ids[0]
+            self.logger.info(str(my_url))
 
-        # Start the application on tablet
-        self.tablet_service.cleanWebview()
-        self.tablet_service.loadUrl(str(my_url))
-        self.tablet_service.showWebview()
-        self.animated_speech.say(self.voice_speed + stop_str, self.configuration)
+            # Start the application on tablet
+            self.tablet_service.cleanWebview()
+            self.tablet_service.loadUrl(str(my_url))
+            self.tablet_service.showWebview()
+            self.animated_speech.say(self.voice_speed + stop_str, self.configuration)
 
-        while self.isRunning:
-            pass
+            while self.isRunning:
+                pass
+        except IndexError as e:
+            if self.language == "it":
+                error_msg = "Mi dispiace non ho trovato il video."
+            else:
+                error_msg = "I'm sorry I couldn't find the video on YouTube."
+            self.animated_speech.say(self.voice_speed + error_msg, self.configuration)
+
 
         self.tablet_service.cleanWebview()
         self.tablet_service.hideWebview()
