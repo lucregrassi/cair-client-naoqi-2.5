@@ -22,14 +22,14 @@ import json
 import socket
 import zlib
 
-ip = "130.251.13.108"
+ip = "130.251.13.112"
 server_ip = ip
 audio_recorder_ip = ip
 registration_ip = ip
 request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
 language = "it"
-min_registered_users_number = 2
+min_registered_users_number = 4
 
 
 class MyClass(GeneratedClass):
@@ -175,7 +175,7 @@ class MyClass(GeneratedClass):
         while self.isAlive:
             self.logger.info("** Listening **")
             # Tell the audio recorder that the client is ready to receive the user reply
-            self.client_socket.send(b"ready")
+            self.client_socket.send(dialogue_state.sentence_type.encode("utf-8"))
             xml_string = self.client_socket.recv(1024).decode('utf-8')
 
             if xml_string == "":
@@ -222,7 +222,7 @@ class MyClass(GeneratedClass):
             if any(exit_sent in sentence for exit_sent in self.exit_keywords):
                 self.isAlive = False
                 if language == "it":
-                    goodbye_msg = "Ok, è stato un piacere parlare con te! A presto!"
+                    goodbye_msg = "Ok, è stato un piacere parlare con voi! A presto!"
                 else:
                     goodbye_msg = "Ok, it was a pleasure talking with you! Goodbye."
                 self.animated_speech.say(self.voice_speed + goodbye_msg, self.configuration)

@@ -17,9 +17,9 @@ import zlib
 from cairlib_single.CAIRclient_SoftBank_actions import ActionManager
 from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
-server_ip = "130.251.13.108"
-audio_recorder_ip = "130.251.13.108"
-registration_ip = "130.251.13.108"
+server_ip = "130.251.13.112"
+audio_recorder_ip = "130.251.13.112"
+registration_ip = "130.251.13.112"
 request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
 language = "it"
@@ -165,8 +165,10 @@ class MyClass(GeneratedClass):
         # Loop until the user wants to stop the conversation
         while self.isAlive:
             self.logger.info("** Listening **")
-            # Tell the audio recorder that the client is ready to receive the user reply
-            self.client_socket.send(b"ready")
+            # Tell the audio recorder that the client is ready to listen
+            # Send the sentence type so that it knows if it has to wait for a passphrase
+            sentence_type = dialogue_state["sentence_type"]
+            self.client_socket.send(sentence_type.encode("utf-8"))
             sentence = self.client_socket.recv(1024).decode('utf-8')
 
             if sentence == "":

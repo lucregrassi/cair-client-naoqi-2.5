@@ -22,7 +22,7 @@
    </triggerSentences>
    <loadingResponses>
     <sentence lang="it_IT">Va bene, dammi solo un attimo.</sentence>
-    <sentence lang="it_IT">Certo! Avvio subito il client per CAIR.</sentence>
+    <sentence lang="it_IT">Certo! Dammi un momento.</sentence>
    </loadingResponses>
    <permissions/>
   </behaviorContent>
