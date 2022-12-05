@@ -47,7 +47,11 @@ class Utils:
         profile_id = "00000000-0000-0000-0000-000000000000"
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
         with open("speakers_info.json", 'w') as f:
-            json.dump({profile_id: {"name": "User", "gender": 'nb'}},
+            if language  == "it":
+                user_name = "Utente"
+            else:
+                user_name = "User"
+            json.dump({profile_id: {"name": user_name, "gender": 'nb'}},
                       f, ensure_ascii=False, indent=4)
     
         # Initialize dialogue statistics

@@ -59,7 +59,6 @@ class DialogueStatistics:
             while len(self.latest_turns) > community_turns:
                 self.latest_turns.pop(0)
             # Add the id of the last speaker at the end of the list
-            print("Adding", profile_id, "to latest turns")
             self.latest_turns.append(profile_id)
 
             # If it's the first speaker of the turn (and it is not the first interaction),
