@@ -49,10 +49,16 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "What would you like me to translate?", self.configuration)
+            if self.language == "it":
+                to_say = "Che cosa vorresti tradurre?"
+                speech_reco_lan = "Italian"
+            else:
+                to_say = "What would you like me to translate?"
+                speech_reco_lan = "English"
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
             # Start speech recognition
-            self.sASR.startReco("English", False, True)
+            self.sASR.startReco(speech_reco_lan, False, True)
 
             start_time_silence = time.time() + 1800
 
@@ -103,10 +109,17 @@ class MyClass(GeneratedClass):
                 raise Exception("No data")
         # If there is no parameter, ask for it
         except:
-            self.animated_speech.say(self.voice_speed + "In which language do you want me to translate?", self.configuration)
+            if language == "it":
+                to_say = "In quale lingua vuoi tradurre?"
+                speech_reco_lan = "Italian"
+            else:
+                to_say = "In which language do you want me to translate?"
+                speech_reco_lan = "English"
+
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
             # Start speech recognition
-            self.sASR.startReco("English", False, True)
+            self.sASR.startReco(speech_reco_lan, False, True)
             start_time_silence = time.time() + 1800
 
             sentence = ""
@@ -152,9 +165,17 @@ class MyClass(GeneratedClass):
 
         if dest_language not in installed_languages:
             if dest_language in available_languages:
-                self.animated_speech.say(self.voice_speed + "I'm sorry, " + dest_language + " language is not installed.", self.configuration)
+                if self.language == "it":
+                    to_say = "Mi dispiace, la lingua " + dest_language + " non è installata."
+                else:
+                    to_say = "I'm sorry, " + dest_language + " language is not installed."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             else:
-                self.animated_speech.say(self.voice_speed + "I'm sorry, I can't speak " + dest_language, self.configuration)
+                if self.language == "it":
+                    to_say = "Mi dispiace, non so parlare " + dest_language
+                else:
+                    to_say = "I'm sorry, I can't speak " + dest_language
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         else:
             languages_mapping = {'Arabic': 'ar', 'Brazilian': '-', 'Chinese': 'zh-TW', 'Czech': 'cs', 'Danish': 'da',
                                  'Dutch': 'nl', 'English': 'en', 'Finnish': 'fi', 'French': 'fr', 'German': 'de',
@@ -162,19 +183,29 @@ class MyClass(GeneratedClass):
                                  'Polish': 'pl', 'Portuguese': 'pt', 'Russian': 'ru', 'Spanish': 'es', 'Swedish': 'sv',
                                  'Turkish': 'tr'}
             if languages_mapping[dest_language] == '-':
-                self.animated_speech.say(self.voice_speed + "I'm sorry I can't translate in " + dest_language, self.configuration)
+                if language == "it":
+                    to_say = "Mi dispiace, non so tradurre in " + dest_language
+                else:
+                    to_say = "I'm sorry I can't translate in " + dest_language
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             else:
-                self.animated_speech.say(self.voice_speed + "The " + dest_language + " for " + to_translate + " is: ")
-                self.tts.setParameter("speed", 85)
+                if language == "it":
+                    to_say = to_translate + " in " + dest_language + " è: "
+                else:
+                    to_say = "The " + dest_language + " for " + to_translate + " is: "
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+                self.tts.setParameter("speed", 80)
                 try:
                     translation = translate(to_translate, languages_mapping[dest_language]).encode('utf-8')
                     self.logger.info(translation)
                     self.tts.say(translation, dest_language)
-                    self.tts.setLanguage("English")
-                    self.onInput_onStop()
                 except:
+                    pass
+
+                if self.language == "it":
+                    self.tts.setLanguage("Italian")
+                else:
                     self.tts.setLanguage("English")
-                    self.onInput_onStop()
 
         self.memory.removeData("CAIR/translate_text")
         self.memory.removeData("CAIR/translate_lan")

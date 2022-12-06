@@ -5,6 +5,7 @@ from naoqi import ALProxy
 from PyDictionary import PyDictionary
 from mtranslate import translate
 
+
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
@@ -40,14 +41,18 @@ class MyClass(GeneratedClass):
         # Check if the parameter is in memory
         try:
             to_define = str(self.memory.getData("CAIR/dictionary"))
-            self.logger.info(to_define)
+            self.logger.info("word to define: " + str(to_define))
             to_define = to_define.strip()
             if to_define == "None":
+                self.logger.info("no word to define")
                 raise Exception("No data")
+            else:
+                to_define_en = translate(str(to_define), 'en').encode("utf-8")
+                self.logger.info("translate word " + to_define_en)
         # If there is no parameter, ask for it
         except:
             if self.language == "it":
-                ask_def = "Coa vuoi che cerchi sul dizionario?"
+                ask_def = "Cosa vuoi che cerchi sul dizionario?"
             else:
                 ask_def = "What word would you like me to search on the dictionary?"
             self.animated_speech.say(self.voice_speed + ask_def, self.configuration)
@@ -100,14 +105,16 @@ class MyClass(GeneratedClass):
             self.memory.insertData(self.speech_reco_event, [])
             self.memory.insertData("CAIR/dictionary", str(sentence))
             to_define = str(self.memory.getData("CAIR/dictionary"))
+            to_define_en = translate(to_define, 'en').encode("utf-8")
+            self.logger.info("translate word " + str(to_define_en))
 
         dictionary = PyDictionary()
         try:
-            if dictionary.meaning(to_define):
-                definition = str(dictionary.meaning(to_define)['Noun'][0])
+            if dictionary.meaning(to_define_en):
+                definition = str(dictionary.meaning(to_define_en)['Noun'][0])
                 self.logger.info(definition)
                 if self.language == "it":
-                    definition_it = translate(definition, "it").encode('utf-8')
+                    definition_it = translate(definition, 'it').encode('utf-8')
                     outcome = "La definizione di " + to_define + " è: " + definition_it
                 else:
                     outcome = "The definition of " + to_define + " is: " + definition

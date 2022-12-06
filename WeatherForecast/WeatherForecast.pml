@@ -5,7 +5,14 @@
         <BehaviorDescription name="behavior" src="weather" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
-    <Resources />
+    <Resources>
+        <File name="__init__" src="libs/mtranslate/__init__.py" />
+        <File name="__init__" src="libs/mtranslate/__init__.pyc" />
+        <File name="__main__" src="libs/mtranslate/__main__.py" />
+        <File name="__main__" src="libs/mtranslate/__main__.pyc" />
+        <File name="core" src="libs/mtranslate/core.py" />
+        <File name="core" src="libs/mtranslate/core.pyc" />
+    </Resources>
     <Topics />
     <IgnoredPaths />
     <Translations auto-fill="en_US">

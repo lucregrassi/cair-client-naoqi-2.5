@@ -52,7 +52,6 @@
         <File name="test_lxml" src="libs/bs4/tests/test_lxml.pyc" />
         <File name="test_soup" src="libs/bs4/tests/test_soup.py" />
         <File name="test_soup" src="libs/bs4/tests/test_soup.pyc" />
-        <File name="test_tree" src="libs/bs4/tests/test_tree.py" />
         <File name="test_tree" src="libs/bs4/tests/test_tree.pyc" />
         <File name="goslate" src="libs/goslate.py" />
         <File name="__init__" src="libs/mtranslate/__init__.py" />

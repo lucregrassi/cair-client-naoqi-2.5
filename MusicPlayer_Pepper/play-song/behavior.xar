@@ -111,20 +111,40 @@ class MyClass(GeneratedClass):
                     sys.exit(0)
 
             sentence = sentence.replace(" ", "_")
-            print sentence
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
             self.memory.insertData("CAIR/song_title", str(sentence))
 
-        # You can also ask the user if they also want to see the video or just listen to the song
+        if self.language == "it":
+            ask_video = "Vuoi che ti mostri anche il video?"
+        else:
+            ask_video = "Do you want me to show you also the video?"
+        # Once the parameter is obtained, ask the user if he/she wants to watch also the video
+        self.animated_speech.say(self.voice_speed + ask_video, self.configuration)
+
+        # Restart asr service
+        self.asr_service.pause(False)
+        self.asr_service.subscribe("Test_ASR")
+        time.sleep(4)
+        answer = self.memory.getData("WordRecognized")[0]
+        self.asr_service.unsubscribe("Test_ASR")
+        self.logger.info(answer)
 
         # Call the play-video behavior
-        self.behavior_manager.runBehavior("musicplayer/play-video")
-        while self.behavior_manager.isBehaviorRunning("musicplayer/play-video"):
-            pass
+        if answer == "yes":
+            self.behavior_manager.runBehavior("musicplayer/play-video")
+            while self.behavior_manager.isBehaviorRunning("musicplayer/play-video"):
+                pass
+
+        # Call the play-song behavior
+        else:
+            self.behavior_manager.runBehavior("musicplayer/play-music")
+            while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
+                pass
 
         self.memory.removeData("CAIR/song_title")
         self.onInput_onStop()
+
 
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped

@@ -1,8 +1,11 @@
 import qi
 from naoqi import ALProxy
+import sys
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/cairclient_single/libs")
 import threading
 import time
 import re
+from mtranslate import translate
 
 
 class ActionManager(object):
@@ -189,7 +192,8 @@ class ActionManager(object):
                                                   "/apps/cairclient/img/ExecutionMode.png")
                 language = re.findall("language=(\w+)", item)[0]
                 self.logger(language)
-                self.memory.insertData("CAIR/translate_lan", language)
+                translated_lan = translate(language, 'en')
+                self.memory.insertData("CAIR/translate_lan", translated_lan)
                 what = re.findall("what=(.*)", item)[0]
                 self.logger(what)
                 self.memory.insertData("CAIR/translate_text", what)
@@ -206,7 +210,8 @@ class ActionManager(object):
                                                   "/apps/cairclient/img/ExecutionMode.png")
                 what = re.findall("what=(.*)", item)[0]
                 self.logger(what)
-                self.memory.insertData("CAIR/dictionary", what)
+                translated_what = translate(what, 'en')
+                self.memory.insertData("CAIR/dictionary", translated_what)
                 self.behavior_manager.runBehavior("wordtools/dictionary")
                 while self.behavior_manager.isBehaviorRunning("wordtools/dictionary"):
                     time.sleep(0.1)

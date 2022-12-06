@@ -702,59 +702,6 @@ Hello, world!
     def test_escaped_ampersand_in_attribute_value_is_left_alone(self):
         self.assertSoupEquals('<a href="http://example.org?a=1&amp;b=2;3"></a>')
 
-    def test_entities_in_strings_converted_during_parsing(self):
-        # Both XML and HTML entities are converted to Unicode characters
-        # during parsing.
-        text = "<p>&lt;&lt;sacr&eacute;&#32;bleu!&gt;&gt;</p>"
-        expected = u"<p>&lt;&lt;sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!&gt;&gt;</p>"
-        self.assertSoupEquals(text, expected)
-
-    def test_smart_quotes_converted_on_the_way_in(self):
-        # Microsoft smart quotes are converted to Unicode characters during
-        # parsing.
-        quote = b"<p>\x91Foo\x92</p>"
-        soup = self.soup(quote)
-        self.assertEqual(
-            soup.p.string,
-            u"\N{LEFT SINGLE QUOTATION MARK}Foo\N{RIGHT SINGLE QUOTATION MARK}")
-
-    def test_non_breaking_spaces_converted_on_the_way_in(self):
-        soup = self.soup("<a>&nbsp;&nbsp;</a>")
-        self.assertEqual(soup.a.string, u"\N{NO-BREAK SPACE}" * 2)
-
-    def test_entities_converted_on_the_way_out(self):
-        text = "<p>&lt;&lt;sacr&eacute;&#32;bleu!&gt;&gt;</p>"
-        expected = u"<p>&lt;&lt;sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!&gt;&gt;</p>".encode("utf-8")
-        soup = self.soup(text)
-        self.assertEqual(soup.p.encode("utf-8"), expected)
-
-    def test_real_iso_latin_document(self):
-        # Smoke test of interrelated functionality, using an
-        # easy-to-understand document.
-
-        # Here it is in Unicode. Note that it claims to be in ISO-Latin-1.
-        unicode_html = u'<html><head><meta content="text/html; charset=ISO-Latin-1" http-equiv="Content-type"/></head><body><p>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</p></body></html>'
-
-        # That's because we're going to encode it into ISO-Latin-1, and use
-        # that to test.
-        iso_latin_html = unicode_html.encode("iso-8859-1")
-
-        # Parse the ISO-Latin-1 HTML.
-        soup = self.soup(iso_latin_html)
-        # Encode it to UTF-8.
-        result = soup.encode("utf-8")
-
-        # What do we expect the result to look like? Well, it would
-        # look like unicode_html, except that the META tag would say
-        # UTF-8 instead of ISO-Latin-1.
-        expected = unicode_html.replace("ISO-Latin-1", "utf-8")
-
-        # And, of course, it would be in UTF-8, not Unicode.
-        expected = expected.encode("utf-8")
-
-        # Ta-da!
-        self.assertEqual(result, expected)
-
     def test_real_shift_jis_document(self):
         # Smoke test to make sure the parser can handle a document in
         # Shift-JIS encoding, without choking.
@@ -962,10 +909,6 @@ class XMLTreeBuilderSmokeTest(object):
         encoded = soup.encode()
         self.assertTrue(b"&lt; &lt; hey &gt; &gt;" in encoded)
 
-    def test_can_parse_unicode_document(self):
-        markup = u'<?xml version="1.0" encoding="euc-jp"><root>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</root>'
-        soup = self.soup(markup)
-        self.assertEqual(u'Sacr\xe9 bleu!', soup.root.string)
 
     def test_popping_namespaced_tag(self):
         markup = '<rss xmlns:dc="foo"><dc:creator>b</dc:creator><dc:date>2012-07-02T20:33:42Z</dc:date><dc:rights>c</dc:rights><image>d</image></rss>'

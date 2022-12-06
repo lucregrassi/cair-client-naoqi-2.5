@@ -17,9 +17,8 @@ import zlib
 from cairlib_single.CAIRclient_SoftBank_actions import ActionManager
 from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
-server_ip = "130.251.13.112"
-audio_recorder_ip = "130.251.13.112"
-registration_ip = "130.251.13.112"
+server_ip = "131.175.205.146"
+audio_recorder_ip = "130.251.13.116"
 request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
 language = "it"
@@ -34,14 +33,17 @@ class MyClass(GeneratedClass):
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
         self.memory = ALProxy("ALMemory")
+        self.memory.insertData("CAIR/server_ip", str(server_ip))
         self.speech_reco_event = "Audio/RecognizedWords"
         self.al = ALProxy("ALAutonomousLife")
         self.motion = ALProxy("ALMotion")
         self.tts = ALProxy("ALTextToSpeech")
         if language == "it":
+            self.language = self.memory.insertData("CAIR/language", "it")
             self.tts.setLanguage("Italian")
             self.not_installed_behavior = "Mi dispiace, non sono ancora capace di svolgere questa azione."
         else:
+            self.language = self.memory.insertData("CAIR/language", "en")
             self.tts.setLanguage("English")
             self.not_installed_behavior = "I'm sorry, I am not yet able to perform this task."
         self.animated_speech = ALProxy("ALAnimatedSpeech")
@@ -59,9 +61,10 @@ class MyClass(GeneratedClass):
         # This variable tells if the user want the robot to repeat a sentence
         self.repeat = False
         self.stop_recording = False
-        self.exit_keywords = ["stop talking", "quit the application", "esci dall'app", "esci dallapp", "esci dallapplicazione"]
+        self.exit_sentences = ["stop talking", "quit the application", "esci dall'app", "esci dallapp", "esci dallapplicazione"]
         self.repeat_keywords = ["repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]
         self.stop_recording_keywords = ["smetti di ascoltare", "spegni il microfono"]
+        self.passphrases = ["passo e chiudo", "cosa ne pensi"]
 
         # Store the number of people in front of the robot, coming from the sensor readings
         self.people = 0
@@ -91,6 +94,7 @@ class MyClass(GeneratedClass):
         self.speech_reco_event = "Audio/RecognizedWords"
         self.asr_service = ALProxy("ALSpeechRecognition")
         # asr needs to be paused before changing the language and setting the vocabulary
+        self.asr_service.pause(False)
         self.asr_service.pause(True)
         # change the language to overcome vocabulary problem
         self.asr_service.setLanguage("Italian")
@@ -99,7 +103,7 @@ class MyClass(GeneratedClass):
         self.asr_service.pause(True)
         self.asr_service.setVocabulary(self.vocabulary, False)
         self.asr_service.setAudioExpression(False)
-        self.asr_service.setParameter("Sensitivity", 0.1)
+        self.asr_service.setParameter("Sensitivity", 0.3)
 
     def onInput_onStart(self):
         # Try connecting to the socket that records the audio
@@ -182,12 +186,18 @@ class MyClass(GeneratedClass):
             # Check if the user wants to exit or wants the robot to repeat the previous sentence
             sentence = sentence.replace(".", "")
             sentence = sentence.replace("?", "")
+
+            # Delete passphrases from the user sentence
+            for passphrase in self.passphrases:
+                if passphrase in sentence.lower():
+                    sentence = sentence.replace(passphrase, "")
+
             # Reset repeat to false, otherwise it will always repeat the previous sentence
             self.repeat = False
             self.stop_recording = False
 
             # If the user said one of the "Exit Application keywords"
-            if sentence.lower() in self.exit_keywords:
+            if any(exit_sent in sentence.lower() for exit_sent in self.exit_sentences):
                 self.isAlive = False
                 if language == "it":
                     goodbye_msg = "Ok, grazie per aver parlato con me! A presto!"
@@ -198,7 +208,7 @@ class MyClass(GeneratedClass):
                 self.onInput_onStop()
                 sys.exit(0)
             # If the user said a Repeat keyword
-            elif sentence.lower() in self.repeat_keywords:
+            elif any(repeat_kw in sentence.lower() for repeat_kw in self.repeat_keywords):
                 # If a previous sentence to repeat exists
                 if self.previous_sentence:
                     self.repeat = True
@@ -215,7 +225,7 @@ class MyClass(GeneratedClass):
                         repeat_msg = "I'm sorry, I have nothing to repeat."
                     self.animated_speech.say(self.voice_speed + repeat_msg, self.configuration)
 
-            elif sentence.lower() in self.stop_recording_keywords:
+            elif any(stop_reco_kw in sentence.lower() for stop_reco_kw in self.stop_recording_keywords):
                 self.stop_recording = True
                 self.animated_speech.say(self.voice_speed + "Ok, non ti ascolterò più. Ricomincerò ad ascoltarti solo quando dirai ascoltami.", self.configuration)
                 user_input = ""

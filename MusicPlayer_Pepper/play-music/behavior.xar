@@ -46,8 +46,6 @@ class MyClass(GeneratedClass):
             self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             self.onInput_onStop()
             sys.exit(0)
-        else:
-            self.memory.insertData("CAIR/server_ip", "")
 
         text = self.memory.getData("CAIR/song_title")
         self.logger.info(str(text))
@@ -79,6 +77,7 @@ class MyClass(GeneratedClass):
         while self.isRunning and abs(currentPos - file_length) > 1e-09:
             currentPos = self.audio_player_service.getCurrentPosition(fileId)
 
+        self.onInput_onStop()
 
 
     def onInput_onStop(self):
