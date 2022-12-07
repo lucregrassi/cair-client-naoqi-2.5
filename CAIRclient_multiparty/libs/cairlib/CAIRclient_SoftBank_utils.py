@@ -140,7 +140,7 @@ class Utils(object):
 
         # ** STEP 3 ** Ask the gender to the user
         if self.language == "it":
-            to_say = "Per favore, dimmi quale pronome di genere vuoi che usi quando parlo con te: femminile, maschile o neutro?"
+            to_say = "Per favore, dimmi quale pronome di genere devo usare quando parlo con te: femminile, maschile o neutro?"
         else:
             to_say = "Please, tell me which gender pronoun should I use when I talk with you: male, female or neutral?"
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
@@ -149,9 +149,9 @@ class Utils(object):
 
         # ** STEP 4 ** Ask the user to talk for 20 seconds
         if self.language == "it":
-            to_say = "Per favore, parla per 20 secondi in modo che io possa imparare a riconoscere la tua voce."
+            to_say = "Per favore, parla per 30 secondi in modo che io possa imparare a riconoscere la tua voce."
         else:
-            to_say = "Please, talk for 20 seconds so that I can learn to recognize your voice."
+            to_say = "Please, talk for 30 seconds so that I can learn to recognize your voice."
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         client_registration_socket.send(b"new_profile_enrollment")
         # Wait for the completion of the enrollment

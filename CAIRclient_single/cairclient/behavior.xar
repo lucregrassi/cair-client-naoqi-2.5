@@ -18,7 +18,7 @@ from cairlib_single.CAIRclient_SoftBank_actions import ActionManager
 from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
 server_ip = "131.175.205.146"
-audio_recorder_ip = "130.251.13.116"
+audio_recorder_ip = "130.251.13.179"
 request_uri = "http://" + server_ip + ":5000/CAIR_hub"
 
 language = "it"
@@ -190,7 +190,8 @@ class MyClass(GeneratedClass):
             # Delete passphrases from the user sentence
             for passphrase in self.passphrases:
                 if passphrase in sentence.lower():
-                    sentence = sentence.replace(passphrase, "")
+                    sentence = sentence.lower().replace(passphrase, "")
+            self.logger.info("sentence without passphrase: " + str(sentence))
 
             # Reset repeat to false, otherwise it will always repeat the previous sentence
             self.repeat = False
@@ -252,7 +253,6 @@ class MyClass(GeneratedClass):
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat and not self.stop_recording:
-                self.logger.info(str(sentence))
                 # Compose the payload of the message to be sent to the server
                 data = {"client_sentence": sentence, "dialogue_state": dialogue_state}
                 encoded_data = json.dumps(data).encode('utf-8')

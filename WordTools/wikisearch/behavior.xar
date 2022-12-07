@@ -42,10 +42,13 @@ class MyClass(GeneratedClass):
         # Check if the parameter is in memory
         try:
             what = str(self.memory.getData("CAIR/wikisearch"))
-            self.logger.info(what)
+            self.logger.info("search on wiki: " + what)
             what = what.strip()
             if what == "None":
                 raise Exception("No data")
+            else:
+                what_en = translate(what, 'en').encode("utf-8")
+                self.logger.info("translated search: " + what_en)
         # If there is no parameter, ask for it
         except:
             self.animated_speech.say(self.voice_speed + "What would you like to search on Wikipedia?", self.configuration)
@@ -93,23 +96,38 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CAIR/wikisearch", str(sentence))
-            what = str(self.memory.getData("CAIR/wikisearch"))
+            what = str(sentence)
+            what_en = translate(what, 'en').encode("utf-8")
+            self.logger.info("translated search: " + what_en)
 
         warnings.catch_warnings()
         warnings.simplefilter("ignore")
         wikipedia.set_lang("en")
+
         try:
-            tmp = wikipedia.summary(what, sentences=1)
+            tmp = wikipedia.summary(what_en, sentences=1)
             res = re.sub(r"\(.*?\)", "", tmp).replace(")", "").encode('utf-8')
-            reply = "Here's what I found on Wikipedia about " + str(what) + ". " + res
+            translated_res = translate(res, 'it').encode("utf-8")
+            if language == "it":
+                reply = "Ecco cosa ho trovato su Wikipedia riguardo " + str(what) + ". " + str(translated_res)
+            else:
+                reply = "Here's what I found on Wikipedia about " + str(what) + ". " + res
         except (wikipedia.DisambiguationError, wikipedia.exceptions.DisambiguationError) as e:
             opt = random.choice(e.options)
+            opt_it = translate(opt, 'it').encode("utf-8")
             self.logger.info(str(opt))
             res = wikipedia.summary(opt, sentences=1).encode('utf-8')
-            reply = "Here's what I found on Wikipedia about " + str(opt) + ". " + str(res)
+            translated_res = translate(res, 'it').encode("utf-8")
+            if language == "it":
+                reply = "Ecco cosa ho trovato su Wikipedia riguardo " + str(opt_it) + ". " + str(translated_res)
+            else:
+                reply = "Here's what I found on Wikipedia about " + str(opt) + ". " + res
+
         except wikipedia.exceptions.PageError:
-            reply = "I'm sorry, I didn't find anything about " + str(what) + " on Wikipedia."
+            if language == "it":
+                reply = "Mi dispiace, non sono riuscito a trovare niente riguardante " + str(what) + " su Wikipedia."
+            else:
+                reply = "I'm sorry, I didn't find anything about " + str(what) + " on Wikipedia."
 
         self.logger.info(str(reply))
         self.animated_speech.say(self.voice_speed + str(reply), self.configuration)

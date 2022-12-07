@@ -103,10 +103,14 @@ class MyClass(GeneratedClass):
 
         try:
             dest_language = str(self.memory.getData("CAIR/translate_lan"))
-            self.logger.info(dest_language)
+            self.logger.info("language: " + dest_language)
             dest_language = dest_language.strip()
             if dest_language == "None":
                 raise Exception("No data")
+            else:
+                translated_lan = translate(str(dest_language), 'en').encode("utf-8")
+                self.logger.info("translated language: " + translated_lan)
+
         # If there is no parameter, ask for it
         except:
             if language == "it":
@@ -158,13 +162,14 @@ class MyClass(GeneratedClass):
 
             self.logger.info(str(sentence))
             self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CAIR/translate_lan", str(sentence))
-            dest_language = self.memory.getData("CAIR/translate_lan")
+            dest_language = str(sentence)
+            translated_lan = translate(dest_language, 'en').encode("utf-8")
+            self.logger.info("translated language: " + translated_lan)
 
-        dest_language = dest_language.strip().capitalize()
+        translated_lan = translated_lan.strip().capitalize()
 
-        if dest_language not in installed_languages:
-            if dest_language in available_languages:
+        if translated_lan not in installed_languages:
+            if translated_lan in available_languages:
                 if self.language == "it":
                     to_say = "Mi dispiace, la lingua " + dest_language + " non è installata."
                 else:
@@ -182,7 +187,7 @@ class MyClass(GeneratedClass):
                                  'Greek': 'el', 'Italian': 'it', 'Japanese': 'ja', 'Korean': 'ko', 'Norwegian': 'no',
                                  'Polish': 'pl', 'Portuguese': 'pt', 'Russian': 'ru', 'Spanish': 'es', 'Swedish': 'sv',
                                  'Turkish': 'tr'}
-            if languages_mapping[dest_language] == '-':
+            if languages_mapping[translated_lan] == '-':
                 if language == "it":
                     to_say = "Mi dispiace, non so tradurre in " + dest_language
                 else:
@@ -190,15 +195,15 @@ class MyClass(GeneratedClass):
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             else:
                 if language == "it":
-                    to_say = to_translate + " in " + dest_language + " è: "
+                    to_say = to_translate + " in " + dest_language + "si dice: "
                 else:
                     to_say = "The " + dest_language + " for " + to_translate + " is: "
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-                self.tts.setParameter("speed", 80)
+                self.tts.setParameter("speed", 85)
                 try:
-                    translation = translate(to_translate, languages_mapping[dest_language]).encode('utf-8')
+                    translation = translate(to_translate, languages_mapping[translated_lan]).encode('utf-8')
                     self.logger.info(translation)
-                    self.tts.say(translation, dest_language)
+                    self.tts.say(translation, translated_lan)
                 except:
                     pass
 

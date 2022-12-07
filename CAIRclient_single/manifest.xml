@@ -19,7 +19,6 @@
    <loadingResponses>
     <sentence lang="en_US">Ok, I'm connecting to the CAIR cloud</sentence>
    </loadingResponses>
-   <autonomous/>
    <permissions/>
   </behaviorContent>
  </contents>

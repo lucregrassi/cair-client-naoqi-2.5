@@ -22,7 +22,7 @@ import json
 import socket
 import zlib
 
-ip = "130.251.13.112"
+ip = "192.168.1.104"
 server_ip = ip
 audio_recorder_ip = ip
 registration_ip = ip
@@ -42,6 +42,7 @@ class MyClass(GeneratedClass):
         self.exit_keywords = ["stop talking", "esci dallapp", "esci dallapplicazione", "quit the application"]
         self.repeat_keywords = ["repeat", "can you repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]
         self.memory = ALProxy("ALMemory")
+        self.memory.insertData("CAIR/server_ip", server_ip)
         self.speech_reco_event = "Audio/RecognizedWords"
         self.al = ALProxy("ALAutonomousLife")
         self.motion = ALProxy("ALMotion")
@@ -80,8 +81,8 @@ class MyClass(GeneratedClass):
 
         self.logger.info("Setting voice speed")
         try:
-            self.voice_speed = "\\RSPD=80\\"
-            self.memory.insertData("CAIR/voice_speed", 80)
+            self.voice_speed = "\\RSPD=85\\"
+            self.memory.insertData("CAIR/voice_speed", 85)
             # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.memory.insertData("CAIR/voice_speed", 100)
@@ -90,7 +91,7 @@ class MyClass(GeneratedClass):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.audio_device = ALProxy("ALAudioDevice")
-        self.audio_device.setOutputVolume(50)
+        self.audio_device.setOutputVolume(60)
 
 
     def onInput_onStart(self):
