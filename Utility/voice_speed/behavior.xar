@@ -4,6 +4,7 @@
         self.memory = ALProxy("ALMemory")
         self.tts = ALProxy("ALTextToSpeech")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.language = self.memory.getData("CAIR/language")
         try:
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
@@ -21,54 +22,104 @@
     def onInput_onStart(self):
         level = self.memory.getData("CAIR/voice_speed_level")
         previous_speed = self.memory.getData("CAIR/voice_speed")
-        self.logger.info(previous_speed)
+        self.logger.info("Previous voice speed: " + previous_speed)
 
-        if level == "faster":
+        if level == "faster" or level == "veloce":
             if previous_speed == 100:
-                self.animated_speech.say(self.voice_speed + "Sorry, I can't speak faster than this.", self.configuration)
+                if self.language == "it":
+                    to_say = "Mi dispiace, non posso parlare più veloce di così."
+                else:
+                    to_say = "Sorry, I can't speak faster than this."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+                new_speed = previous_speed
             else:
                 new_speed = previous_speed + 10
                 if new_speed > 100:
                     new_speed = 100
                     self.logger.info(str(new_speed))
                 self.voice_speed = "\\RSPD=" + str(new_speed) + "\\"
-                self.animated_speech.say(self.voice_speed + "I increased my voice speed.", self.configuration)
-        elif level == "slower":
+                if self.language == "it":
+                    to_say = "Ok, ora parlerò più velocemente."
+                else:
+                    to_say = "I increased my voice speed."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+        elif level == "slower" or level == "lentamente":
             if previous_speed == 50:
-                self.animated_speech.say(self.voice_speed + "Sorry, I can't speak slower than this.", self.configuration)
+                if self.language == "it":
+                    to_say = "Mi dispiace, non posso parlare più lentamente di così."
+                else:
+                    to_say = "Sorry, I can't speak slower than this."
+                new_speed = previous_speed
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             else:
                 new_speed = previous_speed - 10
                 if new_speed < 50:
                     new_speed = 50
                     self.logger.info(str(new_speed))
                 self.voice_speed = "\\RSPD=" + str(new_speed) + "\\"
-                self.animated_speech.say(self.voice_speed + "I decreased my voice speed.", self.configuration)
-        elif level == "high":
+                if self.language == "it":
+                    to_say = "Ok, ora parlerò più lentamente."
+                else:
+                    to_say = "I decreased my voice speed."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+        elif level == "high" or level == "elevata":
             if previous_speed == 100:
-                self.animated_speech.say(self.voice_speed + "My voice speed is already set to high.", self.configuration)
+                if self.language == "it":
+                    to_say = "Sto già parlando alla velocità massima."
+                else:
+                    to_say = "My voice speed is already set to high."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+                new_speed = previous_speed
             else:
                 new_speed = 100
                 self.logger.info(str(new_speed))
                 self.voice_speed = "\\RSPD=100\\"
-                self.animated_speech.say(self.voice_speed + "My voice speed is now set to high.", self.configuration)
-        elif level == "normal":
+                if self.language == "it":
+                    to_say = "Ok, ora parlerò velocemente."
+                else:
+                    to_say = "Ok, my voice speed is now set to high."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+        elif level == "normal" or level == "normale":
             if previous_speed == 70:
-                self.animated_speech.say(self.voice_speed + "My voice speed is already set to normal.", self.configuration)
+                if self.language == "it":
+                    to_say = "Sto già parlando a velocità normale."
+                else:
+                    to_say = "My voice speed is already set to normal."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+                new_speed = previous_speed
             else:
                 new_speed = 70
                 self.logger.info(str(new_speed))
                 self.voice_speed = "\\RSPD=70\\"
-                self.animated_speech.say(self.voice_speed + "My voice speed is now set to normal.", self.configuration)
-        elif level == "low":
+                if self.language == "it":
+                    to_say = "Ok, ora parlerò a velocità normale."
+                else:
+                    to_say = "Ok, my voice speed is now set to normal."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+        elif level == "low" or level == "lenta":
             if previous_speed == 60:
-                self.animated_speech.say(self.voice_speed + "My voice speed is already set to low.", self.configuration)
+                if self.language == "it":
+                    to_say = "Sto già parlando a velocità lenta."
+                else:
+                    to_say = "My voice speed is already set to low."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+                new_speed = previous_speed
             else:
                 new_speed = 60
                 self.logger.info(str(new_speed))
                 self.voice_speed = "\\RSPD=60\\"
-                self.animated_speech.say(self.voice_speed + "My voice speed is now set to low.", self.configuration)
+                if self.language == "it":
+                    to_say = "Ok, ora parlerò lentamente."
+                else:
+                    to_say = "Ok, my voice speed is now set to low."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         else:
-            self.tts.say("I'm sorry, I can't set my voice speed to " + str(level) + " .")
+            if self.language == "it":
+                to_say = "Mi dispiace, non posso impostare la velocità con cui parlo a " + str(level) + ". "
+            else:
+                to_say = "I'm sorry, I can't set my voice speed to " + str(level) + ". "
+            new_speed = previous_speed
+            self.tts.say(self.voice_speed + to_say, self.configuration)
 
         self.memory.insertData("CAIR/voice_speed", new_speed)
         self.onInput_onStop()

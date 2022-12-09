@@ -22,7 +22,7 @@ import json
 import socket
 import zlib
 
-ip = "192.168.1.104"
+ip = "192.168.1.103"
 server_ip = ip
 audio_recorder_ip = ip
 registration_ip = ip

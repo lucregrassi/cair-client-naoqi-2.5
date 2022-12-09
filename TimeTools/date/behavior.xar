@@ -13,6 +13,7 @@ class MyClass(GeneratedClass):
         except:
             self.voice_speed = "\\RSPD=80\\"
         self.configuration = {"bodyLanguageMode": "contextual"}
+        self.language = self.memory.getData("CAIR/language")
 
     def onLoad(self):
         #put initialization code here
@@ -24,9 +25,15 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         today = date.today()
-        d1 = today.strftime("%m/%d/%Y")
+        if self.language == "it":
+            d1 = today.strftime("%d/%m/%Y")
+            to_say = "Oggi è il " + str(d1)
+        else:
+            d1 = today.strftime("%m/%d/%Y")
+            to_say = "It's " + str(d1)
         self.logger.info(str(d1))
-        self.animated_speech.say(self.voice_speed + "It's " + str(d1))
+
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         self.onStopped()
 
     def onInput_onStop(self):

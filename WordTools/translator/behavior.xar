@@ -43,7 +43,7 @@ class MyClass(GeneratedClass):
         # Check if the text to translate is in memory
         try:
             to_translate = str(self.memory.getData("CAIR/translate_text"))
-            self.logger.info(to_translate)
+            self.logger.info("sentence to translate: " + to_translate)
             to_translate = to_translate.strip()
             if to_translate == "None":
                 raise Exception("No data")
@@ -202,7 +202,7 @@ class MyClass(GeneratedClass):
                 self.tts.setParameter("speed", 85)
                 try:
                     translation = translate(to_translate, languages_mapping[translated_lan]).encode('utf-8')
-                    self.logger.info(translation)
+                    self.logger.info("translation: " + translation)
                     self.tts.say(translation, translated_lan)
                 except:
                     pass
