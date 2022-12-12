@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package uuid="gangnam-style-pepper" version="0.0.11">
+ <names>
+  <name lang="en_US">Gangnam Style Pepper</name>
+  <name lang="fr_FR">Gangnam sta ile</name>
+  <name lang="ja_JP">江南スタイル</name>
+  <name lang="zh_CN">江南Style</name>
+ </names>
+ <descriptions>
+  <description lang="en_US">Gangnam style dance.</description>
+  <description lang="fr_FR">La danse de l'été: Gangnam Style!</description>
+  <description lang="ja_JP">江南スタイルダンスです！</description>
+  <description lang="zh_CN">舞蹈江南Style</description>
+ </descriptions>
+ <supportedLanguages>
+  <language>en_US</language>
+  <language>fr_FR</language>
+  <language>ja_JP</language>
+  <language>zh_CN</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+  <language>fr_FR</language>
+  <language>ja_JP</language>
+  <language>zh_CN</language>
+ </descriptionLanguages>
+ <contents/>
+ <requirements>
+  <naoqiRequirement minVersion="2.0.1"/>
+  <robotRequirement model="NAO_H25"/>
+ </requirements>
+</package>

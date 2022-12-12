@@ -24,7 +24,7 @@
     def onInput_onStart(self):
         level = self.memory.getData("CAIR/volume_level").lower()
         previous_volume = self.audio_device.getOutputVolume()
-        self.logger.info("Previous volume: " + previous_volume)
+        self.logger.info("Previous volume: " + str(previous_volume))
 
         if level in self.higher_volume:
             if previous_volume == 100:

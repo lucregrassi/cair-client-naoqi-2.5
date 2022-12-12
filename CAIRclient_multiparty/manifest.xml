@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="cairclient_multiparty">
+<package uuid="cairclient_multiparty" version="0.0.0">
  <names>
   <name lang="en_US">CAIRclient_multiparty</name>
  </names>
