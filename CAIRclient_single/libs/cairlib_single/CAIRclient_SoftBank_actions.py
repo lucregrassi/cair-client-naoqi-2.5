@@ -17,6 +17,7 @@ class ActionManager(object):
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory = ALProxy("ALMemory")
         self.tablet = True
+        self.not_installed_behaviour = "Mi dispiace, non sono in grado di fare quello che mi hai chiesto."
         try:
             self.tablet_service = ALProxy("ALTabletService")
         except:
