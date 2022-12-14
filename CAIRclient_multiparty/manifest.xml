@@ -21,8 +21,8 @@
     <sentence lang="it_IT">Connettiti al cloud</sentence>
    </triggerSentences>
    <loadingResponses>
-    <sentence lang="it_IT">Va bene, dammi solo un attimo.</sentence>
-    <sentence lang="it_IT">Certo! Dammi un momento.</sentence>
+    <sentence lang="it_IT">Datemi solo un attimo.</sentence>
+    <sentence lang="it_IT">Non vedo l'ora di parlare con voi!</sentence>
    </loadingResponses>
    <permissions/>
   </behaviorContent>
