@@ -115,7 +115,7 @@ class MyClass(GeneratedClass):
 
         text = self.memory.getData("CAIR/karaoke_title")
         self.logger.info(str(text))
-        self.animated_speech.say(self.voice_speed + wait_str self.configuration)
+        self.animated_speech.say(self.voice_speed + wait_str, self.configuration)
 
         search_keyword = text.replace(" ", "+") + "+karaoke"
         html = urllib2.urlopen("https://www.youtube.com/results?search_query=" + search_keyword)

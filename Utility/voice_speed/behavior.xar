@@ -24,7 +24,7 @@
         previous_speed = self.memory.getData("CAIR/voice_speed")
         self.logger.info("Previous voice speed: " + previous_speed)
 
-        if level == "faster" or level == "veloce":
+        if level == "faster" or level == "velocemente":
             if previous_speed == 100:
                 if self.language == "it":
                     to_say = "Mi dispiace, non posso parlare più veloce di così."

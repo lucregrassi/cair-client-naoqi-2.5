@@ -22,7 +22,7 @@ import json
 import socket
 import zlib
 
-ip = "192.168.1.102"
+ip = "192.168.76.149"
 server_ip = ip
 audio_recorder_ip = ip
 registration_ip = ip
@@ -133,7 +133,7 @@ class MyClass(GeneratedClass):
             # with the info of a generic user
             welcome_sentence_str = self.utils.acquire_initial_state()
             if language == "it":
-                welcome_msg = "Benvenuto! "
+                welcome_msg = "Benvenuti! "
             else:
                 welcome_msg = "Welcome, it's nice to meet you! "
             self.logger.info(welcome_msg + str(welcome_sentence_str))
@@ -142,7 +142,7 @@ class MyClass(GeneratedClass):
         else:
             self.logger.info("Users are already present in the info file")
             if language == "it":
-                welcome_back_msg = "È bello rivederti! Di cosa vorresti parlare?"
+                welcome_back_msg = "È bello rivedervi! Di cosa vorreste parlare?"
             else:
                 welcome_back_msg = "Welcome back! I missed you. What would you like to talk about?"
             self.animated_speech.say(self.voice_speed + welcome_back_msg, self.configuration)

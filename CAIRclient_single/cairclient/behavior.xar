@@ -183,6 +183,9 @@ class MyClass(GeneratedClass):
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
                 self.onInput_onStop()
 
+            # Add spaces at the beginning and end of user sentence to match certain keywords
+            sentence = " " + sentence + " "
+
             # Check if the user wants to exit or wants the robot to repeat the previous sentence
             sentence = sentence.replace(".", "")
             sentence = sentence.replace("?", "")
