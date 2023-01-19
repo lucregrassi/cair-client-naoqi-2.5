@@ -1,3 +1,5 @@
+#!usr/bin/python -tt
+# -*- coding: utf-8 -*-
 import qi
 from naoqi import ALProxy
 import threading
@@ -19,6 +21,14 @@ class ActionManager(object):
             self.tablet_service = ALProxy("ALTabletService")
         except:
             self.tablet = False
+        
+        try:
+            self.voice_speed = "\\RSPD=85\\"
+            self.memory.insertData("CAIR/voice_speed", 85)
+            # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        except:
+            self.memory.insertData("CAIR/voice_speed", 100)
+            self.voice_speed = "\\RSPD=100\\"
 
     # This thread function allows the robot to talk while it is performing the action for the corresponding greeting
     def greeting_thread(self, greeting):
@@ -407,5 +417,3 @@ class ActionManager(object):
                     time.sleep(0.1)
             else:
                 self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
-        else:
-            self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)

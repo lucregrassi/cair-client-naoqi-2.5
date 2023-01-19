@@ -2,7 +2,6 @@
 <Package name="MusicPlayer_Nao" format_version="4">
     <Manifest src="manifest.xml" />
     <BehaviorDescriptions>
-        <BehaviorDescription name="behavior" src="play-music" xar="behavior.xar" />
         <BehaviorDescription name="behavior" src="play-song" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />

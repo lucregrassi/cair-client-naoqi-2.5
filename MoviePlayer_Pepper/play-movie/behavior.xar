@@ -49,68 +49,6 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         # Check if the parameter is in memory
-        try:
-            text = self.memory.getData("CAIR/movie_title")
-            self.logger.info(str(text))
-            if text == "None":
-                raise Exception("No data")
-        # If there is no parameter, ask for it
-        except:
-            if self.language == "it"
-                to_say = "Per favore, dimmi il titolo del film"
-                reco_language = "Italian"
-            else:
-                to_say = "Please, tell me the title of the movie."
-                reco_language = "English"
-            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-
-            # Start speech recognition
-            self.sASR.startReco(reco_language, False, True)
-            self.setAutonomousAbilities(True, True, True, True, True)
-
-            start_time_silence = time.time() + 1800
-
-            sentence = ""
-            reco_speech = self.memory.getData(self.speech_reco_event)
-            self.logger.info(str(reco_speech))
-            stop = False
-
-            while True:
-                time.sleep(0.1)
-                while not reco_speech:
-                    time.sleep(0.1)
-                    if sentence and time.time() - start_time_silence > 0.1:
-                        self.sASR.stopReco()
-                        self.setAutonomousAbilities(False, True, True, True, True)
-                        stop = True
-                        break
-                    reco_speech = self.memory.getData(self.speech_reco_event)
-                    print reco_speech
-                sys.stdout.flush()
-                if stop:
-                    break
-                if sentence == "":
-                    sep = ""
-                else:
-                    sep = " "
-
-                if reco_speech:
-                    sentence = sentence + sep + reco_speech[0][0]
-                start_time_silence = time.time()
-                self.memory.insertData(self.speech_reco_event, [])
-                reco_speech = self.memory.getData(self.speech_reco_event)
-
-                exit_keywords = ["stop", "exit", "quit"]
-                if sentence.lower() in exit_keywords:
-                    self.onInput_onStop()
-                    sys.exit(0)
-
-            sentence = sentence.replace(" ", "_")
-            print sentence
-            self.logger.info(str(sentence))
-            self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CAIR/movie_title", str(sentence))
-
         text = self.memory.getData("CAIR/movie_title")
         self.logger.info(str(text))
 

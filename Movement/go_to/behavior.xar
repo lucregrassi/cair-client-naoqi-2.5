@@ -20,9 +20,7 @@ class MyClass(GeneratedClass):
         # For NAO robot
         self.motionProxy.setMotionConfig([["ENABLE_FOOT_CONTACT_PROTECTION", True]])
 
-        self.sASR = ALProxy("ASR2")
         self.al = ALProxy("ALAutonomousLife")
-        self.speech_reco_event = "Audio/RecognizedWords"
 
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
@@ -77,65 +75,10 @@ class MyClass(GeneratedClass):
 
 
     def onInput_onStart(self):
-        try:
-            where = str(self.memory.getData("CAIR/go_to"))
-            self.logger.info(where)
-            where = where.strip()
-            if where == "None":
-                raise Exception("No data")
-        # If there is no parameter, ask for it
-        except:
-            if self.language == "it":
-                to_say = "Dove vuoi che vada?"
-            else:
-                to_say = "Where should I go?"
 
-            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-
-            # Start speech recognition
-            self.sASR.startReco("English", False, True)
-            self.setAutonomousAbilities(True, True, True, True, True)
-
-            start_time_silence = time.time() + 1800
-
-            sentence = ""
-            reco_speech = self.memory.getData(self.speech_reco_event)
-            self.logger.info(str(reco_speech))
-            stop = False
-
-            while True:
-                time.sleep(0.1)
-                while not reco_speech:
-                    time.sleep(0.1)
-                    if sentence and time.time() - start_time_silence > 0.1:
-                        self.sASR.stopReco()
-                        self.setAutonomousAbilities(False, True, True, True, True)
-                        stop = True
-                        break
-                    reco_speech = self.memory.getData(self.speech_reco_event)
-                    print reco_speech
-                sys.stdout.flush()
-                if stop:
-                    break
-                if sentence == "":
-                    sep = ""
-                else:
-                    sep = " "
-
-                if reco_speech:
-                    sentence = sentence + sep + reco_speech[0][0]
-                start_time_silence = time.time()
-                self.memory.insertData(self.speech_reco_event, [])
-                reco_speech = self.memory.getData(self.speech_reco_event)
-
-                exit_keywords = ["exit", "quit", "stop"]
-                if sentence.lower() in exit_keywords:
-                    self.onInput_onStop()
-
-            self.logger.info(str(sentence))
-            self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CAIR/go_to", str(sentence))
-            where = str(self.memory.getData("CAIR/go_to"))
+        where = str(self.memory.getData("CAIR/go_to"))
+        self.logger.info(where)
+        where = where.strip()
 
         places = self.get_places_from_map()
 

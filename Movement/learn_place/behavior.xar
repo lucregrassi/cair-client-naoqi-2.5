@@ -34,9 +34,7 @@ class MyClass(GeneratedClass):
         self.asr_service.pause(True)
         self.asr_service.setVocabulary(vocabulary, False)
 
-        self.sASR = ALProxy("ASR2")
         self.al = ALProxy("ALAutonomousLife")
-        self.speech_reco_event = "Audio/RecognizedWords"
 
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
         self.al.setAutonomousAbilityEnabled("AutonomousBlinking", blinking)
@@ -71,65 +69,9 @@ class MyClass(GeneratedClass):
         return places
 
     def onInput_onStart(self):
-
-        try:
-            where = str(self.memory.getData("CAIR/learn_place"))
-            self.logger.info(where)
-            where = where.strip()
-            if where == "None":
-                raise Exception("No data")
-        # If there is no parameter, ask for it
-        except:
-            if self.language == "it":
-                to_say = "Che posto è questo?"
-            else:
-                to_say = "Which place is this?"
-            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-
-            # Start speech recognition
-            self.sASR.startReco("English", False, True)
-            self.setAutonomousAbilities(True, True, True, True, True)
-
-            start_time_silence = time.time() + 1800
-
-            sentence = ""
-            reco_speech = self.memory.getData(self.speech_reco_event)
-            self.logger.info(str(reco_speech))
-            stop = False
-
-            while True:
-                time.sleep(0.1)
-                while not reco_speech:
-                    time.sleep(0.1)
-                    if sentence and time.time() - start_time_silence > 0.1:
-                        self.sASR.stopReco()
-                        self.setAutonomousAbilities(False, True, True, True, True)
-                        stop = True
-                        break
-                    reco_speech = self.memory.getData(self.speech_reco_event)
-                    print reco_speech
-                sys.stdout.flush()
-                if stop:
-                    break
-                if sentence == "":
-                    sep = ""
-                else:
-                    sep = " "
-
-                if reco_speech:
-                    sentence = sentence + sep + reco_speech[0][0]
-                start_time_silence = time.time()
-                self.memory.insertData(self.speech_reco_event, [])
-                reco_speech = self.memory.getData(self.speech_reco_event)
-
-                exit_keywords = ["exit", "quit", "stop"]
-                if sentence.lower() in exit_keywords:
-                    self.onInput_onStop()
-
-            self.logger.info(str(sentence))
-            self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CAIR/learn_place", str(sentence))
-            where = str(self.memory.getData("CAIR/learn_place"))
+        where = str(self.memory.getData("CAIR/learn_place"))
+        self.logger.info(where)
+        where = where.strip()
 
         # Get the name of place the user wants to add from the memory
         places = self.get_places_from_map()

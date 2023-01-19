@@ -15,9 +15,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         self.memory = ALProxy("ALMemory")
         self.tts = ALProxy("ALTextToSpeech")
-        self.sASR = ALProxy("ASR2")
         self.al = ALProxy("ALAutonomousLife")
-        self.speech_reco_event = "Audio/RecognizedWords"
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         try:
             self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
@@ -41,130 +39,16 @@ class MyClass(GeneratedClass):
         self.logger.info(str(installed_languages))
 
         # Check if the text to translate is in memory
-        try:
-            to_translate = str(self.memory.getData("CAIR/translate_text"))
-            self.logger.info("sentence to translate: " + to_translate)
-            to_translate = to_translate.strip()
-            if to_translate == "None":
-                raise Exception("No data")
-        # If there is no parameter, ask for it
-        except:
-            if self.language == "it":
-                to_say = "Che cosa vorresti tradurre?"
-                speech_reco_lan = "Italian"
-            else:
-                to_say = "What would you like me to translate?"
-                speech_reco_lan = "English"
-            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
 
-            # Start speech recognition
-            self.sASR.startReco(speech_reco_lan, False, True)
+        to_translate = str(self.memory.getData("CAIR/translate_text"))
+        self.logger.info("sentence to translate: " + to_translate)
+        to_translate = to_translate.strip()
 
-            start_time_silence = time.time() + 1800
-
-            sentence = ""
-            reco_speech = self.memory.getData(self.speech_reco_event)
-            self.logger.info(str(reco_speech))
-            stop = False
-
-            while True:
-                time.sleep(0.1)
-                while not reco_speech:
-                    time.sleep(0.1)
-                    if sentence and time.time() - start_time_silence > 0.1:
-                        self.sASR.stopReco()
-                        stop = True
-                        break
-                    reco_speech = self.memory.getData(self.speech_reco_event)
-                    print reco_speech
-                sys.stdout.flush()
-                if stop:
-                    break
-                if sentence == "":
-                    sep = ""
-                else:
-                    sep = " "
-
-                if reco_speech:
-                    sentence = sentence + sep + reco_speech[0][0]
-                start_time_silence = time.time()
-                self.memory.insertData(self.speech_reco_event, [])
-                reco_speech = self.memory.getData(self.speech_reco_event)
-
-                exit_keywords = ["stop", "exit", "quit"]
-                if any(keyword in sentence.lower() for keyword in exit_keywords):
-                    self.onInput_onStop()
-                    sys.exit(0)
-
-            self.logger.info(str(sentence))
-            self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CAIR/translate_text", str(sentence))
-            to_translate = self.memory.getData("CAIR/translate_text")
-
-        try:
-            dest_language = str(self.memory.getData("CAIR/translate_lan"))
-            self.logger.info("language: " + dest_language)
-            dest_language = dest_language.strip()
-            if dest_language == "None":
-                raise Exception("No data")
-            else:
-                translated_lan = translate(str(dest_language), 'en').encode("utf-8")
-                self.logger.info("translated language: " + translated_lan)
-
-        # If there is no parameter, ask for it
-        except:
-            if language == "it":
-                to_say = "In quale lingua vuoi tradurre?"
-                speech_reco_lan = "Italian"
-            else:
-                to_say = "In which language do you want me to translate?"
-                speech_reco_lan = "English"
-
-            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-
-            # Start speech recognition
-            self.sASR.startReco(speech_reco_lan, False, True)
-            start_time_silence = time.time() + 1800
-
-            sentence = ""
-            reco_speech = self.memory.getData(self.speech_reco_event)
-            self.logger.info(str(reco_speech))
-            stop = False
-
-            while True:
-                time.sleep(0.1)
-                while not reco_speech:
-                    time.sleep(0.1)
-                    if sentence and time.time() - start_time_silence > 0.1:
-                        self.sASR.stopReco()
-                        stop = True
-                        break
-                    reco_speech = self.memory.getData(self.speech_reco_event)
-                    print reco_speech
-                sys.stdout.flush()
-                if stop:
-                    break
-                if sentence == "":
-                    sep = ""
-                else:
-                    sep = " "
-
-                if reco_speech:
-                    sentence = sentence + sep + reco_speech[0][0]
-                start_time_silence = time.time()
-                self.memory.insertData(self.speech_reco_event, [])
-                reco_speech = self.memory.getData(self.speech_reco_event)
-
-                exit_keywords = ["stop", "exit", "quit"]
-                if any(keyword in sentence.lower() for keyword in exit_keywords):
-                    self.onInput_onStop()
-                    sys.exit(0)
-
-            self.logger.info(str(sentence))
-            self.memory.insertData(self.speech_reco_event, [])
-            dest_language = str(sentence)
-            translated_lan = translate(dest_language, 'en').encode("utf-8")
-            self.logger.info("translated language: " + translated_lan)
+        dest_language = str(self.memory.getData("CAIR/translate_lan"))
+        self.logger.info("language: " + dest_language)
+        dest_language = dest_language.strip()
+        translated_lan = translate(str(dest_language), 'en').encode("utf-8")
+        self.logger.info("translated language: " + translated_lan)
 
         translated_lan = translated_lan.strip().capitalize()
 

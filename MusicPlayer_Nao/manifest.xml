@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="musicplayer">
+<package uuid="musicplayer" version="0.0.0">
  <names>
   <name lang="en_US">MusicPlayer_Nao</name>
  </names>
@@ -10,10 +10,6 @@
   <language>en_US</language>
  </descriptionLanguages>
  <contents>
-  <behaviorContent path="play-music">
-   <nature>interactive</nature>
-   <permissions/>
-  </behaviorContent>
   <behaviorContent path="play-song">
    <nature>interactive</nature>
    <permissions/>

@@ -41,68 +41,10 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        # Check if the parameter is in memory
-        try:
-            city = str(self.memory.getData("CAIR/weather_city"))
-            self.logger.info(city)
-            city = city.strip()
-
-            if city == "None":
-                raise Exception("No data")
-        # If there is no parameter, ask for it
-        except:
-            if self.language == "it":
-                ask_city = "Di quale città vuoi sapere le previsioni?"
-            else:
-                ask_city = "Of which city do you want to know the weather forecast?"
-            self.animated_speech.say(self.voice_speed + ask_city, self.configuration)
-
-            # Start speech recognition
-            self.sASR.startReco("English", False, True)
-            self.setAutonomousAbilities(True, True, True, True, True)
-
-            start_time_silence = time.time() + 1800
-
-            sentence = ""
-            reco_speech = self.memory.getData(self.speech_reco_event)
-            self.logger.info(str(reco_speech))
-            stop = False
-
-            while True:
-                time.sleep(0.1)
-                while not reco_speech:
-                    time.sleep(0.1)
-                    if sentence and time.time() - start_time_silence > 0.1:
-                        self.sASR.stopReco()
-                        self.setAutonomousAbilities(False, True, True, True, True)
-                        stop = True
-                        break
-                    reco_speech = self.memory.getData(self.speech_reco_event)
-                    print reco_speech
-                sys.stdout.flush()
-                if stop:
-                    break
-                if sentence == "":
-                    sep = ""
-                else:
-                    sep = " "
-
-                if reco_speech:
-                    sentence = sentence + sep + reco_speech[0][0]
-                start_time_silence = time.time()
-                self.memory.insertData(self.speech_reco_event, [])
-                reco_speech = self.memory.getData(self.speech_reco_event)
-
-                exit_keywords = ["stop", "exit", "quit"]
-                if any(keyword in sentence.lower() for keyword in exit_keywords):
-                    self.onInput_onStop()
-                    sys.exit(0)
-
-            self.logger.info(str(sentence))
-            self.memory.insertData(self.speech_reco_event, [])
-            self.memory.insertData("CAIR/weather_city", str(sentence))
-            city = str(self.memory.getData("CAIR/weather_city"))
-
+        # Take the parameter from memory
+        city = str(self.memory.getData("CAIR/weather_city"))
+        self.logger.info(city)
+        city = city.strip()
 
         BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
         API_KEY = "06e80be25a22e79a3fb26d7461199a2a"
