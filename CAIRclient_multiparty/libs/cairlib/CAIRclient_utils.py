@@ -8,10 +8,12 @@ import string
 
 
 class Utils:
-    def __init__(self, language, server_ip, registration_ip):
+    def __init__(self, language, server_ip, registration_ip, port):
         self.language = language
         self.server_ip = server_ip
         self.registration_ip = registration_ip
+        self.port = port
+        self.request_uri = "http://" + self.server_ip + ":" + self.port + "/CAIR_hub"
         
     def compose_sentence(self, sentence_pieces):
         sentence = ""
@@ -27,7 +29,7 @@ class Utils:
     # for all the speakers. Then, it initializes the speakers stats and speakers info data for the unknown speaker
     def acquire_initial_state(self):
         # Try to contact the server and retry until the dialogue state is received
-        resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+        resp = requests.get(self.request_uri, verify=False)
         print(resp)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
@@ -37,7 +39,7 @@ class Utils:
             print("S: Waiting for the CAIR server to provide the dialogue state...")
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
-                resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+                resp = requests.get(self.request_uri, verify=False)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)
         # Store the dialogue state in the corresponding file

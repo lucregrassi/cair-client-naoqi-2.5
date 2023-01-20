@@ -12,12 +12,14 @@ import string
 
 
 class Utils(object):
-    def __init__(self, logger, app_name, language, server_ip, registration_ip):
+    def __init__(self, logger, app_name, language, server_ip, registration_ip, port):
         super(Utils, self).__init__()
         self.logger = logger
         self.language = language
         self.server_ip = server_ip
         self.registration_ip = registration_ip
+        self.port = port
+        self.request_uri = "http://" + self.server_ip + ":" + self.port + "/CAIR_hub"
         self.al = ALProxy("ALAutonomousLife")
         self.memory = ALProxy("ALMemory")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
@@ -58,7 +60,7 @@ class Utils(object):
     def acquire_initial_state(self):
         # Registration of the first "unknown" user
         # Try to contact the server
-        resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+        resp = requests.get(self.request_uri, verify=False)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
 
@@ -67,7 +69,7 @@ class Utils(object):
             self.animated_speech.say(self.voice_speed + "I'm waiting for the server...", self.configuration)
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
-                resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+                resp = requests.get(self.request_uri, verify=False)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)
         # Store the dialogue state in the corresponding file

@@ -22,11 +22,12 @@ import json
 import socket
 import zlib
 
-ip = "192.168.76.149"
+ip = "130.251.13.191"
 server_ip = ip
 audio_recorder_ip = ip
 registration_ip = ip
-request_uri = "http://" + server_ip + ":5000/CAIR_hub"
+port = "5000"
+request_uri = "http://" + server_ip + ":" + port + "/CAIR_hub"
 
 language = "it"
 min_registered_users_number = 4
@@ -37,7 +38,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         # Instances of the classes of the other files in the libs folder containing functions needed here
         self.plans = ActionManager(self.logger.info)
-        self.utils = Utils(self.logger.info, app_name, language, server_ip, registration_ip)
+        self.utils = Utils(self.logger.info, app_name, language, server_ip, registration_ip, port)
         self.isAlive = True
         self.exit_keywords = ["stop talking", "esci dallapp", "esci dallapplicazione", "quit the application"]
         self.repeat_keywords = ["repeat", "can you repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]

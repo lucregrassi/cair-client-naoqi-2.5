@@ -13,6 +13,7 @@ class ActionManager(object):
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.memory = ALProxy("ALMemory")
+        self.not_installed_behavior = "Mi dispiace, ma al momento non sono ancora in grado di fare quello che mi hai chiesto!"
         self.tablet = True
         try:
             self.tablet_service = ALProxy("ALTabletService")
@@ -406,3 +407,5 @@ class ActionManager(object):
                     time.sleep(0.1)
             else:
                 self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
+        else:
+            self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)

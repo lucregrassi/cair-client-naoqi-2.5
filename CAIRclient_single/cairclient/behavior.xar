@@ -19,7 +19,8 @@ from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
 server_ip = "131.175.205.146"
 audio_recorder_ip = "130.251.13.110"
-request_uri = "http://" + server_ip + ":5000/CAIR_hub"
+port = "5000"
+request_uri = "http://" + server_ip + ":" + port + "/CAIR_hub"
 
 language = "it"
 
@@ -29,7 +30,7 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         # Instances of the classes of the other files in the libs folder containing functions needed here
         self.plans = ActionManager(self.logger.info)
-        self.utils = Utils(self.logger.info, app_name, language, server_ip)
+        self.utils = Utils(self.logger.info, app_name, language, server_ip, port)
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         self.isAlive = True
         self.memory = ALProxy("ALMemory")
