@@ -21,7 +21,7 @@ from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
 cineca_ip = "131.175.205.146"
 local = "130.251.13.122"
-server_ip = local
+server_ip = cineca_ip
 audio_recorder_ip = local
 port = "5000"
 music_port = "5008"
@@ -81,10 +81,7 @@ class MyClass(GeneratedClass):
 
         self.dialogue_state_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
                                         "dialogue_state.json"
-        self.speakers_info_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
-                                       "speakers_info.json"
-        self.dialogue_statistics_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
-                                             "dialogue_statistics.json"
+
         # To store the previous sentence said by the robot
         self.previous_sentence = ""
         # This variable tells if the user want the robot to repeat a sentence
@@ -307,6 +304,7 @@ class MyClass(GeneratedClass):
 
                 # Say the dialogue sentence
                 self.logger.info(str(dialogue_sentence))
+                dialogue_sentence = dialogue_sentence.replace("ə", "")
                 self.animated_speech.say(self.voice_speed + str(dialogue_sentence), self.configuration)
                 self.previous_sentence = dialogue_sentence
 

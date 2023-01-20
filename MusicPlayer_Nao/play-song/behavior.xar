@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play Song" id="1" localization="8" tooltip="This box contains a Python script to play music. It  retrieves eventual missing parameters, and calls the play-music behavior to reproduce the requested song." x="167" y="74"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Play Song" id="1" localization="8" tooltip="This box contains a Python script to play music. It  retrieves eventual missing parameters, and calls the play-music behavior to reproduce the requested song." x="202" y="88"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import sys
 import qi
 import urllib2
 import re
@@ -24,8 +24,6 @@ class MyClass(GeneratedClass):
             self.language = "en"
         self.configuration = {"bodyLanguageMode": "contextual"}
 
-        self.memory.subscribeToEvent("TouchChanged", self.getName(), "onTouched")
-        self.isRunning = True
         self.audio_player_service = ALProxy("ALAudioPlayer")
         self.server_ip = self.memory.getData("CAIR/server_ip")
         self.music_port = self.memory.getData("CAIR/music_port")
@@ -37,11 +35,6 @@ class MyClass(GeneratedClass):
         self.al.setAutonomousAbilityEnabled("BasicAwareness", awareness)
         self.al.setAutonomousAbilityEnabled("ListeningMovement", listening)
         self.al.setAutonomousAbilityEnabled("SpeakingMovement", speaking)
-
-    def onTouched(self, strVarName, value):
-        self.logger.info("touched")
-        self.isRunning = False
-        self.audio_player_service.stopAll()
 
     def onLoad(self):
         pass
@@ -86,11 +79,10 @@ class MyClass(GeneratedClass):
         self.logger.info(file_length)
         currentPos = self.audio_player_service.getCurrentPosition(fileId)
 
-        while self.isRunning and abs(currentPos - file_length) > 1e-09:
+        while abs(currentPos - file_length) > 1e-09:
             currentPos = self.audio_player_service.getCurrentPosition(fileId)
 
         self.onInput_onStop()
-
 
         self.behavior_manager.runBehavior("musicplayer/play-music")
         while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
