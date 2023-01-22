@@ -8,6 +8,7 @@ import wikipedia
 import warnings
 import random
 
+
 class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
@@ -42,31 +43,22 @@ class MyClass(GeneratedClass):
         self.logger.info("Search on wiki: " + what)
         what = what.strip()
 
-        what_en = translate(what, 'en').encode("utf-8")
-        self.logger.info("english search: " + what_en)
-
         warnings.catch_warnings()
         warnings.simplefilter("ignore")
-        wikipedia.set_lang("en")
+        wikipedia.set_lang("it")
 
         try:
-            tmp = wikipedia.summary(what_en, sentences=1)
+            tmp = wikipedia.summary(what, sentences=1)
             res = re.sub(r"\(.*?\)", "", tmp).replace(")", "").encode('utf-8')
-            translated_res = translate(res, 'it').encode("utf-8")
             if language == "it":
-                reply = "Ecco cosa ho trovato su Wikipedia riguardo " + str(what) + ". " + str(translated_res)
+                reply = "Ecco cosa ho trovato su Wikipedia riguardo " + str(what) + ". " + str(res)
             else:
                 reply = "Here's what I found on Wikipedia about " + str(what) + ". " + res
         except (wikipedia.DisambiguationError, wikipedia.exceptions.DisambiguationError) as e:
-            opt = random.choice(e.options)
-            opt_it = translate(opt, 'it').encode("utf-8")
-            self.logger.info(str(opt))
-            res = wikipedia.summary(opt, sentences=1).encode('utf-8')
-            translated_res = translate(res, 'it').encode("utf-8")
             if language == "it":
-                reply = "Ecco cosa ho trovato su Wikipedia riguardo " + str(opt_it) + ". " + str(translated_res)
+                reply = "Mi dispiace, ho trovato molti risultati riguardanti " + str(what) + " su Wikipedia. Prova a chiedermelo di nuovo cercando di essere più specifico."
             else:
-                reply = "Here's what I found on Wikipedia about " + str(opt) + ". " + res
+                reply = "I'm sorry, I found many results regardin " + str(what) + " on Wikipedia. Try being more specific."
 
         except wikipedia.exceptions.PageError:
             if language == "it":
