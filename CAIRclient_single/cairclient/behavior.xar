@@ -29,6 +29,7 @@ music_port = "5003"
 request_uri = "http://" + cineca_ip + ":" + port + "/CAIR_hub"
 
 language = "it"
+gender = "f"
 
 
 class MyClass(GeneratedClass):
@@ -283,6 +284,10 @@ class MyClass(GeneratedClass):
                 # If there is an intent reply, it means that something has been matched by the Plan manager service
                 if plan_sentence:
                     self.logger.info(str(plan_sentence))
+                    if gender == "f":
+                        plan_sentence = plan_sentence.replace("ə", "a")
+                    else:
+                        plan_sentence = plan_sentence.replace("ə", "o")
                     # Say the plan sentence
                     self.animated_speech.say(self.voice_speed + str(plan_sentence), self.configuration)
 
@@ -303,7 +308,11 @@ class MyClass(GeneratedClass):
 
                 # Say the dialogue sentence
                 self.logger.info(str(dialogue_sentence))
-                dialogue_sentence = dialogue_sentence.replace("ə", "")
+                if gender == "f":
+                    dialogue_sentence = dialogue_sentence.replace("ə", "a")
+                else:
+                    dialogue_sentence = dialogue_sentence.replace("ə", "o")
+
                 self.animated_speech.say(self.voice_speed + str(dialogue_sentence), self.configuration)
                 self.previous_sentence = dialogue_sentence
 
