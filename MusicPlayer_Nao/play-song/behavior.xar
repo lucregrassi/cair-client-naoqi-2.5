@@ -84,10 +84,6 @@ class MyClass(GeneratedClass):
         while abs(currentPos - file_length) > 1e-09:
             currentPos = self.audio_player_service.getCurrentPosition(fileId)
 
-        self.behavior_manager.runBehavior("musicplayer/play-music")
-        while self.behavior_manager.isBehaviorRunning("musicplayer/play-music"):
-            pass
-
         self.memory.removeData("CAIR/song_title")
         self.onInput_onStop()
 

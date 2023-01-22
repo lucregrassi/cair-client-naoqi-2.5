@@ -55,11 +55,9 @@ class MyClass(GeneratedClass):
         self.memory.insertData("CAIR/music_port", str(music_port))
 
         self.logger.info("Setting voice speed")
-        try:
-            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
-        except:
-            self.memory.insertData("CAIR/voice_speed", 85)
-            self.voice_speed = "\\RSPD=85\\"
+
+        self.memory.insertData("CAIR/voice_speed", 85)
+        self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
 
         # Initialize socket and try to connec
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
