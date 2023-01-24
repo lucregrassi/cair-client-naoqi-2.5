@@ -66,23 +66,26 @@ class MyClass(GeneratedClass):
         self.animated_speech.say(self.voice_speed + wait_str, self.configuration)
         text = text.replace(" ", "+")
 
-        response = requests.put(self.request_uri + str(text), verify=False)
-        encoded_string = response.json()['mp3']
-        wav_file = open(self.app_path + '/song.mp3', 'wb')
-        decoded_string = base64.b64decode(encoded_string)
-        wav_file.write(decoded_string)
+        try:
+            response = requests.put(self.request_uri + str(text), verify=False)
+            encoded_string = response.json()['mp3']
+            wav_file = open(self.app_path + '/song.mp3', 'wb')
+            decoded_string = base64.b64decode(encoded_string)
+            wav_file.write(decoded_string)
 
-        self.animated_speech.say(self.voice_speed + start_str, self.configuration)
+            self.animated_speech.say(self.voice_speed + start_str, self.configuration)
 
-        fileId = self.audio_player_service.loadFile(self.app_path + "/song.mp3")
-        self.logger.info(fileId)
-        self.audio_player_service.play(fileId)
-        file_length = self.audio_player_service.getFileLength(fileId)
-        self.logger.info(file_length)
-        currentPos = self.audio_player_service.getCurrentPosition(fileId)
-
-        while abs(currentPos - file_length) > 1e-09:
+            fileId = self.audio_player_service.loadFile(self.app_path + "/song.mp3")
+            self.logger.info(fileId)
+            self.audio_player_service.play(fileId)
+            file_length = self.audio_player_service.getFileLength(fileId)
+            self.logger.info(file_length)
             currentPos = self.audio_player_service.getCurrentPosition(fileId)
+
+            while abs(currentPos - file_length) > 1e-09:
+                currentPos = self.audio_player_service.getCurrentPosition(fileId)
+        except:
+            self.animated_speech.say(self.voice_speed + "Mi dispiace, in questo momento non riesco a riprodurre la canzone che mi hai chiesto.", self.configuration)
 
         self.memory.removeData("CAIR/song_title")
         self.onInput_onStop()
