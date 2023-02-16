@@ -63,6 +63,7 @@ class MyClass(GeneratedClass):
         else:
             wait_str = "Give me a moment. I'm looking for the song. Please, be patient, it may take a while."
             start_str = "Here is the song you asked fror!"
+        self.logger.info(wait_str)
         self.animated_speech.say(self.voice_speed + wait_str, self.configuration)
         text = text.replace(" ", "+")
 

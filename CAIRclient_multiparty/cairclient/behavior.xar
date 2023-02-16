@@ -315,7 +315,12 @@ class MyClass(GeneratedClass):
                         for prof_id in speakers_info:
                             if prof_id in plan_sentence:
                                 plan_sentence = plan_sentence.replace("$" + prof_id, speakers_info[prof_id]["name"])
-                    # Say the plan sentence
+                    # Replace schwa in plan sentence and say it
+                    if "ə" in plan_sentence:
+                        if gender == "f":
+                            plan_sentence = plan_sentence.replace("ə", "a")
+                        elif gender == "m":
+                            plan_sentence = plan_sentence.replace("ə", "o")
                     self.animated_speech.say(self.voice_speed + str(plan_sentence), self.configuration)
 
                 # If there is a plan, execute it (if the behavior is installed)

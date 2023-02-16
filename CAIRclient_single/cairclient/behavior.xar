@@ -20,7 +20,7 @@ from cairlib_single.CAIRclient_SoftBank_actions import ActionManager
 from cairlib_single.CAIRclient_SoftBank_utils import Utils
 
 cineca_ip = "131.175.205.146"
-local = "130.251.13.104"
+local = "130.251.13.120"
 
 server_ip = cineca_ip
 audio_recorder_ip = local
@@ -81,6 +81,8 @@ class MyClass(GeneratedClass):
 
         self.dialogue_state_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
                                         "dialogue_state.json"
+        self.response_times_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "response_times.txt"
 
         # To store the previous sentence said by the robot
         self.previous_sentence = ""
@@ -178,6 +180,7 @@ class MyClass(GeneratedClass):
             sentence_type = dialogue_state["sentence_type"]
             self.client_socket.send(sentence_type.encode("utf-8"))
             sentence = self.client_socket.recv(1024).decode('utf-8')
+            start_time = time.time()
 
             if sentence == "":
                 if language == "it":
@@ -312,6 +315,11 @@ class MyClass(GeneratedClass):
                     dialogue_sentence = dialogue_sentence.replace("ə", "a")
                 else:
                     dialogue_sentence = dialogue_sentence.replace("ə", "o")
+
+                end_time = time.time()
+                # Save the response time in the file
+                with open(self.response_times_file_path, 'a') as f:
+                    f.write(str(end_time - start_time) + "\n")
 
                 self.animated_speech.say(self.voice_speed + str(dialogue_sentence), self.configuration)
                 self.previous_sentence = dialogue_sentence

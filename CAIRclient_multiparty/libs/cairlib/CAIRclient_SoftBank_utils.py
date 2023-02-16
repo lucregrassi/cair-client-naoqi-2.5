@@ -142,7 +142,7 @@ class Utils(object):
 
         # ** STEP 3 ** Ask the gender to the user
         if self.language == "it":
-            to_say = "Per favore, dimmi quale pronome di genere devo usare quando parlo con te: femminile o maschile?"
+            to_say = "Per favore, dimmi se sei maschio o femmina."
         else:
             to_say = "Please, tell me which gender pronoun should I use when I talk with you: male, female or neutral?"
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
