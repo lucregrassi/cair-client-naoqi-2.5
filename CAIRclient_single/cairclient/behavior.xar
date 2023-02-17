@@ -280,6 +280,11 @@ class MyClass(GeneratedClass):
                     self.onInput_onStop()
                     exit(0)
 
+                end_time = time.time()
+                # Save the response time in the file
+                with open(self.response_times_file_path, 'a') as f:
+                    f.write(str(end_time - start_time) + "\n")
+
                 plan_sentence = hub_response.json()['plan_sentence']
                 plan = hub_response.json()['plan']
                 dialogue_sentence = hub_response.json()['dialogue_sentence']
@@ -315,11 +320,6 @@ class MyClass(GeneratedClass):
                     dialogue_sentence = dialogue_sentence.replace("ə", "a")
                 else:
                     dialogue_sentence = dialogue_sentence.replace("ə", "o")
-
-                end_time = time.time()
-                # Save the response time in the file
-                with open(self.response_times_file_path, 'a') as f:
-                    f.write(str(end_time - start_time) + "\n")
 
                 self.animated_speech.say(self.voice_speed + str(dialogue_sentence), self.configuration)
                 self.previous_sentence = dialogue_sentence
