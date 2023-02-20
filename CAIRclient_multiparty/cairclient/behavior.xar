@@ -65,6 +65,9 @@ class MyClass(GeneratedClass):
                                        "speakers_info.json"
         self.dialogue_statistics_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
                                              "dialogue_statistics.json"
+        self.response_times_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "response_times.txt"
+
         # To store the previous sentence said by the robot
         self.previous_sentence = ""
         # This variable tells if the user want the robot to repeat a sentence
@@ -179,6 +182,7 @@ class MyClass(GeneratedClass):
             # Tell the audio recorder that the client is ready to receive the user reply
             self.client_socket.send(dialogue_state.sentence_type.encode("utf-8"))
             xml_string = self.client_socket.recv(1024).decode('utf-8')
+            start_time = time.time()
 
             if xml_string == "":
                 if language == "it":
@@ -307,6 +311,11 @@ class MyClass(GeneratedClass):
                                 dialogue_sentence_str.replace("$" + prof_id, speakers_info[prof_id]["name"])
 
                 self.logger.info(str(dialogue_sentence_str))
+
+                end_time = time.time()
+                # Save the response time in the file
+                with open(self.response_times_file_path, 'a') as f:
+                    f.write(str(end_time - start_time) + "\n")
 
                 # If there is a plan sentence, it means that something has been matched by the Plan manager service
                 if plan_sentence:
