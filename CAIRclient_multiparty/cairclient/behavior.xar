@@ -22,15 +22,19 @@ import json
 import socket
 import zlib
 
-ip = "192.168.1.101"
+ip = "130.251.13.107"
+cineca = "131.175.205.146"
 server_ip = ip
 audio_recorder_ip = ip
 registration_ip = ip
-port = "5000"
+openai = False
+if openai:
+    port = "5005"
+else:
+    port = "5000"
 request_uri = "http://" + server_ip + ":" + port + "/CAIR_hub"
 
 language = "it"
-min_registered_users_number = 4
 
 
 class MyClass(GeneratedClass):
@@ -85,8 +89,8 @@ class MyClass(GeneratedClass):
 
         self.logger.info("Setting voice speed")
         try:
-            self.voice_speed = "\\RSPD=85\\"
-            self.memory.insertData("CAIR/voice_speed", 85)
+            self.voice_speed = "\\RSPD=95\\"
+            self.memory.insertData("CAIR/voice_speed", 95)
             # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.memory.insertData("CAIR/voice_speed", 100)
@@ -136,13 +140,9 @@ class MyClass(GeneratedClass):
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
             welcome_sentence_str = self.utils.acquire_initial_state()
-            if language == "it":
-                welcome_msg = "Benvenuti! "
-            else:
-                welcome_msg = "Welcome, it's nice to meet you! "
-            self.logger.info(welcome_msg + str(welcome_sentence_str))
+            self.logger.info(str(welcome_sentence_str))
             self.animated_speech.say(self.voice_speed + welcome_msg + str(welcome_sentence_str), self.configuration)
-            self.previous_sentence = welcome_msg + welcome_sentence_str
+            self.previous_sentence = welcome_sentence_str
         else:
             self.logger.info("Users are already present in the info file")
             if language == "it":
@@ -207,7 +207,7 @@ class MyClass(GeneratedClass):
             dialogue_turn = DialogueTurn(xml_string)
 
             # Update the dialogue statistics only if the required minimum number of users is registered
-            if len(dialogue_statistics.mapping_index_speaker) > min_registered_users_number:
+            if len(dialogue_statistics.mapping_index_speaker) > 1:
                 dialogue_statistics.update_statistics(dialogue_turn, prev_turn_last_speaker)
 
                 # Update content of the speaker stats file after having updated them after someone talked
@@ -255,10 +255,16 @@ class MyClass(GeneratedClass):
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat:
+                # Copy the speakers info in a dictionary that does not contain the names
+                # This is needed by OpenAI as it should know the gender.
+                speakers_info_no_names = {}
+                for speaker_id in speakers_info:
+                    speakers_info_no_names[speaker_id] = {"gender": speakers_info[speaker_id]["gender"]}
+
                 # Compose the payload of the message to be sent to the server
                 data = {"client_sentence": xml_string, "dialogue_state": dialogue_state.to_dict(),
-                        "dialogue_statistics": dialogue_statistics.to_dict(), "prev_speaker_info":
-                            {"id": prev_turn_last_speaker, "topic": prev_speaker_topic}}
+                        "dialogue_statistics": dialogue_statistics.to_dict(), "speakers_info": speakers_info_no_names,
+                        "prev_speaker_info": {"id": prev_turn_last_speaker, "topic": prev_speaker_topic}}
 
                 # Update the info about id and topic of previous speaker to the current one
                 prev_turn_last_speaker = dialogue_turn.turn_pieces[-1].profile_id
@@ -289,17 +295,6 @@ class MyClass(GeneratedClass):
                 plan_sentence = hub_response.json()['plan_sentence']
                 plan = hub_response.json()['plan']
                 dialogue_sentence = hub_response.json()['dialogue_sentence']
-
-                # Loop over the elements of the list containing the pieces of the sentence along with their type
-                for elem in dialogue_sentence:
-                    gender = speakers_info[elem[2]]["gender"]
-                    if "$" in elem[1]:
-                        elem[1] = elem[1].replace("$" + elem[2], speakers_info[elem[2]]["name"])
-                    if "ə" in elem[1]:
-                        if gender == "f":
-                            elem[1] = elem[1].replace("ə", "a")
-                        elif gender == "m":
-                            elem[1] = elem[1].replace("ə", "o")
 
                 dialogue_sentence_str = self.utils.compose_sentence(dialogue_sentence)
                 # Substitute the speaker name in place of the user id

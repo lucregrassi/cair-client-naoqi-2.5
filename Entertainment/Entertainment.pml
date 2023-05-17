@@ -12,7 +12,6 @@
         <File name="elephant" src="entertainment/elephant.ogg" />
         <File name="mikhael-landscape-paisaje" src="entertainment/sounds/mikhael-landscape-paisaje.ogg" />
         <File name="vacuum1" src="entertainment/vacuum1.ogg" />
-        <File name="heaven1" src="entertainment/behavior_1/heaven1.ogg" />
         <File name="camera1" src="entertainment/camera1.ogg" />
         <File name="epicsax" src="entertainment/epicsax.ogg" />
         <File name="Britney Spears  Gimme More" src="Britney Spears  Gimme More.mp3" />
