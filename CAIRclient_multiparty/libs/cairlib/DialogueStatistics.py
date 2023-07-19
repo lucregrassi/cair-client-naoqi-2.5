@@ -35,7 +35,6 @@ class DialogueStatistics:
 
     # This method updates the statistics based on who spoke in the last turn
     def update_statistics(self, dialogue_turn, prev_turn_last_speaker):
-        print("Updating dialogue statistics")
         for i, turn_piece in enumerate(dialogue_turn.turn_pieces):
             profile_id = turn_piece.profile_id
             # Do not consider generic user in the moving window

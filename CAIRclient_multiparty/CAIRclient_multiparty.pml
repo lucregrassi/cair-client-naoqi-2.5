@@ -47,6 +47,7 @@
         <File name="SpeakerInfo" src="libs/cairlib/SpeakerInfo.py" />
         <File name="__init__" src="libs/cairlib/__init__.py" />
         <File name="DialogueSentencePiece" src="libs/cairlib/DialogueSentencePiece.py" />
+        <File name="Utils" src="libs/cairlib/Utils.py" />
     </Resources>
     <Topics />
     <IgnoredPaths />

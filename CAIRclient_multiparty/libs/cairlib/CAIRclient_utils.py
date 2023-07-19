@@ -27,10 +27,9 @@ class Utils:
 
     # This method performs a GET request to the cloud to get the initial sentence and the dialogue state that will be used
     # for all the speakers. Then, it initializes the speakers stats and speakers info data for the unknown speaker
-    def acquire_initial_state(self):
+    def acquire_initial_state(self, language):
         # Try to contact the server and retry until the dialogue state is received
         resp = requests.get(self.request_uri, verify=False)
-        print(resp)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
     
@@ -78,18 +77,7 @@ class Utils:
         with open("dialogue_statistics.json", 'w') as f:
             json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
     
-        # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
-        user_gender = new_speaker_info.gender.translate(str.maketrans('', '', string.punctuation)).lower()
-        female_list = ["female", "femmina", "femminile", "donna"]
-        male_list = ["male", "maschio", "maschile", "uomo"]
-        if any(word in user_gender for word in female_list):
-            user_gender = "f"
-        elif any(word in user_gender for word in male_list):
-            user_gender = "m"
-        else:
-            user_gender = "nb"
-    
-        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": user_gender}
+        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": new_speaker_info.gender}
         with open("speakers_info.json", 'w') as f:
             json.dump(speakers_info, f, ensure_ascii=False, indent=4)
     
@@ -121,7 +109,8 @@ class Utils:
         print(to_say)
         client_registration_socket.send(b"new_profile_gender")
         new_profile_gender = client_registration_socket.recv(256).decode('utf-8')
-    
+        print("RECEIVED GENDER:", new_profile_gender)
+        
         # ** STEP 4 ** Ask the user to talk for 20 seconds
         if self.language == "it":
             to_say = "S: Per favore, parla per 20 secondi in modo che io possa imparare a riconoscere la tua voce."

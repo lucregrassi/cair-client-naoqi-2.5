@@ -22,16 +22,13 @@ import json
 import socket
 import zlib
 
-ip = "130.251.13.107"
+ip = "130.251.13.120"
 cineca = "131.175.205.146"
-server_ip = ip
+server_ip = cineca
 audio_recorder_ip = ip
 registration_ip = ip
 openai = False
-if openai:
-    port = "5005"
-else:
-    port = "5000"
+port = "5000"
 request_uri = "http://" + server_ip + ":" + port + "/CAIR_hub"
 
 language = "it"
@@ -89,8 +86,8 @@ class MyClass(GeneratedClass):
 
         self.logger.info("Setting voice speed")
         try:
-            self.voice_speed = "\\RSPD=95\\"
-            self.memory.insertData("CAIR/voice_speed", 95)
+            self.voice_speed = "\\RSPD=85\\"
+            self.memory.insertData("CAIR/voice_speed", 85)
             # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.memory.insertData("CAIR/voice_speed", 100)
@@ -99,7 +96,7 @@ class MyClass(GeneratedClass):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.audio_device = ALProxy("ALAudioDevice")
-        self.audio_device.setOutputVolume(60)
+        self.audio_device.setOutputVolume(50)
 
 
     def onInput_onStart(self):
@@ -141,7 +138,7 @@ class MyClass(GeneratedClass):
             # with the info of a generic user
             welcome_sentence_str = self.utils.acquire_initial_state()
             self.logger.info(str(welcome_sentence_str))
-            self.animated_speech.say(self.voice_speed + welcome_msg + str(welcome_sentence_str), self.configuration)
+            self.animated_speech.say(self.voice_speed + str(welcome_sentence_str), self.configuration)
             self.previous_sentence = welcome_sentence_str
         else:
             self.logger.info("Users are already present in the info file")
@@ -228,7 +225,7 @@ class MyClass(GeneratedClass):
             if any(exit_sent in sentence for exit_sent in self.exit_keywords):
                 self.isAlive = False
                 if language == "it":
-                    goodbye_msg = "Ok, è stato un piacere parlare con voi! A presto!"
+                    goodbye_msg = "Ok, è stato bello passare del tempo insieme! A presto!"
                 else:
                     goodbye_msg = "Ok, it was a pleasure talking with you! Goodbye."
                 self.animated_speech.say(self.voice_speed + goodbye_msg, self.configuration)

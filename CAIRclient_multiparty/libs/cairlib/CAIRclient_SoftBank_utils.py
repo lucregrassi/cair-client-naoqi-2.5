@@ -104,18 +104,7 @@ class Utils(object):
         with open(self.dialogue_statistics_file_path, 'w') as f:
             json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
 
-        # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
-        user_gender = ''.join(c for c in new_speaker_info.gender if c not in string.punctuation).lower()
-        female_list = ["female", "femmina", "femminile", "donna"]
-        male_list = ["male", "maschio", "maschile", "uomo"]
-        if any(word in user_gender for word in female_list):
-            user_gender = "f"
-        elif any(word in user_gender for word in male_list):
-            user_gender = "m"
-        else:
-            user_gender = "nb"
-
-        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": user_gender}
+        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": new_speaker_info.gender}
         with open(self.speakers_info_file_path, 'w') as f:
             json.dump(speakers_info, f, ensure_ascii=False, indent=4)
 
@@ -142,7 +131,7 @@ class Utils(object):
 
         # ** STEP 3 ** Ask the gender to the user
         if self.language == "it":
-            to_say = "Per favore, dimmi se sei maschio o femmina."
+            to_say = "Per favore, dimmi quale pronome di genere devo usare quando parlo con te: femminile o maschile?"
         else:
             to_say = "Please, tell me which gender pronoun should I use when I talk with you: male, female or neutral?"
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
