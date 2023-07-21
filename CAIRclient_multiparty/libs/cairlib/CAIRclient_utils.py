@@ -8,13 +8,36 @@ import string
 
 
 class Utils:
-    def __init__(self, language, server_ip, registration_ip, port):
+    def __init__(self, language, server_ip, registration_ip):
         self.language = language
         self.server_ip = server_ip
         self.registration_ip = registration_ip
-        self.port = port
-        self.request_uri = "http://" + self.server_ip + ":" + self.port + "/CAIR_hub"
         
+    def replace_schwa(self, sentence):
+        # Loop over the elements of the list containing the pieces of the sentence along with their type to replace
+        # names and, eventually, schwas
+        for elem in sentence:
+            gender = self.speakers_info[elem[2]]["gender"]
+            if "$" in elem[1]:
+                elem[1] = elem[1].replace("$" + elem[2], self.speakers_info[elem[2]]["name"])
+            if "ə" in elem[1]:
+                if gender == "f":
+                    elem[1] = elem[1].replace("ə", "a")
+                elif gender == "m":
+                    elem[1] = elem[1].replace("ə", "o")
+                else:
+                    elem[1] = elem[1].replace("ə", "")
+        return sentence
+
+    def replace_speaker_name(self, sentence):
+        # Substitute the speaker name in place of the user id
+        # The reply of the Dialogue Manager should never be empty
+        if "$" in sentence:
+            for prof_id in self.speakers_info:
+                if prof_id in sentence:
+                    sentence = sentence.replace("$" + prof_id, self.speakers_info[prof_id]["name"])
+        return sentence
+
     def compose_sentence(self, sentence_pieces):
         sentence = ""
         # print(sentence_pieces)
@@ -27,9 +50,10 @@ class Utils:
 
     # This method performs a GET request to the cloud to get the initial sentence and the dialogue state that will be used
     # for all the speakers. Then, it initializes the speakers stats and speakers info data for the unknown speaker
-    def acquire_initial_state(self, language):
+    def acquire_initial_state(self):
         # Try to contact the server and retry until the dialogue state is received
-        resp = requests.get(self.request_uri, verify=False)
+        resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+        print(resp)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
     
@@ -38,7 +62,7 @@ class Utils:
             print("S: Waiting for the CAIR server to provide the dialogue state...")
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
-                resp = requests.get(self.request_uri, verify=False)
+                resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)
         # Store the dialogue state in the corresponding file
@@ -77,7 +101,18 @@ class Utils:
         with open("dialogue_statistics.json", 'w') as f:
             json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
     
-        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": new_speaker_info.gender}
+        # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
+        user_gender = new_speaker_info.gender.translate(str.maketrans('', '', string.punctuation)).lower()
+        female_list = ["female", "femmina", "femminile", "donna"]
+        male_list = ["male", "maschio", "maschile", "uomo"]
+        if any(word in user_gender for word in female_list):
+            user_gender = "f"
+        elif any(word in user_gender for word in male_list):
+            user_gender = "m"
+        else:
+            user_gender = "nb"
+    
+        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": user_gender}
         with open("speakers_info.json", 'w') as f:
             json.dump(speakers_info, f, ensure_ascii=False, indent=4)
     
@@ -109,8 +144,7 @@ class Utils:
         print(to_say)
         client_registration_socket.send(b"new_profile_gender")
         new_profile_gender = client_registration_socket.recv(256).decode('utf-8')
-        print("RECEIVED GENDER:", new_profile_gender)
-        
+    
         # ** STEP 4 ** Ask the user to talk for 20 seconds
         if self.language == "it":
             to_say = "S: Per favore, parla per 20 secondi in modo che io possa imparare a riconoscere la tua voce."

@@ -14,15 +14,13 @@ import string
 class Utils(object):
     def __init__(self, logger):
         super(Utils, self).__init__()
-        self.memory = ALProxy("ALMemory")
         self.logger = logger
+        self.memory = ALProxy("ALMemory")
         self.language = self.memory.getData("CAIR/language")
         self.server_ip = self.memory.getData("CAIR/server_ip")
-        self.server_port = self.memory.getData("CAIR/server_port")
         self.registration_ip = self.memory.getData("CAIR/registration_ip")
         self.app_name = self.memory.getData("CAIR/app_name")
         self.al = ALProxy("ALAutonomousLife")
-        
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.dialogue_state_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + self.app_name + \
@@ -54,14 +52,25 @@ class Utils(object):
                 else:
                     elem[1] = elem[1].replace("ə", "")
         return sentence
+
+    def replace_schwa_in_string(self, sentence, speakers_info, current_speaker_id):
+        if "ə" in sentence:
+            if speakers_info[current_speaker_id]["gender"] == "f":
+                schwa_replacement = "a"
+            elif speakers_info[current_speaker_id]["gender"] == "m":
+                schwa_replacement = "o"
+            else:
+                schwa_replacement = ""
+            sentence = sentence.replace("ə", schwa_replacement)
+        return sentence
     
-    def replace_speaker_name(self, sentence, speakers_info):
+    def replace_speaker_name(self, sentence):
         # Substitute the speaker name in place of the user id
         # The reply of the Dialogue Manager should never be empty
         if "$" in sentence:
-            for prof_id in speakers_info:
+            for prof_id in self.speakers_info:
                 if prof_id in sentence:
-                    sentence = sentence.replace("$" + prof_id, speakers_info[prof_id]["name"])
+                    sentence = sentence.replace("$" + prof_id, self.speakers_info[prof_id]["name"])
         return sentence
     
     def setAutonomousAbilities(self, blinking, background, awareness, listening, speaking):
@@ -86,7 +95,7 @@ class Utils(object):
     def acquire_initial_state(self):
         # Registration of the first "unknown" user
         # Try to contact the server
-        resp = requests.get("http://" + self.server_ip + ":" + self.server_port + "/CAIR_hub", verify=False)
+        resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
 
@@ -95,7 +104,7 @@ class Utils(object):
             self.animated_speech.say(self.voice_speed + "I'm waiting for the server...", self.configuration)
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
-                resp = requests.get("http://" + self.server_ip + ":" + self.server_port + "/CAIR_hub", verify=False)
+                resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)
         # Store the dialogue state in the corresponding file

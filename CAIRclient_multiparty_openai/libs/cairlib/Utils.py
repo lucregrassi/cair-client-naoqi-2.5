@@ -16,13 +16,13 @@ class Utils:
     def __init__(self):
         pass
 
-    def replace_schwa(self, sentence):
+    def replace_schwa(self, sentence, speakers_info):
         # Loop over the elements of the list containing the pieces of the sentence along with their type to replace
         # names and, eventually, schwas
         for elem in sentence:
-            gender = self.speakers_info[elem[2]]["gender"]
+            gender = speakers_info[elem[2]]["gender"]
             if "$" in elem[1]:
-                elem[1] = elem[1].replace("$" + elem[2], self.speakers_info[elem[2]]["name"])
+                elem[1] = elem[1].replace("$" + elem[2], speakers_info[elem[2]]["name"])
             if "ə" in elem[1]:
                 if gender == "f":
                     elem[1] = elem[1].replace("ə", "a")
@@ -32,7 +32,7 @@ class Utils:
                     elem[1] = elem[1].replace("ə", "")
         return sentence
 
-    def replace_schwa_in_string(self, sentence):
+    def replace_schwa_in_string(self, sentence, speakers_info, current_speaker_id):
         if "ə" in sentence:
             if speakers_info[current_speaker_id]["gender"] == "f":
                 schwa_replacement = "a"
