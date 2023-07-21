@@ -14,15 +14,14 @@ import string
 class Utils(object):
     def __init__(self, logger):
         super(Utils, self).__init__()
-        self.memory = ALProxy("ALMemory")
         self.logger = logger
+        self.memory = ALProxy("ALMemory")
         self.language = self.memory.getData("CAIR/language")
         self.server_ip = self.memory.getData("CAIR/server_ip")
-        self.server_port = self.memory.getData("CAIR/server_port")
         self.registration_ip = self.memory.getData("CAIR/registration_ip")
         self.app_name = self.memory.getData("CAIR/app_name")
+        self.server_port = self.memory.getData("CAIR/server_port")
         self.al = ALProxy("ALAutonomousLife")
-        
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.dialogue_state_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + self.app_name + \
@@ -39,13 +38,19 @@ class Utils(object):
             self.memory.insertData("CAIR/voice_speed", 80)
             self.voice_speed = "\\RSPD=80\\"
 
-    def replace_schwa(self, sentence):
+    def process_sentence(self, sentence, speakers_info):
+        sentence = self.replace_schwa(sentence, speakers_info)
+        sentence_str = self.compose_sentence(sentence)
+        sentence_str = self.replace_speaker_name(sentence_str, speakers_info)
+        return sentence_str
+        
+    def replace_schwa(self, sentence, speakers_info):
         # Loop over the elements of the list containing the pieces of the sentence along with their type to replace
         # names and, eventually, schwas
         for elem in sentence:
-            gender = self.speakers_info[elem[2]]["gender"]
+            gender = speakers_info[elem[2]]["gender"]
             if "$" in elem[1]:
-                elem[1] = elem[1].replace("$" + elem[2], self.speakers_info[elem[2]]["name"])
+                elem[1] = elem[1].replace("$" + elem[2], speakers_info[elem[2]]["name"])
             if "ə" in elem[1]:
                 if gender == "f":
                     elem[1] = elem[1].replace("ə", "a")
@@ -54,7 +59,18 @@ class Utils(object):
                 else:
                     elem[1] = elem[1].replace("ə", "")
         return sentence
-    
+
+    def replace_schwa_in_string(self, sentence, speakers_info, current_speaker_id):
+        if "ə" in sentence:
+            if speakers_info[current_speaker_id]["gender"] == "f":
+                schwa_replacement = "a"
+            elif speakers_info[current_speaker_id]["gender"] == "m":
+                schwa_replacement = "o"
+            else:
+                schwa_replacement = ""
+            sentence = sentence.replace("ə", schwa_replacement)
+        return sentence
+
     def replace_speaker_name(self, sentence, speakers_info):
         # Substitute the speaker name in place of the user id
         # The reply of the Dialogue Manager should never be empty

@@ -89,7 +89,7 @@ class MyClass(GeneratedClass):
         self.logger.info("Setting voice speed")
         try:
             self.voice_speed = "\\RSPD=100\\"
-            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+            # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
         except:
             self.memory.insertData("CAIR/voice_speed", 100)
             self.voice_speed = "\\RSPD=100\\"
