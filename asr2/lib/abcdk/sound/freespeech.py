@@ -75,7 +75,7 @@ class FreeSpeech():
         try:
             txt = str(txt)
         except BaseException, err:
-            logging.debug( "can't convert text to ascii?" )
+            logging.debug("can't convert text to ascii?")
             try:
                 txt = self.cleanText(txt)
             except:
