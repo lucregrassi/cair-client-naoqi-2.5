@@ -48,6 +48,8 @@
         <File name="__init__" src="libs/cairlib/__init__.py" />
         <File name="DialogueSentencePiece" src="libs/cairlib/DialogueSentencePiece.py" />
         <File name="Utils" src="libs/cairlib/Utils.py" />
+        <File name="sentences_it" src="sentences_it.txt" />
+        <File name="sentences_en" src="sentences_en.txt" />
     </Resources>
     <Topics />
     <IgnoredPaths />

@@ -22,8 +22,9 @@ import json
 import socket
 import zlib
 import threading
+import random
 
-ip = "192.168.1.51"
+ip = "130.251.13.168"
 cineca = "131.175.205.146"
 server_ip = ip
 audio_recorder_ip = ip
@@ -43,6 +44,15 @@ class MyClass(GeneratedClass):
         GeneratedClass.__init__(self)
         # Instances of the classes of the other files in the libs folder containing functions needed here
         self.memory = ALProxy("ALMemory")
+        self.logger.info("Setting voice speed")
+        try:
+            self.voice_speed = "\\RSPD=100\\"
+            self.memory.insertData("CAIR/voice_speed", 100)
+            # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        except:
+            self.memory.insertData("CAIR/voice_speed", 100)
+            self.voice_speed = "\\RSPD=100\\"
+
         self.memory.insertData("CAIR/server_ip", server_ip)
         self.memory.insertData("CAIR/server_port", server_port)
         self.memory.insertData("CAIR/registration_ip", registration_ip)
@@ -76,6 +86,16 @@ class MyClass(GeneratedClass):
         self.response_times_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
                                         "response_times.txt"
 
+        if language == "it":
+            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "sentences_it.txt"
+        else:
+            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "sentences_en.txt"
+        self.sentences = []
+        with open(sentences_file_path) as f:
+            self.sentences = [line.rstrip() for line in f]
+
         # This variable tells if the user want the robot to repeat a sentence
         self.repeat = False
 
@@ -86,18 +106,10 @@ class MyClass(GeneratedClass):
         except:
             self.tablet = False
 
-        self.logger.info("Setting voice speed")
-        try:
-            self.voice_speed = "\\RSPD=100\\"
-            self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
-        except:
-            self.memory.insertData("CAIR/voice_speed", 100)
-            self.voice_speed = "\\RSPD=100\\"
-
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.audio_device = ALProxy("ALAudioDevice")
-        self.audio_device.setOutputVolume(40)
+        self.audio_device.setOutputVolume(50)
 
         # To store the previous sentence said by the robot
         self.previous_sentence = ""
@@ -109,7 +121,7 @@ class MyClass(GeneratedClass):
         self.plan_sentence = ""
         self.plan = ""
 
-    def hub_request(self, data, req_type):
+    def hub_request(self, data):
         encoded_data = json.dumps(data).encode('utf-8')
         compressed_data = zlib.compress(encoded_data)
         hub_response = requests.put(request_uri, data=compressed_data, verify=False)
@@ -123,7 +135,7 @@ class MyClass(GeneratedClass):
                 json.dump(self.dialogue_state.to_dict(), f, ensure_ascii=False, indent=4)
             self.dialogue_sentence = hub_response.json()['dialogue_sentence']
 
-            if req_type == 1:
+            if data["req_type"] == 1:
                 self.dialogue_statistics = DialogueStatistics(d=hub_response.json()["dialogue_statistics"])
                 # The hub updates the average topic distance matrix, hence it should be written on the file
                 with open("dialogue_statistics.json", 'w') as f:
@@ -267,7 +279,7 @@ class MyClass(GeneratedClass):
                         repeat_msg = "Certamente. Ho detto: "
                     else:
                         repeat_msg = "Sure! I said: "
-                    self.animated_speech.say(self.voice_speed + repeat_msg + str(self.previous_sentence),
+                    self.animated_speech.say(self.voice_speed + repeat_msg + str(self.previous_sentence[1]),
                                              self.configuration)
                 else:
                     if language == "it":
@@ -278,17 +290,14 @@ class MyClass(GeneratedClass):
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat:
-                if language == "it":
-                    to_say = "Ok..."
-                else:
-                    to_say = "Ok..."
-                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-
                 # Copy the speakers info in a dictionary that does not contain the names
                 # This is needed by OpenAI as it should know the gender.
                 speakers_info_no_names = {}
                 for speaker_id in self.speakers_info:
                     speakers_info_no_names[speaker_id] = {"gender": self.speakers_info[speaker_id]["gender"]}
+
+                # Update prev topic
+                self.dialogue_state.prev_topic = self.dialogue_state.topic
 
                 # Compose the payload of the message to be sent to the server
                 data = {"req_type": 1, "client_sentence": xml_string, "dialogue_state": self.dialogue_state.to_dict(),
@@ -299,8 +308,22 @@ class MyClass(GeneratedClass):
                 prev_turn_last_speaker = dialogue_turn.turn_pieces[-1].profile_id
                 prev_speaker_topic = self.dialogue_state.topic
 
-                # Perform first request and save dialogue sentence so that it is not overwritten by the second request
-                self.hub_request(data, 1)
+                # Create the thread for the first request
+                req_thread = threading.Thread(target=self.hub_request, args=(data,))
+                req_thread.start()
+
+                # When using openAI say something to fill the void while waiting
+                if openai:
+                    to_say = str(random.choice(self.sentences))
+                    self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+
+                # Wait for the thread to finish
+                req_thread.join()
+
+                # Make a copy of the list so that the original is not modified
+                dialogue_sentence1 = self.dialogue_sentence
+                self.logger.info(str(dialogue_sentence1))
+                dialogue_sentence1_str = self.utils.process_sentence(dialogue_sentence1, self.speakers_info)
 
                 # If there is a plan sentence, it means that something has been matched by the Plan manager service
                 if self.plan_sentence:
@@ -329,27 +352,24 @@ class MyClass(GeneratedClass):
                         self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
                                                       "/apps/" + self.app_name + "/img/DialogueMode.png")
 
-                req_thread = threading.Thread(target=self.hub_request, args=(data, 2,))
+                data["req_type"] = 2
+                req_thread = threading.Thread(target=self.hub_request, args=(data,))
                 if openai:
-                    data["req_type"] = 2
                     data["dialogue_state"] = self.dialogue_state.to_dict()
                     # Create a thread that performs another request to get the continuation of the dialogue
                     req_thread.start()
-
-                # Make a copy of the list so that the original is not modified
-                dialogue_sentence1 = self.dialogue_sentence
-                self.logger.info(str(dialogue_sentence1))
-                dialogue_sentence1_str = self.utils.process_sentence(dialogue_sentence1, self.speakers_info)
-                self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
-
-                if openai:
+                    # Say the first part of the sentence while the second thread performs the request
+                    self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
                     req_thread.join()
                     dialogue_sentence2 = [self.dialogue_sentence[1]]
                     self.logger.info(str(dialogue_sentence2))
                     dialogue_sentence2_str = self.utils.process_sentence(dialogue_sentence2, self.speakers_info)
                     self.animated_speech.say(self.voice_speed + str(dialogue_sentence2_str), self.configuration)
+                else:
+                    self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
 
                 self.previous_sentence = self.dialogue_sentence
+                self.dialogue_state.prev_dialogue_sentence = self.dialogue_sentence
 
     def onUnload(self):
         pass

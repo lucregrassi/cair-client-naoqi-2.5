@@ -10,6 +10,7 @@ class ActionManager(object):
         super(ActionManager, self).__init__()
         self.logger = logger
         self.memory = ALProxy("ALMemory")
+        self.voice_speed = self.memory.getData("CAIR/voice_speed")
         self.server_ip = self.memory.getData("CAIR/server_ip")
         self.behavior_manager = ALProxy("ALBehaviorManager")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
