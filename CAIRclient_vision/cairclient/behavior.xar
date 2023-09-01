@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Python Script" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="257" y="70"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[#!usr/bin/python -tt
+# -*- coding: utf-8 -*-
+import qi
+from naoqi import ALProxy
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
+app_name = "cairclient_vision"
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/libs/")
+sys.path.append("/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/")
+from cairlib.DialogueTurn import DialogueTurn
+from cairlib.CAIRclient_SoftBank_utils import Utils
+from cairlib.CAIRclient_SoftBank_actions import ActionManager
+import xml.etree.ElementTree as ET
+import xml
+import requests
+import socket
+import base64
+import time
+import threading
+import random
+
+ip = "130.251.13.159" #server ip
+#cineca = "131.175.205.146"
+cineca = ip
+server_ip = cineca
+audio_recorder_ip = ip
+registration_ip = ip
+
+denseCap = True
+img_port = "5100"
+gpt_port = "5101"
+request_url_gpt = "http://" + server_ip + ":" + gpt_port + "/CAIR_hub_gpt"
+img_url=  "http://" + server_ip + ":" + img_port + "/process"
+language = "it"
+
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.memory = ALProxy("ALMemory")
+        self.memory.insertData("CAIR/language", language)
+        self.memory.insertData("CAIR/app_name", app_name)
+        self.memory.insertData("CAIR/server_ip", server_ip)
+        self.memory.insertData("CAIR/server_port", port)
+        self.memory.insertData("CAIR/registration_ip", registration_ip)
+        # Instances of the classes of the other files in the libs folder containing functions needed here
+        self.plans = ActionManager(self.logger.info)
+        self.utils = Utils(self.logger.info)
+        self.isAlive = True
+        self.exit_keywords = ["stop talking", "esci dallapp", "esci dallapplicazione", "quit the application"]
+        self.repeat_keywords = ["repeat", "can you repeat", "say it again", "puoi ripetere", "ripeti", "non ho capito"]
+        self.speech_reco_event = "Audio/RecognizedWords"
+        self.al = ALProxy("ALAutonomousLife")
+        self.motion = ALProxy("ALMotion")
+        self.bm = ALProxy("ALBackgroundMovement")
+        #"Starting BasicAwareness"############################################################
+        self.ba_service = ALProxy("ALBasicAwareness")
+        ############################################################################
+        self.tts = ALProxy("ALTextToSpeech")
+        if language == "it":
+            self.tts.setLanguage("Italian")
+            self.not_installed_behavior = "Mi dispiace, non sono ancora capace di svolgere questa azione perché l'applicazione non è installata."
+            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "sentences_it.txt"
+        elif language == "en":
+            self.tts.setLanguage("English")
+            self.not_installed_behavior = "I'm sorry, I am not able to perform this task as the application is not installed."
+            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "sentences_en.txt"
+        else:
+            self.tts.setLanguage("Chinese")
+            self.not_installed_behavior = "你好，我不能执行这个任务因为程序没有安装"
+            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "sentences_cn.txt"
+
+
+        self.sentences = []
+        with open(sentences_file_path) as f:
+            self.sentences = [line.rstrip() for line in f]
+
+        self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.tts = ALProxy("ALTextToSpeech")
+        self.configuration = {"bodyLanguageMode": "contextual"}
+        self.behavior_manager = ALProxy("ALBehaviorManager")
+        self.audio_device = ALProxy("ALAudioDevice")
+
+        # To store the previous sentence said by the robot
+        self.previous_sentence = ""
+        # This variable tells if the user want the robot to repeat a sentence
+        self.repeat = False
+
+        # Store the number of people in front of the robot, coming from the sensor readings
+        self.people = 0
+
+        self.logger.info("Trying to connect to ALTabletService...")
+        self.tablet = True
+        try:
+            self.tablet_service = ALProxy("ALTabletService")
+        except:
+            self.tablet = False
+
+        self.logger.info("Setting voice speed")
+        try:
+            self.voice_speed = "\\RSPD=95\\"
+            self.memory.insertData("CAIR/voice_speed", 95)
+            # self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
+        except:
+            self.memory.insertData("CAIR/voice_speed", 100)
+            self.voice_speed = "\\RSPD=100\\"
+        self.cap_start = False
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.audio_device = ALProxy("ALAudioDevice")
+        self.audio_device.setOutputVolume(60)
+        self.my_thread = threading.Thread(target=self.capture_image)
+        self.my_thread.start()
+        self.talking = ""
+        self.istalking = False
+        self.my_thread_talking = threading.Thread(target=self.quick_response)
+        self.my_thread_talking.start()
+
+    def quick_response(self):
+        while True:
+            if self.talking != "":
+                self.istalking = True
+                self.tts.say(self.voice_speed + self.talking)
+                self.istalking = False
+                self.talking = ""
+            time.sleep(0.5)
+
+    def capture_image(self):
+        IP = "127.0.0.1"
+        PORT = 9559
+        self.cap_start = True
+        # Create a proxy to ALPhotoCapture
+        try:
+          photoCaptureProxy = ALProxy("ALPhotoCapture", IP, PORT)
+          # Maximum 4 minimum 1
+          photoCaptureProxy.setResolution(3)
+          photoCaptureProxy.setPictureFormat("jpg")
+        except Exception, e:
+          print "Error when creating ALPhotoCapture proxy:"
+          print str(e)
+          exit(1)
+
+        while True:
+            try:
+                if self.cap_start:
+                    photoCaptureProxy.takePictures(1, "/home/nao/recordings/cameras/", "my_camera_img", True)
+                    time.sleep(1)
+                    with open("/home/nao/recordings/cameras/my_camera_img.jpg", "rb") as img_file:
+                            # Encode your image with base64 and convert it to string
+                            img_encoded = base64.b64encode(img_file.read()).decode('utf-8')
+                        # Create a dictionary with the encoded image
+                    data = {"frame": img_encoded}
+                    # Send the image to the server using a POST request
+                    response = requests.post(img_url, json=data)
+                    # Print the server's response
+                    print(response.json())
+                    # Open your image in binary mode
+                else :
+                    time.sleep(1)
+            except :
+                raise MemoryError("read image failed")
+
+    def onInput_onStart(self):
+        # Try connecting to the socket that records the audio
+        self.logger.info("Trying to connect to the audio recorder socket.")
+        try:
+            self.client_socket.connect((audio_recorder_ip, 9090))
+        except:
+            if language == "it":
+                to_say = "Mi dispiace, non riesco a connettermi al microfono esterno. Controlla l'indirizzo I P e riprova."
+            else:
+                to_say = "I'm sorry, I can't connect to external microphone. Check the IP address and try again."
+            self.tts.say(self.voice_speed + to_say)
+            self.onInput_onStop()
+        try:
+            if self.al.getState() != "disabled":
+                self.al.setState("disabled")
+        except:
+            pass
+
+        # Wake the robot up if not already up
+        self.motion.wakeUp()
+        #self.ba_service.setEnabled(False)
+        #self.bm.setEnabled(False)
+        #self.ba_service.setEngagementMode("Unengaged")
+        self.cap_start = True
+        #self.ba_service.pauseAwareness()
+        # With Pepper robot, preload the images to be set on the tablet during the conversation
+
+        if self.tablet:
+            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
+                                             "/apps/" + app_name + "/img/DialogueMode.png")
+            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
+                                          "/apps/" + app_name + "/img/DialogueMode.png")
+
+        if denseCap:
+#                start_conv = "Please, using your visual ability, greet the user in front of you, then select something interesting from what you see to initiate a conversation. And the subsequent conversation will be conducted in English.There's no need to respond to this sentence, just do what I'm asking you to do now. "
+            start_conv = "start"
+            if language =="it":
+#                    start_conv = "Per favore, utilizzando la tua capacità visiva, saluta l'utente di fronte a te, poi seleziona qualcosa di interessante da ciò che vedi per iniziare una conversazione.E la conversazione successiva sarà condotta in Italiano. Non c'è bisogno di rispondere a questa frase, fai semplicemente quello che ti sto chiedendo di fare ora"
+                start_conv = "Inizio"
+            elif language =="cn":
+                #start_conv = "请结合给你的视觉能力，向眼前的用户打个招呼，然后从看到的东西中挑选出比较有趣的事物来直接向发起对话,并且后续对话以中文进行,不用对这句话做出任何回应，直接做我现在要求你做的事"
+                start_conv = "开始"
+
+            self.logger.info("*Performing request*")
+            hello_response = requests.put(request_url_gpt, data=start_conv, verify=False)
+            welcome_back_msg = str(hello_response.text)
+            self.tts.say(self.voice_speed + welcome_back_msg)
+
+        while self.isAlive:
+            self.logger.info("** Listening **")
+            # Tell the audio recorder that the client is ready to receive the user reply
+            self.client_socket.send("q".encode("utf-8"))
+            self.cap_start = True
+            xml_string = self.client_socket.recv(1024).decode('utf-8')
+
+            if xml_string == "":
+                if language == "it":
+                    to_say = "Mi dispiace, c'è stato qualche problema con la connessione al microfono esterno."
+                else:
+                    to_say = "I'm sorry, there was a problem with the connection to the external microphone."
+                self.tts.say(self.voice_speed + to_say)
+                self.onInput_onStop()
+
+            # Do not proceed until the xml string is complete and all tags are closed
+            proceed = False
+            while not proceed:
+                try:
+                    ET.ElementTree(ET.fromstring(xml_string))
+                    proceed = True
+                except xml.etree.ElementTree.ParseError:
+                    # If the xml is not complete, read again from the socket
+                    self.logger.info("The XML is not complete.")
+                    xml_string = xml_string + self.client_socket.recv(1024).decode('utf-8')
+
+            # Create a dialogue turn object starting from the xml
+            dialogue_turn = DialogueTurn(xml_string)
+            # Parse the xml string and extract the first sentence and the first speaker
+            tree = ET.ElementTree(ET.fromstring(xml_string))
+            sentence = tree.findall('profile_id')[0].text.strip('.,!?')
+            self.logger.info(str(sentence))
+            self.logger.info(str('Test dealing with densecap:'))
+
+            # Check if the user wants to exit or wants the robot to repeat the previous sentence
+            sentence = sentence.replace(".", "")
+            # Reset repeat to false, otherwise it will always repeat the previous sentence
+            self.repeat = False
+
+            # If the user said one of the "Exit Application keywords"
+            if any(exit_sent in sentence for exit_sent in self.exit_keywords):
+                self.isAlive = False
+                if language == "it":
+                    goodbye_msg = "Ok, è stato un piacere parlare con voi! A presto!"
+                else:
+                    goodbye_msg = "Ok, it was a pleasure talking with you! Goodbye."
+                self.tts.say(self.voice_speed + goodbye_msg)
+                self.memory.insertData(self.speech_reco_event, [])
+                self.onInput_onStop()
+                sys.exit(0)
+            # If the user said a Repeat keyword
+            elif sentence.lower() in self.repeat_keywords:
+                # If a previous sentence to repeat exists
+                if self.previous_sentence:
+                    self.repeat = True
+                    if language == "it":
+                        repeat_msg = "Certamente. Ho detto: "
+                    else:
+                        repeat_msg = "Sure! I said: "
+                    self.tts.say(self.voice_speed + repeat_msg + str(self.previous_sentence))
+                else:
+                    if language == "it":
+                        repeat_msg = "Mi dispiace, non ho niente da ripetere."
+                    else:
+                        repeat_msg = "I'm sorry, I have nothing to repeat."
+                    self.tts.say(self.voice_speed + repeat_msg)
+
+            # If the user did not ask to exit or to repeat something, send the sentence to the server
+            if not self.repeat:
+                if denseCap:
+                    self.cap_start = True
+                    self.logger.info("*Performing request*")
+                    self.talking = str(random.choice(self.sentences))
+                    sentence = str(sentence)
+                    self.logger.info(sentence)
+
+                    hub_response = requests.put(request_url_gpt, data=sentence, verify=False)
+                    self.logger.info(hub_response)
+                    while(self.istalking):
+                        time.sleep(0.1)
+                    self.tts.say(self.voice_speed + str(hub_response.text))
+                    continue
+
+    def onUnload(self):
+        pass
+
+    def onInput_onStop(self):
+        if self.tablet:
+            self.tablet_service.hideImage()
+        self.al.setState("interactive")
+        self.utils.setAutonomousAbilities(True, True, True, True, True)
+        # If present, delete the transformation - if the robot moves outside CAIR it is no more valid
+        try:
+            self.memory.removeData("CAIR/transformation_matrix")
+            self.memory.removeData("CAIR/theta")
+        except:
+            self.logger.info("No transformation to delete in memory.")
+            pass
+        self.onUnload()
+        self.onStopped()
+        sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

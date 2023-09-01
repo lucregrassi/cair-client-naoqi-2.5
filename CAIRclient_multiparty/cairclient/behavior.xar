@@ -361,8 +361,7 @@ class MyClass(GeneratedClass):
                     # Say the first part of the sentence while the second thread performs the request
                     self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
                     req_thread.join()
-                    dialogue_sentence2 = [self.dialogue_sentence[1]]
-                    self.logger.info(str(dialogue_sentence2))
+                    dialogue_sentence2 = self.dialogue_sentence[1:]
                     dialogue_sentence2_str = self.utils.process_sentence(dialogue_sentence2, self.speakers_info)
                     self.animated_speech.say(self.voice_speed + str(dialogue_sentence2_str), self.configuration)
                 else:
