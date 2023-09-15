@@ -50,6 +50,7 @@
         <File name="Utils" src="libs/cairlib/Utils.py" />
         <File name="sentences_it" src="sentences_it.txt" />
         <File name="sentences_en" src="sentences_en.txt" />
+        <File name="sentences_cn" src="sentences_cn.txt" />
     </Resources>
     <Topics />
     <IgnoredPaths />

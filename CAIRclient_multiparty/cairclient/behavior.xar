@@ -24,7 +24,7 @@ import zlib
 import threading
 import random
 
-ip = "130.251.13.168"
+ip = "130.251.13.130"
 cineca = "131.175.205.146"
 server_ip = ip
 audio_recorder_ip = ip
@@ -36,7 +36,7 @@ else:
     server_port = "5000"
 request_uri = "http://" + server_ip + ":" + server_port + "/CAIR_hub"
 
-language = "it"
+language = "en"
 
 
 class MyClass(GeneratedClass):
