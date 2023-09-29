@@ -8,17 +8,17 @@ import string
 
 
 class Utils:
-    def __init__(self, language, server_ip, registration_ip):
+    def __init__(self, language, port, server_ip, registration_ip):
         self.language = language
         self.server_ip = server_ip
         self.registration_ip = registration_ip
-        
+        self.port = port
+
     def process_sentence(self, sentence, speakers_info):
         sentence = self.replace_schwa(sentence, speakers_info)
         sentence_str = self.compose_sentence(sentence)
-        sentence_str = self.replace_speaker_name(sentence_str, speakers_info)
         return sentence_str
-        
+
     def replace_schwa(self, sentence, speakers_info):
         # Loop over the elements of the list containing the pieces of the sentence along with their type to replace
         # names and, eventually, schwas
@@ -69,39 +69,38 @@ class Utils:
     # for all the speakers. Then, it initializes the speakers stats and speakers info data for the unknown speaker
     def acquire_initial_state(self):
         # Try to contact the server and retry until the dialogue state is received
-        resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+        resp = requests.get("http://" + self.server_ip + ":" + self.port + "/CAIR_hub", verify=False)
         print(resp)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
-    
+
         # If the server is not up, continue trying until a response is received
         if not dialogue_state:
             print("S: Waiting for the CAIR server to provide the dialogue state...")
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
-                resp = requests.get("http://" + self.server_ip + ":5000/CAIR_hub", verify=False)
+                resp = requests.get("http://" + self.server_ip + ":" + self.port + "/CAIR_hub", verify=False)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)
         # Store the dialogue state in the corresponding file
         with open("dialogue_state.json", 'w') as f:
             json.dump(dialogue_state, f, ensure_ascii=False, indent=4)
-    
+
         profile_id = "00000000-0000-0000-0000-000000000000"
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
         with open("speakers_info.json", 'w') as f:
-            if language  == "it":
+            if self.language == "it":
                 user_name = "Utente"
             else:
                 user_name = "User"
-            json.dump({profile_id: {"name": user_name, "gender": 'nb'}},
+            json.dump({profile_id: {"name": user_name, "gender": 'nb', "age": "nd"}},
                       f, ensure_ascii=False, indent=4)
-    
+
         # Initialize dialogue statistics
         dialogue_statistics = DialogueStatistics(profile_id=profile_id)
         # Update the stats in the file
         with open("dialogue_statistics.json", 'w') as f:
             json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
-    
         return first_dialogue_sentence
 
     # This method updates the info and the statistics of the users when a new user registers
@@ -117,7 +116,7 @@ class Utils:
         # Update the stats in the file
         with open("dialogue_statistics.json", 'w') as f:
             json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
-    
+
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
         user_gender = new_speaker_info.gender.translate(str.maketrans('', '', string.punctuation)).lower()
         female_list = ["female", "femmina", "femminile", "donna"]
@@ -128,22 +127,24 @@ class Utils:
             user_gender = "m"
         else:
             user_gender = "nb"
-    
-        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": user_gender}
+
+        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": user_gender,
+                                                      "age": new_speaker_info.age}
         with open("speakers_info.json", 'w') as f:
             json.dump(speakers_info, f, ensure_ascii=False, indent=4)
-    
+
         return speakers_info, dialogue_statistics
-    
+
     # This function performs the registration of a new speaker on the Microsoft APIs
     def registration_procedure(self):
         # Establish a socket connection with the registration.py script
         client_registration_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_registration_socket.connect((self.registration_ip, 9091))
+
         # ** STEP 1 ** Create a new profile ID
         client_registration_socket.send(b"new_profile_id")
         new_profile_id = client_registration_socket.recv(256).decode('utf-8')
-    
+
         # ** STEP 2 ** Ask the name to the user
         if self.language == "it":
             to_say = "S: Per favore, dimmi come ti chiami."
@@ -152,7 +153,7 @@ class Utils:
         print(to_say)
         client_registration_socket.send(b"new_profile_name")
         new_profile_name = client_registration_socket.recv(256).decode('utf-8')
-    
+
         # ** STEP 3 ** Ask the gender to the user
         if self.language == "it":
             to_say = "Per favore, dimmi quale pronome di genere vuoi che usi quando parlo con te: femminile, maschile o neutro?"
@@ -161,8 +162,17 @@ class Utils:
         print(to_say)
         client_registration_socket.send(b"new_profile_gender")
         new_profile_gender = client_registration_socket.recv(256).decode('utf-8')
-    
-        # ** STEP 4 ** Ask the user to talk for 20 seconds
+
+        # ** STEP 4 ** Ask the age to the user
+        if self.language == "it":
+            to_say = "Per favore, dimmi quanti anni hai."
+        else:
+            to_say = "Please, tell your age."
+        print(to_say)
+        client_registration_socket.send(b"new_profile_age")
+        new_profile_age = client_registration_socket.recv(256).decode('utf-8')
+
+        # ** STEP 5 ** Ask the user to talk for 20 seconds
         if self.language == "it":
             to_say = "S: Per favore, parla per 20 secondi in modo che io possa imparare a riconoscere la tua voce."
         else:
@@ -178,7 +188,7 @@ class Utils:
         else:
             to_say = "S: Thank you for registering " + new_profile_name + "! From now on I will recognize your voice."
         print(to_say)
-        new_speaker_info = SpeakerInfo(new_profile_id, new_profile_name, new_profile_gender)
+        new_speaker_info = SpeakerInfo(new_profile_id, new_profile_name, new_profile_gender, new_profile_age)
         # This function updates the info and the statistics of the users, adding the new profile id and the name to the
         # speakers_info and increasing the dimensions of the structures contained in the dialogue statistics.
         speakers_info, dialogue_statistics = self.add_speaker_statistics(new_speaker_info)

@@ -41,7 +41,6 @@ class Utils(object):
     def process_sentence(self, sentence, speakers_info):
         sentence = self.replace_schwa(sentence, speakers_info)
         sentence_str = self.compose_sentence(sentence)
-        sentence_str = self.replace_speaker_name(sentence_str, speakers_info)
         return sentence_str
         
     def replace_schwa(self, sentence, speakers_info):
@@ -100,8 +99,7 @@ class Utils(object):
     # This method performs a GET request to the cloud to get the initial sentence and the dialogue state that will be used
     # for all the speakers. Then, it initializes the speakers stats and speakers info data.
     def acquire_initial_state(self):
-        # Registration of the first "unknown" user
-        # Try to contact the server
+        # Try to contact the server and retry until the dialogue state is received
         resp = requests.get("http://" + self.server_ip + ":" + self.server_port + "/CAIR_hub", verify=False)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
@@ -120,8 +118,12 @@ class Utils(object):
 
         profile_id = "00000000-0000-0000-0000-000000000000"
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
-        with open(self.speakers_info_file_path, 'w') as f:
-            json.dump({profile_id: {"name": "User", "gender": 'nb'}},
+        with open("speakers_info.json", 'w') as f:
+            if self.language == "it":
+                user_name = "Utente"
+            else:
+                user_name = "User"
+            json.dump({profile_id: {"name": user_name, "gender": 'nb', "age": "nd"}},
                       f, ensure_ascii=False, indent=4)
 
         # Initialize dialogue statistics
@@ -129,7 +131,6 @@ class Utils(object):
         # Update the stats in the file
         with open(self.dialogue_statistics_file_path, 'w') as f:
             json.dump(dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
-
         return first_dialogue_sentence
 
     # This method updates the info and the statistics of the users when a new user registers
@@ -157,8 +158,9 @@ class Utils(object):
         else:
             user_gender = "nb"
 
-        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": user_gender}
-        with open(self.speakers_info_file_path, 'w') as f:
+        speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": user_gender,
+                                                      "age": new_speaker_info.age}
+        with open("speakers_info.json", 'w') as f:
             json.dump(speakers_info, f, ensure_ascii=False, indent=4)
 
         return speakers_info, dialogue_statistics
@@ -168,6 +170,7 @@ class Utils(object):
         # Establish a socket connection with the registration.py script
         client_registration_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_registration_socket.connect((self.registration_ip, 9091))
+
         # ** STEP 1 ** Create a new profile ID
         self.logger("Creating new profile ID")
         client_registration_socket.send(b"new_profile_id")
@@ -191,7 +194,16 @@ class Utils(object):
         client_registration_socket.send(b"new_profile_gender")
         new_profile_gender = client_registration_socket.recv(256).decode('utf-8')
 
-        # ** STEP 4 ** Ask the user to talk for 20 seconds
+        # ** STEP 4 ** Ask the age to the user
+        if self.language == "it":
+            to_say = "Per favore, dimmi quanti anni hai."
+        else:
+            to_say = "Please, tell your age."
+        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+        client_registration_socket.send(b"new_profile_age")
+        new_profile_age = client_registration_socket.recv(256).decode('utf-8')
+
+        # ** STEP 5 ** Ask the user to talk for 20 seconds
         if self.language == "it":
             to_say = "Per favore, parla per 20 secondi in modo che io possa imparare a riconoscere la tua voce."
         else:
@@ -206,7 +218,7 @@ class Utils(object):
         else:
             to_say = "Thank you for registering " + str(new_profile_name) + "! From now on I will recognize your voice."
         self.animated_speech.say(self.voice_speed + str(to_say), self.configuration)
-        new_speaker_info = SpeakerInfo(new_profile_id, new_profile_name, new_profile_gender)
+        new_speaker_info = SpeakerInfo(new_profile_id, new_profile_name, new_profile_gender, new_profile_age)
         # This function updates the info and the statistics of the users, adding the new profile id and the name to the
         # speakers_info and increasing the dimensions of the structures contained in the dialogue statistics.
         speakers_info, dialogue_statistics = self.add_speaker_statistics(new_speaker_info)
