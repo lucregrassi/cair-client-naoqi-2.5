@@ -23,9 +23,13 @@ import socket
 import zlib
 import threading
 import random
+import base64
+import time
 
-ip = "130.251.13.130"
+# Location of the server
 cineca = "131.175.205.146"
+local = "130.251.13.167"
+ip = local
 server_ip = ip
 audio_recorder_ip = ip
 registration_ip = ip
@@ -36,6 +40,13 @@ else:
     server_port = "5000"
 request_uri = "http://" + server_ip + ":" + server_port + "/CAIR_hub"
 
+# Dense captioning - if set to false the dense_cap_result will be sent empty to the server and the
+# visual information will not be used by gpt-4
+dense_cap = True
+dense_cap_result = []
+img_port = "5100"
+img_url = "http://" + server_ip + ":" + img_port + "/CAIR_dense_captioning"
+max_history_turns = 6
 language = "en"
 
 
@@ -86,18 +97,8 @@ class MyClass(GeneratedClass):
         self.response_times_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
                                         "response_times.txt"
 
-        if language == "it":
-            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
-                                        "sentences_it.txt"
-        else:
-            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
-                                        "sentences_en.txt"
-        self.sentences = []
-        with open(sentences_file_path) as f:
-            self.sentences = [line.rstrip() for line in f]
-
-        # This variable tells if the user want the robot to repeat a sentence
-        self.repeat = False
+        self.nuance_vectors_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "nuance_vectors.json"
 
         self.logger.info("Trying to connect to ALTabletService...")
         self.tablet = True
@@ -113,13 +114,46 @@ class MyClass(GeneratedClass):
 
         # To store the previous sentence said by the robot
         self.previous_sentence = ""
-
         self.dialogue_sentence = []
         self.dialogue_state = {}
         self.dialogue_statistics = {}
         self.speakers_info = {}
+        self.nuance_vectors = {}
+        self.conversation_history = {}
         self.plan_sentence = ""
         self.plan = ""
+        # This variable tells if the user want the robot to repeat a sentence
+        self.repeat = False
+
+        # Read the sentences in the correct language from the file
+        if language == "it":
+            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/sentences_it.txt"
+        else:
+            sentences_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/sentences_en.txt"
+        self.sentences = []
+        with open(sentences_file_path) as f:
+            self.sentences = [line.rstrip() for line in f]
+
+        self.dense_cap = dense_cap
+        self.dense_cap_result = dense_cap_result
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.photoCaptureProxy = ALProxy("ALPhotoCapture", "127.0.0.1", 9559)
+        self.photoCaptureProxy.setResolution(2)
+        self.photoCaptureProxy.setPictureFormat("jpg")
+
+    def capture_image(self):
+        while True:
+            self.photoCaptureProxy.takePictures(1, "/home/nao/recordings/cameras/", "camera_image", True)
+            with open("/home/nao/recordings/cameras/camera_image.jpg", "rb") as img_file:
+                img_encoded = base64.b64encode(img_file.read()).decode('utf-8')
+            # Create a dictionary with the encoded image
+            data = {"frame": img_encoded}
+            # Send the image to the server using a POST request
+            response = requests.post(img_url, json=data)
+            # Print the server's response
+            self.dense_cap_result = response.json()["result"]
+            time.sleep(3.5)
 
     def hub_request(self, data):
         encoded_data = json.dumps(data).encode('utf-8')
@@ -184,33 +218,48 @@ class MyClass(GeneratedClass):
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
             welcome_sentence_str = self.utils.acquire_initial_state()
-            self.logger.info(str(welcome_sentence_str))
-            self.animated_speech.say(self.voice_speed + str(welcome_sentence_str), self.configuration)
-            self.previous_sentence = welcome_sentence_str
+            # Retrieve starting nuance vectors
+            with open(self.nuance_vectors_file_path) as f:
+                self.nuance_vectors = json.load(f)
+            welcome_str = welcome_sentence_str
+            self.logger.info(str(welcome_str))
         else:
             self.logger.info("Users are already present in the info file")
             if language == "it":
                 welcome_back_msg = "È bello rivedervi! Di cosa vorreste parlare?"
             else:
                 welcome_back_msg = "Welcome back! I missed you. What would you like to talk about?"
-            self.animated_speech.say(self.voice_speed + welcome_back_msg, self.configuration)
-            self.previous_sentence = welcome_back_msg
+            welcome_str = welcome_back_msg
+
+        self.previous_sentence = welcome_str
+        self.animated_speech.say(self.voice_speed + str(welcome_sentence_str), self.configuration)
 
         # Retrieve the states of the users and save them in a dictionary
         with open(self.dialogue_state_file_path) as f:
             self.dialogue_state = DialogueState(d=json.load(f))
 
+        # If it is the first time, fill the nuance vectors from the file
+        if len(self.nuance_vectors) != 0:
+            self.dialogue_state.dialogue_nuances = self.nuance_vectors
+        # Store the welcome or welcome back string in the assistant field
+        self.dialogue_state.conversation_history.append({"role": "assistant", "content": welcome_str})
+
         # Retrieve the info of the users and store them in a dictionary
         with open(self.speakers_info_file_path) as f:
             self.speakers_info = json.load(f)
 
-        # Retrieve the json containing the dialogue stats
+        # Retrieve dialogue statistics file
         with open(self.dialogue_statistics_file_path) as f:
             self.dialogue_statistics = DialogueStatistics(d=json.load(f))
 
         self.dialogue_state.prev_dialogue_sentence = [["s", self.previous_sentence]]
         prev_turn_last_speaker = ""
         prev_speaker_topic = ""
+
+        # If dense captioning should be used, start the thread to update visual information
+        if self.dense_cap:
+            t1 = threading.Thread(None, self.acquire_image)
+            t1.start()
 
         while self.isAlive:
             self.logger.info("** Listening **")
@@ -290,19 +339,24 @@ class MyClass(GeneratedClass):
 
             # If the user did not ask to exit or to repeat something, send the sentence to the server
             if not self.repeat:
+                # Store the user sentence in the conversation history of the dialogue state and pop the first item if needed
+                if len(self.dialogue_state.conversation_history) >= max_history_turns:
+                    self.dialogue_state.conversation_history.pop(0)
+                    print(self.dialogue_state.conversation_history)
+                self.dialogue_state.conversation_history.append({"role": "user", "content": sentence})
+
                 # Copy the speakers info in a dictionary that does not contain the names
                 # This is needed by OpenAI as it should know the gender.
                 speakers_info_no_names = {}
                 for speaker_id in self.speakers_info:
-                    speakers_info_no_names[speaker_id] = {"gender": self.speakers_info[speaker_id]["gender"]}
-
-                # Update prev topic
-                self.dialogue_state.prev_topic = self.dialogue_state.topic
+                    speakers_info_no_names[speaker_id] = {"gender": self.speakers_info[speaker_id]["gender"],
+                                                          "age": self.speakers_info[speaker_id]["age"]}
 
                 # Compose the payload of the message to be sent to the server
                 data = {"req_type": 1, "client_sentence": xml_string, "dialogue_state": self.dialogue_state.to_dict(),
                         "dialogue_statistics": self.dialogue_statistics.to_dict(), "speakers_info": speakers_info_no_names,
-                        "prev_speaker_info": {"id": prev_turn_last_speaker, "topic": prev_speaker_topic}}
+                        "prev_speaker_info": {"id": prev_turn_last_speaker, "topic": prev_speaker_topic},
+                        "dense_cap_result": self.dense_cap_result}
 
                 # Update the info about id and topic of previous speaker to the current one
                 prev_turn_last_speaker = dialogue_turn.turn_pieces[-1].profile_id
@@ -319,11 +373,6 @@ class MyClass(GeneratedClass):
 
                 # Wait for the thread to finish
                 req_thread.join()
-
-                # Make a copy of the list so that the original is not modified
-                dialogue_sentence1 = self.dialogue_sentence
-                self.logger.info(str(dialogue_sentence1))
-                dialogue_sentence1_str = self.utils.process_sentence(dialogue_sentence1, self.speakers_info)
 
                 # If there is a plan sentence, it means that something has been matched by the Plan manager service
                 if self.plan_sentence:
@@ -347,25 +396,40 @@ class MyClass(GeneratedClass):
                             item = item.encode('utf-8')
                             self.plans.perform_action(item)
 
-                    # Once the execution of the plan is finished, set the dialogue mode image on the tablet
-                    if self.tablet:
-                        self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
-                                                      "/apps/" + self.app_name + "/img/DialogueMode.png")
+                # Make a copy of the dialogue sentence before it is modified by the second request
+                dialogue_sentence1 = self.dialogue_sentence
+                dialogue_sentence1_history = self.utils.process_sentence(dialogue_sentence1, self.speakers_info)
+                # Store the assistant sentence in the conversation history of the dialogue state
+                if len(self.dialogue_state.conversation_history) >= max_history_turns:
+                    self.dialogue_state.conversation_history.pop(0)
+                    print(self.dialogue_state.conversation_history)
+                self.dialogue_state.conversation_history.append(
+                    {"role": "assistant", "content": dialogue_sentence1_history})
 
-                data["req_type"] = 2
-                req_thread = threading.Thread(target=self.hub_request, args=(data,))
+                dialogue_sentence1_str = self.utils.replace_speaker_name(dialogue_sentence1_history, self.speakers_info)
                 if openai:
+                    # Update the data content for the second request - update also the dialogue state!
+                    data["req_type"] = 2
                     data["dialogue_state"] = self.dialogue_state.to_dict()
+                    data["dense_cap_result"] = self.dense_cap_result
                     # Create a thread that performs another request to get the continuation of the dialogue
+                    req_thread = threading.Thread(target=self.hub_request, args=(data, 2))
                     req_thread.start()
-                    # Say the first part of the sentence while the second thread performs the request
-                    self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
+
+                self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
+
+                if req_thread.is_alive():
                     req_thread.join()
-                    dialogue_sentence2 = self.dialogue_sentence[1:]
-                    dialogue_sentence2_str = self.utils.process_sentence(dialogue_sentence2, self.speakers_info)
-                    self.animated_speech.say(self.voice_speed + str(dialogue_sentence2_str), self.configuration)
-                else:
-                    self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
+                dialogue_sentence2 = self.dialogue_sentence[1:]
+                dialogue_sentence2_history = self.utils.process_sentence(dialogue_sentence2, self.speakers_info)
+
+                dialogue_sentence2_str = self.utils.replace_speaker_name(dialogue_sentence2_history, self.speakers_info)
+                self.animated_speech.say(self.voice_speed + str(dialogue_sentence2_str), self.configuration)
+
+                # Replace the last assistant reply with the complete one
+                self.dialogue_state.conversation_history.pop()
+                self.dialogue_state.conversation_history.append(
+                    {"role": "assistant", "content": dialogue_sentence1_history + " " + dialogue_sentence2_history})
 
                 self.previous_sentence = self.dialogue_sentence
                 self.dialogue_state.prev_dialogue_sentence = self.dialogue_sentence
