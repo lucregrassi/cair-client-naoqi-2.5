@@ -47,7 +47,7 @@ dense_cap_result = []
 img_port = "5100"
 img_url = "http://" + server_ip + ":" + img_port + "/CAIR_dense_captioning"
 max_history_turns = 6
-language = "en"
+language = "it"
 
 
 class MyClass(GeneratedClass):
@@ -142,7 +142,7 @@ class MyClass(GeneratedClass):
         self.photoCaptureProxy.setResolution(2)
         self.photoCaptureProxy.setPictureFormat("jpg")
 
-    def capture_image(self):
+    def acquire_image(self):
         while True:
             self.photoCaptureProxy.takePictures(1, "/home/nao/recordings/cameras/", "camera_image", True)
             with open("/home/nao/recordings/cameras/camera_image.jpg", "rb") as img_file:
@@ -413,7 +413,7 @@ class MyClass(GeneratedClass):
                     data["dialogue_state"] = self.dialogue_state.to_dict()
                     data["dense_cap_result"] = self.dense_cap_result
                     # Create a thread that performs another request to get the continuation of the dialogue
-                    req_thread = threading.Thread(target=self.hub_request, args=(data, 2))
+                    req_thread = threading.Thread(target=self.hub_request, args=(data,))
                     req_thread.start()
 
                 self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)

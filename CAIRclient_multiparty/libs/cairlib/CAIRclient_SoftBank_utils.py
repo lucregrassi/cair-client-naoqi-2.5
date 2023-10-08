@@ -118,7 +118,7 @@ class Utils(object):
 
         profile_id = "00000000-0000-0000-0000-000000000000"
         # Add the info of the new profile to the file where the key is the profile id and the values are the info (name)
-        with open("speakers_info.json", 'w') as f:
+        with open(self.speakers_info_file_path, 'w') as f:
             if self.language == "it":
                 user_name = "Utente"
             else:
@@ -160,7 +160,7 @@ class Utils(object):
 
         speakers_info[new_speaker_info.profile_id] = {"name": new_speaker_info.name, "gender": user_gender,
                                                       "age": new_speaker_info.age}
-        with open("speakers_info.json", 'w') as f:
+        with open(self.speakers_info_file_path, 'w') as f:
             json.dump(speakers_info, f, ensure_ascii=False, indent=4)
 
         return speakers_info, dialogue_statistics

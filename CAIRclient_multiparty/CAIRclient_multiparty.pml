@@ -51,6 +51,8 @@
         <File name="sentences_it" src="sentences_it.txt" />
         <File name="sentences_en" src="sentences_en.txt" />
         <File name="sentences_cn" src="sentences_cn.txt" />
+        <File name="DialogueNuances" src="libs/cairlib/DialogueNuances.py" />
+        <File name="nuance_vectors" src="nuance_vectors.json" />
     </Resources>
     <Topics />
     <IgnoredPaths />
