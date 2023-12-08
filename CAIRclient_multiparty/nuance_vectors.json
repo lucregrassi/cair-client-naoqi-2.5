@@ -8,9 +8,9 @@
         "contextual_speech_act": [0, 0, 0, 0, 1]
     },
     "values": {
-        "diversity": ["italian", "good mental health", "no physical problems"],
-        "time": ["afternoon", "autumn", "end of september"],
-        "place": ["house", "Genova", "Italy"],
+        "diversity": ["italian", "of good mental health", "on a wheelchair"],
+        "time": ["autumn", "December", "almost Christmas"],
+        "place": ["home", "Quinto", "Italy"],
         "tone": ["humorous", "kind", "dramatic", "controversial", "aggressive", "teasing", "alarmist",
                  "worried", "neutral"],
         "positive_speech_act": ["assertive", "commissive", "expressive"],

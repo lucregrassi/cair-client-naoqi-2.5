@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package uuid="gangnam-style-nao" version="0.0.11">
+<package version="0.0.11" uuid="gangnam-style-nao">
  <names>
   <name lang="en_US">Gangnam Style NAO</name>
   <name lang="fr_FR">Gangnam sta ile</name>
@@ -24,7 +24,15 @@
   <language>ja_JP</language>
   <language>zh_CN</language>
  </descriptionLanguages>
- <contents/>
+ <contents>
+  <behaviorContent path=".">
+   <nature>interactive</nature>
+   <triggerSentences/>
+   <loadingResponses/>
+   <autonomous/>
+   <permissions/>
+  </behaviorContent>
+ </contents>
  <requirements>
   <naoqiRequirement minVersion="2.0.1"/>
   <robotRequirement model="NAO_H25"/>

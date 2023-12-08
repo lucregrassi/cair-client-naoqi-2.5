@@ -25,9 +25,9 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         if language == "it":
-            to_say = "Sono le " + str(datetime.datetime.now().hour + 1) + " e " + str(datetime.datetime.now().minute) + " minuti."
+            to_say = "Sono le " + str(datetime.datetime.now().hour) + " e " + str(datetime.datetime.now().minute) + " minuti."
         else:
-            to_say = "It's " + str(datetime.datetime.now().hour + 1) + " e " + str(datetime.datetime.now().minute)
+            to_say = "It's " + str(datetime.datetime.now().hour) + " e " + str(datetime.datetime.now().minute)
         self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         self.onStopped()
 

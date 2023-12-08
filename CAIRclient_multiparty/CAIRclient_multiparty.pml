@@ -53,6 +53,7 @@
         <File name="sentences_cn" src="sentences_cn.txt" />
         <File name="DialogueNuances" src="libs/cairlib/DialogueNuances.py" />
         <File name="nuance_vectors" src="nuance_vectors.json" />
+        <File name="RICE" src="html/img/RICE.png" />
     </Resources>
     <Topics />
     <IgnoredPaths />

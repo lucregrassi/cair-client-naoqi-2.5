@@ -123,8 +123,8 @@ class Utils(object):
                 user_name = "Utente"
             else:
                 user_name = "User"
-            json.dump({profile_id: {"name": user_name, "gender": 'nb', "age": "nd"}},
-                      f, ensure_ascii=False, indent=4)
+            json.dump({profile_id: {"name": user_name, "gender": "nb", "age": "nd"}}, 
+                       f, ensure_ascii=False, indent=4)
 
         # Initialize dialogue statistics
         dialogue_statistics = DialogueStatistics(profile_id=profile_id)

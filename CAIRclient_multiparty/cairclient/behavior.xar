@@ -28,11 +28,10 @@ import time
 
 # Location of the server
 cineca = "131.175.205.146"
-local = "130.251.13.167"
-ip = local
-server_ip = ip
-audio_recorder_ip = ip
-registration_ip = ip
+local = "192.168.1.60"
+server_ip = cineca
+audio_recorder_ip = local
+registration_ip = local
 openai = True
 if openai:
     server_port = "5005"
@@ -44,7 +43,7 @@ request_uri = "http://" + server_ip + ":" + server_port + "/CAIR_hub"
 # visual information will not be used by gpt-4
 dense_cap = True
 dense_cap_result = []
-img_port = "5100"
+img_port = "5010"
 img_url = "http://" + server_ip + ":" + img_port + "/CAIR_dense_captioning"
 max_history_turns = 6
 language = "it"
@@ -153,7 +152,7 @@ class MyClass(GeneratedClass):
             response = requests.post(img_url, json=data)
             # Print the server's response
             self.dense_cap_result = response.json()["result"]
-            time.sleep(3.5)
+            time.sleep(6)
 
     def hub_request(self, data):
         encoded_data = json.dumps(data).encode('utf-8')
@@ -165,14 +164,14 @@ class MyClass(GeneratedClass):
             # The speakers info are not sent to the Hub.
             self.dialogue_state = DialogueState(d=hub_response.json()['dialogue_state'])
             # Store the updated dialogue state in the file
-            with open("dialogue_state.json", 'w') as f:
+            with open(self.dialogue_state_file_path, 'w') as f:
                 json.dump(self.dialogue_state.to_dict(), f, ensure_ascii=False, indent=4)
             self.dialogue_sentence = hub_response.json()['dialogue_sentence']
 
             if data["req_type"] == 1:
                 self.dialogue_statistics = DialogueStatistics(d=hub_response.json()["dialogue_statistics"])
                 # The hub updates the average topic distance matrix, hence it should be written on the file
-                with open("dialogue_statistics.json", 'w') as f:
+                with open(self.dialogue_statistics_file_path, 'w') as f:
                     json.dump(self.dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
                 self.plan_sentence = hub_response.json()['plan_sentence']
                 self.plan = hub_response.json()['plan']
@@ -193,8 +192,8 @@ class MyClass(GeneratedClass):
             self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             self.onInput_onStop()
         try:
-            if self.al.getState() != "disabled":
-                self.al.setState("disabled")
+            if self.al.getState() != "interactive":
+                self.al.setState("interactive")
         except:
             pass
 
@@ -204,13 +203,15 @@ class MyClass(GeneratedClass):
         # With Pepper robot, preload the images to be set on the tablet during the conversation
         if self.tablet:
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
+                                             "/apps/" + app_name + "/img/RICE.png")
+            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
                                              "/apps/" + app_name + "/img/DialogueMode.png")
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
                                              "/apps/" + app_name + "/img/ExecutionMode.png")
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
                                              "/apps/" + app_name + "/img/PrivacyMode.png")
             self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
-                                          "/apps/" + app_name + "/img/DialogueMode.png")
+                                             "/apps/" + app_name + "/img/RICE.png")
 
         # If it's the first time using the system, call the function that acquires the first state
         if not os.path.isfile(self.speakers_info_file_path):
@@ -226,13 +227,13 @@ class MyClass(GeneratedClass):
         else:
             self.logger.info("Users are already present in the info file")
             if language == "it":
-                welcome_back_msg = "È bello rivedervi! Di cosa vorreste parlare?"
+                welcome_back_msg = "È bello rivederti! Di cosa vorresti parlare?"
             else:
                 welcome_back_msg = "Welcome back! I missed you. What would you like to talk about?"
             welcome_str = welcome_back_msg
 
         self.previous_sentence = welcome_str
-        self.animated_speech.say(self.voice_speed + str(welcome_sentence_str), self.configuration)
+        self.animated_speech.say(self.voice_speed + str(welcome_str), self.configuration)
 
         # Retrieve the states of the users and save them in a dictionary
         with open(self.dialogue_state_file_path) as f:
@@ -241,6 +242,7 @@ class MyClass(GeneratedClass):
         # If it is the first time, fill the nuance vectors from the file
         if len(self.nuance_vectors) != 0:
             self.dialogue_state.dialogue_nuances = self.nuance_vectors
+
         # Store the welcome or welcome back string in the assistant field
         self.dialogue_state.conversation_history.append({"role": "assistant", "content": welcome_str})
 
@@ -377,7 +379,7 @@ class MyClass(GeneratedClass):
                 # If there is a plan sentence, it means that something has been matched by the Plan manager service
                 if self.plan_sentence:
                     self.logger.info(str(self.plan_sentence))
-                    self.utils.replace_speaker_name(self.plan_sentence, self.speakers_info)
+                    self.plan_sentence = self.utils.replace_speaker_name(self.plan_sentence, self.speakers_info)
                     self.plan_sentence = self.utils.replace_schwa_in_string(self.plan_sentence, self.speakers_info, speaker_id)
                     self.animated_speech.say(self.voice_speed + str(self.plan_sentence), self.configuration)
 
@@ -396,6 +398,9 @@ class MyClass(GeneratedClass):
                             item = item.encode('utf-8')
                             self.plans.perform_action(item)
 
+                # Put again the
+                #self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
+                #                             "/apps/" + app_name + "/img/RICE.png")
                 # Make a copy of the dialogue sentence before it is modified by the second request
                 dialogue_sentence1 = self.dialogue_sentence
                 dialogue_sentence1_history = self.utils.process_sentence(dialogue_sentence1, self.speakers_info)
@@ -407,6 +412,8 @@ class MyClass(GeneratedClass):
                     {"role": "assistant", "content": dialogue_sentence1_history})
 
                 dialogue_sentence1_str = self.utils.replace_speaker_name(dialogue_sentence1_history, self.speakers_info)
+                self.logger.info(str(dialogue_sentence1_str))
+
                 if openai:
                     # Update the data content for the second request - update also the dialogue state!
                     data["req_type"] = 2
@@ -416,15 +423,21 @@ class MyClass(GeneratedClass):
                     req_thread = threading.Thread(target=self.hub_request, args=(data,))
                     req_thread.start()
 
+                dialogue_sentence1_str = dialogue_sentence1_str.replace("robot", "ròbot")
                 self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
 
-                if req_thread.is_alive():
-                    req_thread.join()
-                dialogue_sentence2 = self.dialogue_sentence[1:]
-                dialogue_sentence2_history = self.utils.process_sentence(dialogue_sentence2, self.speakers_info)
+                if openai:
+                    if req_thread.is_alive():
+                        req_thread.join()
+                    dialogue_sentence2 = self.dialogue_sentence[1:]
+                    dialogue_sentence2_history = self.utils.process_sentence(dialogue_sentence2, self.speakers_info)
 
-                dialogue_sentence2_str = self.utils.replace_speaker_name(dialogue_sentence2_history, self.speakers_info)
-                self.animated_speech.say(self.voice_speed + str(dialogue_sentence2_str), self.configuration)
+                    dialogue_sentence2_str = self.utils.replace_speaker_name(dialogue_sentence2_history, self.speakers_info)
+                    self.logger.info(str(dialogue_sentence2_str))
+                    dialogue_sentence2_str = dialogue_sentence2_str.replace("robot", "ròbot")
+                    self.animated_speech.say(self.voice_speed + str(dialogue_sentence2_str), self.configuration)
+                else:
+                    dialogue_sentence2_history = ""
 
                 # Replace the last assistant reply with the complete one
                 self.dialogue_state.conversation_history.pop()
@@ -438,8 +451,8 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStop(self):
-        if self.tablet:
-            self.tablet_service.hideImage()
+        #if self.tablet:
+        #    self.tablet_service.hideImage()
         self.al.setState("interactive")
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         # If present, delete the transformation - if the robot moves outside CAIR it is no more valid

@@ -29,16 +29,16 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         where = str(self.memory.getData("CAIR/go"))
-        if where == "forward":
+        if where == "forward" or where == "avanti":
             X = 0.5
             Y = 0.0
-        elif where == "back":
+        elif where == "back" or where == "indietro":
             X = -0.5
             Y = 0.0
-        elif where == "right":
+        elif where == "right" or where == "destra ":
             X = 0.0
             Y = -0.5
-        elif where == "left":
+        elif where == "left" or where == "sinistra":
             X = 0.0
             Y = 0.5
         else:
