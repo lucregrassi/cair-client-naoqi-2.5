@@ -22,12 +22,16 @@
         pass
 
     def onInput_onStart(self):
+        max_volume = 90
+        normal_volume = 50
+        min_volume = 30
+
         level = self.memory.getData("CAIR/volume_level").lower()
         previous_volume = self.audio_device.getOutputVolume()
         self.logger.info("Previous volume: " + str(previous_volume))
 
         if level in self.higher_volume:
-            if previous_volume == 100:
+            if previous_volume == max_volume:
                 if self.language == "it":
                     to_say = "Il mio volume è già al massimo."
 
@@ -36,8 +40,8 @@
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             else:
                 new_volume = previous_volume + 10
-                if new_volume > 100:
-                    new_volume = 100
+                if new_volume > max_volume:
+                    new_volume = max_volume
                     self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 if self.language == "it":
@@ -46,7 +50,7 @@
                     to_say = "I raised my volume."
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         elif level in self.lower_volume:
-            if previous_volume == 40:
+            if previous_volume == min_volume:
                 if self.language == "it":
                     to_say = "Mi dispiace, non posso parlare più piano di così."
                 else:
@@ -54,8 +58,8 @@
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             else:
                 new_volume = previous_volume - 10
-                if new_volume < 40:
-                    new_volume = 40
+                if new_volume < min_volume:
+                    new_volume = min_volume
                     self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 if self.language == "it":
@@ -64,14 +68,14 @@
                     to_say = "I lowered my volume."
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         elif level == "high" or level == "alto":
-            if previous_volume == 100:
+            if previous_volume == max_volume:
                 if self.language == "it":
                     to_say = "Il mio volume è già al massimo."
                 else:
                     to_say = "My volume is already set to high."
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             else:
-                new_volume = 100
+                new_volume = max_volume
                 self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 if self.language == "it":
@@ -80,10 +84,10 @@
                     to_say = "Now my volume is now set to high."
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         elif level == "normal" or level == "normale":
-            if previous_volume == 60:
+            if previous_volume == normal_volume:
                 self.animated_speech.say(self.voice_speed + "My volume is already set to normal.", self.configuration)
             else:
-                new_volume = 60
+                new_volume = normal_volume
                 self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 if self.language == "it":
@@ -92,14 +96,14 @@
                     to_say = "Now my volume is now set to normal."
                 self.animated_speech.say(self.voice_speed + to_say, self.configuration)
         elif level == "low" or level == "basso":
-            if previous_volume == 45:
+            if previous_volume == min_volume:
                 if self.language == "it":
                     to_say = "Il mio volume è già al minimo."
                 else:
                     to_say = "My volume is already set to low."
                 self.animated_speech.say(self.voice_speed + "My volume is already set to low.", self.configuration)
             else:
-                new_volume = 45
+                new_volume = min_volume
                 self.logger.info(str(new_volume))
                 self.audio_device.setOutputVolume(new_volume)
                 if self.language == "it":

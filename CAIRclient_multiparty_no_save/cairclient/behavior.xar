@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIRclient multiparty" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="387" y="142"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[#!usr/bin/python -tt
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="CAIRclient multiparty" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="320" y="123"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[#!usr/bin/python -tt
 # -*- coding: utf-8 -*-
 import qi
 from naoqi import ALProxy
@@ -28,12 +28,10 @@ import time
 
 # Location of the server
 cineca = "131.175.205.146"
-raspberry = "192.168.1.101"
-mac_address = "192.168.1.102"
-lab_server = "130.251.13.192"
-server_ip = mac_address
-audio_recorder_ip = mac_address
-registration_ip = mac_address
+local = "130.251.13.181"
+server_ip = local
+audio_recorder_ip = local
+registration_ip = local
 openai = True
 if openai:
     server_port = "12345"
@@ -45,10 +43,10 @@ request_uri = "http://" + server_ip + ":" + server_port + "/CAIR_hub"
 # visual information will not be used by gpt-4
 dense_cap = True
 dense_cap_result = []
-img_port = "12348"
+img_port = "5010"
 img_url = "http://" + server_ip + ":" + img_port + "/CAIR_dense_captioning"
 max_history_turns = 6
-language = "en"
+language = "it"
 
 
 class MyClass(GeneratedClass):
@@ -157,21 +155,6 @@ class MyClass(GeneratedClass):
             # Print the server's response
             self.dense_cap_result = response.json()["result"]
             time.sleep(6)
-
-    def say_sentence(self):
-        # When using openAI say something to fill the void while waiting
-        if openai:
-            to_say = str(random.choice(self.sentences))
-            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-
-    def check_socket_connection(self, received_string):
-        if received_string == "":
-            if language == "it":
-                to_say = "Mi dispiace, c'è stato qualche problema con la connessione al microfono esterno."
-            else:
-                to_say = "I'm sorry, there was a problem with the connection to the external microphone."
-            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-            self.onInput_onStop()
 
     def hub_request(self, data):
         encoded_data = json.dumps(data).encode('utf-8')
@@ -286,15 +269,15 @@ class MyClass(GeneratedClass):
             self.logger.info("** Listening **")
             # Tell the audio recorder that the client is ready to receive the user reply
             self.client_socket.send(self.dialogue_state.sentence_type.encode("utf-8"))
-            # The first string received is an ack that the user has finished talking (after 2s)
-            received_str = self.client_socket.recv(1024).decode('utf-8')
-            self.check_socket_connection(received_str)
-            random_sent_thread = threading.Thread(target=self.say_sentence, args=())
-            random_sent_thread.start()
-
-            # The second string received should be the xml client sentence
             xml_string = self.client_socket.recv(1024).decode('utf-8')
-            self.check_socket_connection(xml_string)
+
+            if xml_string == "":
+                if language == "it":
+                    to_say = "Mi dispiace, c'è stato qualche problema con la connessione al microfono esterno."
+                else:
+                    to_say = "I'm sorry, there was a problem with the connection to the external microphone."
+                self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+                self.onInput_onStop()
 
             # Do not proceed until the xml string is complete and all tags are closed
             proceed = False
@@ -386,8 +369,12 @@ class MyClass(GeneratedClass):
                 # Create the thread for the first request
                 req_thread = threading.Thread(target=self.hub_request, args=(data,))
                 req_thread.start()
-                # Wait for the thread of the random sentence
-                random_sent_thread.join()
+
+                # When using openAI say something to fill the void while waiting
+                if openai:
+                    to_say = str(random.choice(self.sentences))
+                    self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+
                 # Wait for the thread to finish
                 req_thread.join()
 
@@ -414,8 +401,9 @@ class MyClass(GeneratedClass):
                             self.plans.perform_action(item)
                 self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
 
-                if self.tablet:
-                    self.tablet_service.showImage("http://" + self.tablet_service.robotIp() + "/apps/" + app_name + "/img/RICE.png")
+                # Put again the
+                #self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
+                #                             "/apps/" + app_name + "/img/RICE.png")
                 # Make a copy of the dialogue sentence before it is modified by the second request
                 dialogue_sentence1 = self.dialogue_sentence
                 dialogue_sentence1_history = self.utils.process_sentence(dialogue_sentence1, self.speakers_info)
@@ -473,12 +461,15 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStop(self):
-        if self.tablet:
-            self.tablet_service.hideImage()
+        #if self.tablet:
+        #    self.tablet_service.hideImage()
         self.al.setState("interactive")
         self.utils.setAutonomousAbilities(True, True, True, True, True)
         # If present, delete the transformation - if the robot moves outside CAIR it is no more valid
         try:
+            os.remove(self.dialogue_state_file_path)
+            os.remove(self.speakers_info_file_path)
+            os.remove(self.dialogue_statistics_file_path)
             self.memory.removeData("CAIR/transformation_matrix")
             self.memory.removeData("CAIR/theta")
         except:
