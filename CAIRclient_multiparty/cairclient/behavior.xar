@@ -25,15 +25,18 @@ import threading
 import random
 import base64
 import time
+from datetime import datetime, timedelta
 
 # Location of the server
 cineca = "131.175.205.146"
 raspberry = "192.168.1.101"
-mac_address = "192.168.1.102"
+local_pc = "130.251.13.111"
 lab_server = "130.251.13.192"
-server_ip = mac_address
-audio_recorder_ip = mac_address
-registration_ip = mac_address
+server_ip = local_pc
+audio_recorder_ip = local_pc
+registration_ip = local_pc
+log_service_ip = local_pc
+
 openai = True
 if openai:
     server_port = "12345"
@@ -48,7 +51,7 @@ dense_cap_result = []
 img_port = "12348"
 img_url = "http://" + server_ip + ":" + img_port + "/CAIR_dense_captioning"
 max_history_turns = 6
-language = "en"
+language = "it"
 
 
 class MyClass(GeneratedClass):
@@ -111,6 +114,7 @@ class MyClass(GeneratedClass):
             self.tablet = False
 
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.log_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.audio_device = ALProxy("ALAudioDevice")
         self.audio_device.setOutputVolume(50)
@@ -145,25 +149,6 @@ class MyClass(GeneratedClass):
         self.photoCaptureProxy.setResolution(2)
         self.photoCaptureProxy.setPictureFormat("jpg")
 
-    def acquire_image(self):
-        while True:
-            self.photoCaptureProxy.takePictures(1, "/home/nao/recordings/cameras/", "camera_image", True)
-            with open("/home/nao/recordings/cameras/camera_image.jpg", "rb") as img_file:
-                img_encoded = base64.b64encode(img_file.read()).decode('utf-8')
-            # Create a dictionary with the encoded image
-            data = {"frame": img_encoded}
-            # Send the image to the server using a POST request
-            response = requests.post(img_url, json=data)
-            # Print the server's response
-            self.dense_cap_result = response.json()["result"]
-            time.sleep(6)
-
-    def say_sentence(self):
-        # When using openAI say something to fill the void while waiting
-        if openai:
-            to_say = str(random.choice(self.sentences))
-            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-
     def check_socket_connection(self, received_string):
         if received_string == "":
             if language == "it":
@@ -173,10 +158,61 @@ class MyClass(GeneratedClass):
             self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             self.onInput_onStop()
 
+    def acquire_image(self):
+        while True:
+            now = datetime.now() + timedelta(hours=1)
+            date_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+            # Capture an image an take the time
+            image_capture_start_time = time.time()
+            self.photoCaptureProxy.takePictures(1, "/home/nao/recordings/cameras/", "camera_image", True)
+            with open("/home/nao/recordings/cameras/camera_image.jpg", "rb") as img_file:
+                img_encoded = base64.b64encode(img_file.read()).decode('utf-8')
+            image_capture_end_time = time.time()
+            image_byte_size = (len(img_encoded)*3)/4
+
+            # Create a dictionary with the encoded image
+            data = {"frame": img_encoded}
+            # Send the image to the server using a POST request
+            try:
+                # Log the time needed to perform the request and get the response
+                request_start_time = time.time()
+                response = requests.post(img_url, json=data)
+                self.dense_cap_result = response.json()["result"]
+                request_end_time = time.time()
+                to_log = "v#timestamp:" + date_time_str + "\n"
+                self.log_socket.send(to_log.encode('utf-8'))
+                to_log = "v#image_capture_time:" + str(image_capture_end_time - image_capture_start_time) + "\n"
+                self.log_socket.send(to_log.encode('utf-8'))
+                to_log = "v#compressed_image_size_bytes:" + str(image_byte_size) + "\n"
+                self.log_socket.send(to_log.encode('utf-8'))
+                to_log = "v#densecap_request_response_time:" + str(request_end_time - request_start_time) + "\n"
+                self.log_socket.send(to_log.encode('utf-8'))
+                self.log_socket.send("v#********************\n".encode('utf-8'))
+            except ConnectionError:
+                self.logger.info("** The dense captioning service is not available")
+                exit(1)
+
+    def say_sentence(self):
+        # When using openAI say something to fill the void while waiting
+        if openai:
+            now = datetime.now() + timedelta(hours=1)
+            date_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+            to_log = "d#timestamp:" + date_time_str + "\n"
+            self.log_socket.send(to_log.encode('utf-8'))
+            to_say = str(random.choice(self.sentences))
+            # Log the time taken to say the random sentence
+            start_time = time.time()
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+            end_time = time.time()
+            to_log = "d#ack_sentence_speaking_time:" + str(end_time-start_time) + "\n"
+            self.log_socket.send(to_log.encode('utf-8'))
+
     def hub_request(self, data):
         encoded_data = json.dumps(data).encode('utf-8')
         compressed_data = zlib.compress(encoded_data)
+        start_time = time.time()
         hub_response = requests.put(request_uri, data=compressed_data, verify=False)
+        end_time = time.time()
         # If the Hub cannot contact the dialogue service, the response will be empty
         if hub_response:
             # Overwrite the array containing the states of the profiles with those contained in the Hub response
@@ -188,26 +224,31 @@ class MyClass(GeneratedClass):
             self.dialogue_sentence = hub_response.json()['dialogue_sentence']
 
             if data["req_type"] == 1:
+                to_log = "d#first_request_response_time:" + str(end_time - start_time) + "\n"
                 self.dialogue_statistics = DialogueStatistics(d=hub_response.json()["dialogue_statistics"])
                 # The hub updates the average topic distance matrix, hence it should be written on the file
                 with open(self.dialogue_statistics_file_path, 'w') as f:
                     json.dump(self.dialogue_statistics.to_dict(), f, ensure_ascii=False, indent=4)
                 self.plan_sentence = hub_response.json()['plan_sentence']
                 self.plan = hub_response.json()['plan']
+            else:
+                to_log = "d#second_request_response_time:" + str(end_time - start_time) + "\n"
+            self.log_socket.send(to_log.encode('utf-8'))
         else:
             print("No response received from the Hub!")
             exit(0)
 
     def onInput_onStart(self):
         # Try connecting to the socket that records the audio
-        self.logger.info("Trying to connect to the audio recorder socket.")
+        self.logger.info("Trying to connect to the sockets.")
         try:
             self.client_socket.connect((audio_recorder_ip, 9090))
+            self.log_socket.connect((log_service_ip, 9092))
         except:
             if language == "it":
-                to_say = "Mi dispiace, non riesco a connettermi al microfono esterno. Controlla l'indirizzo I P e riprova."
+                to_say = "Mi dispiace, non riesco a connettermi al microfono esterno o al servizio di log."
             else:
-                to_say = "I'm sorry, I can't connect to external microphone. Check the IP address and try again."
+                to_say = "I'm sorry, I can't connect to external microphone."
             self.animated_speech.say(self.voice_speed + to_say, self.configuration)
             self.onInput_onStop()
         try:
@@ -289,6 +330,8 @@ class MyClass(GeneratedClass):
             # The first string received is an ack that the user has finished talking (after 2s)
             received_str = self.client_socket.recv(1024).decode('utf-8')
             self.check_socket_connection(received_str)
+            self.client_socket.send("ack".encode('utf-8'))
+            # When using openAI say something to fill the void while waiting
             random_sent_thread = threading.Thread(target=self.say_sentence, args=())
             random_sent_thread.start()
 
@@ -439,10 +482,15 @@ class MyClass(GeneratedClass):
                     req_thread.start()
 
                 dialogue_sentence1_str = dialogue_sentence1_str.replace("robot", "ròbot")
+                # Log the time taken to say the first dialogue sentence
+                start_time = time.time()
                 try:
                     self.animated_speech.say(self.voice_speed + str(dialogue_sentence1_str), self.configuration)
                 except:
                     self.animated_speech.say(self.voice_speed + "Mi dispiace, la frase contiene caratteri che non sono in grado di leggere!", self.configuration)
+                end_time = time.time()
+                to_log = "d#first_sentence_speaking_time:" + str(end_time-start_time) + "\n"
+                self.log_socket.send(to_log.encode('utf-8'))
 
                 if openai:
                     if req_thread.is_alive():
@@ -453,11 +501,16 @@ class MyClass(GeneratedClass):
                     dialogue_sentence2_str = self.utils.replace_speaker_name(dialogue_sentence2_history, self.speakers_info)
                     self.logger.info(str(dialogue_sentence2_str))
                     dialogue_sentence2_str = dialogue_sentence2_str.replace("robot", "ròbot")
+                    # Log the time taken to say the second dialogue sentence
+                    start_time = time.time()
                     try:
                         self.animated_speech.say(self.voice_speed + str(dialogue_sentence2_str), self.configuration)
                     except:
-                        pass
-
+                        self.animated_speech.say(self.voice_speed + "Mi dispiace, la frase contiene caratteri che non sono in grado di leggere!", self.configuration)
+                    end_time = time.time()
+                    to_log = "d#second_sentence_speaking_time:" + str(end_time-start_time) + "\n"
+                    self.log_socket.send(to_log.encode('utf-8'))
+                    self.log_socket.send("d#********************\n".encode('utf-8'))
                 else:
                     dialogue_sentence2_history = ""
 
