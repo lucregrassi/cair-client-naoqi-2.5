@@ -13,6 +13,7 @@ class ActionManager(object):
         self.server_ip = self.memory.getData("CAIR/server_ip")
         self.behavior_manager = ALProxy("ALBehaviorManager")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
+        self.voice_speed = self.memory.getData("CAIR/voice_speed")
         self.configuration = {"bodyLanguageMode": "contextual"}
         self.tablet = True
         try:
