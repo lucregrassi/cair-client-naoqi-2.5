@@ -21,8 +21,8 @@
 
     def onInput_onStart(self):
         max_speed = 100
-        normal_speed = 100
-        min_speed = 70
+        normal_speed = 90
+        min_speed = 80
         level = self.memory.getData("CAIR/voice_speed_level")
         previous_speed = self.memory.getData("CAIR/voice_speed")
         self.logger.info("Previous voice speed: " + str(previous_speed))
