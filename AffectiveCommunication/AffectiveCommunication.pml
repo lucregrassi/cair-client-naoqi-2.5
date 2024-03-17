@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Package name="AffectiveCommunication" format_version="4">
+<Package name="AffectiveCommunication" format_version="5">
     <Manifest src="manifest.xml" />
     <BehaviorDescriptions>
         <BehaviorDescription name="behavior" src="hug" xar="behavior.xar" />
         <BehaviorDescription name="behavior" src="handshake" xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
-    <Resources>
-        <File name="icon" src="icon.png" />
-    </Resources>
+    <Resources />
     <Topics />
     <IgnoredPaths />
     <Translations auto-fill="en_US">

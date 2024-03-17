@@ -1,3 +1,5 @@
+#!usr/bin/python -tt
+# -*- coding: utf-8 -*-
 import qi
 from naoqi import ALProxy
 import threading
@@ -15,6 +17,11 @@ class ActionManager(object):
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.voice_speed = self.memory.getData("CAIR/voice_speed")
         self.configuration = {"bodyLanguageMode": "contextual"}
+        self.language = self.memory.getData("CAIR/language")
+        if self.language == "it":
+            self.not_installed_behavior = "Mi dispiace, non posso svolgere questa azione perché l'applicazione non è installata"
+        else:
+            self.not_installed_behavior = "I'm sorry, I can't perform this action because the behavior is not installed"
         self.tablet = True
         try:
             self.tablet_service = ALProxy("ALTabletService")
@@ -33,7 +40,6 @@ class ActionManager(object):
         elif greeting == 3:
             time.sleep(3)
             self.tts.say("Konnichiwa")
-        self.tts.setLanguage("English")
 
     def perform_action(self, item):
         action = re.findall("action=(\w+)", item)[0]
