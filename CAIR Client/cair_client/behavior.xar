@@ -55,7 +55,7 @@ server_port = "12345"
 request_uri = "http://" + server_ip + ":" + server_port + "/CAIR_hub"
 
 #Location of the external microphone
-microphone_ip = "192.168.1.52"
+microphone_ip = "192.168.178.101"
 
 audio_recorder_ip = microphone_ip
 registration_ip = microphone_ip
