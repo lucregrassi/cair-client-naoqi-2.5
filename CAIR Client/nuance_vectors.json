@@ -8,9 +8,9 @@
         "contextual_speech_act": [0, 0, 0, 0, 1]
     },
     "values": {
-        "diversity": ["Italian", "ossessive compulsive disorder", "back pain"],
-        "time": ["morning", "winter", "almost easter"],
-        "place": ["home", "Genoa", "Italy"],
+        "diversity": ["Italian", "none", "none"],
+        "time": ["morning", "spring", "during the Ròbot Valley event"],
+        "place": ["Villa Bombrini", "Genova", "Italy"],
         "tone": ["humorous", "kind", "dramatic", "controversial", "aggressive", "teasing", "alarmist",
                  "worried", "neutral"],
         "positive_speech_act": ["assertive", "commissive", "expressive"],
