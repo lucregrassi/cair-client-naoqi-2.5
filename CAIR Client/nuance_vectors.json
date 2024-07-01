@@ -8,9 +8,9 @@
         "contextual_speech_act": [0, 0, 0, 0, 1]
     },
     "values": {
-        "diversity": ["Italian", "good mental health", "good physical health"],
-        "time": ["afternoon", "spring", "during a meeting"],
-        "place": ["University of Genoa, economy department", "Genoa", "Italy"],
+        "diversity": ["any", "good mental health", "no physical problems"],
+        "time": ["afternoon", "summer", "June"],
+        "place": ["maritime station", "Genoa", "Italy"],
         "tone": ["humorous", "kind", "dramatic", "controversial", "aggressive", "teasing", "alarmist",
                  "worried", "neutral"],
         "positive_speech_act": ["assertive", "commissive", "expressive"],
