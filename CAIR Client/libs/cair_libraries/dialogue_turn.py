@@ -31,7 +31,7 @@ class TurnPiece:
         to_dict()
             Converts the object to a dictionary
         """
-    def __init__(self, profile_id, sentence, speaking_time):
+    def __init__(self, profile_id, sentence, language, speaking_time):
         """
         Parameters
         ----------
@@ -44,6 +44,7 @@ class TurnPiece:
         """
         self.profile_id = profile_id
         self.sentence = sentence
+        self.language = language
         self.speaking_time = speaking_time
         self.number_of_words = len(self.sentence.split())
 
@@ -71,24 +72,27 @@ class DialogueTurn:
             for i in range(len(profile_id_tags)):
                 profile_id = profile_id_tags[i].attrib["value"]
                 sentence = profile_id_tags[i].text
+                language = profile_id_tags[i].find("language").text
                 speaking_time = profile_id_tags[i].find("speaking_time").text
-                turn_piece = TurnPiece(profile_id, sentence, speaking_time)
+                turn_piece = TurnPiece(profile_id, sentence, language, speaking_time)
                 self.add_turn_piece(turn_piece)
         if d:
             self.__dict__ = copy.deepcopy(d)
             self.turn_pieces = []
             for piece in d["turn_pieces"]:
                 # recreate the TurnPiece objects
-                self.turn_pieces.append(TurnPiece(piece["profile_id"], piece["sentence"], piece["speaking_time"]))
+                self.turn_pieces.append(TurnPiece(piece["profile_id"], piece["sentence"], piece["language"], piece["speaking_time"]))
 
     def to_xml_string(self):
         root = ET.Element("response")
         for turn_piece in self.turn_pieces:
             profile_id = turn_piece.profile_id
             sentence = turn_piece.sentence
+            language = turn_piece.language
             speaking_time = turn_piece.speaking_time
             profile_id_tag = ET.SubElement(root, "profile_id", value=profile_id)
             profile_id_tag.text = sentence
+            ET.SubElement(profile_id_tag, "language").text = str(language)
             ET.SubElement(profile_id_tag, "speaking_time").text = str(speaking_time)
         return ET.tostring(root, encoding='unicode')
 
@@ -122,6 +126,8 @@ class DialogueTurn:
             if turn_piece.profile_id == self.turn_pieces[-1].profile_id:
                 # Append the transcribed string to the text of the last profile id
                 self.turn_pieces[-1].sentence = self.turn_pieces[-1].sentence + " " + turn_piece.sentence
+                # We keep only the language of the first turn piece
+                self.turn_pieces[-1].language = self.turn_pieces[0].language
                 self.turn_pieces[-1].speaking_time = self.turn_pieces[-1].speaking_time + turn_piece.speaking_time
             # If the id has changed, add a new element
             else:
@@ -135,7 +141,3 @@ class DialogueTurn:
         for piece in self.turn_pieces:
             speaking_time = speaking_time + float(piece.speaking_time)
         return speaking_time
-
-
-
-

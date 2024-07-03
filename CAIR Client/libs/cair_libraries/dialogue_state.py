@@ -20,11 +20,12 @@ class DialogueState:
         self.sentence_type = None
         self.pattern = None
         self.bool = None
-        self.likelinesses = None
+        self.familiarities = None
         self.flags = None
         self.addressed_community = None
         self.dialogue_nuances = None
         self.conversation_history = None
+        self.ongoing_conversation = None
         self.__dict__ = copy.deepcopy(d)
 
     def to_dict(self):

@@ -1,5 +1,5 @@
-from cair_libraries.DialogueStatistics import DialogueStatistics
-from cair_libraries.SpeakerInfo import SpeakerInfo
+from cair_libraries.dialogue_statistics import DialogueStatistics
+from cair_libraries.speaker_info import SpeakerInfo
 import requests
 import json
 import time
