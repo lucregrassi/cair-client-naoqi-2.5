@@ -53,6 +53,8 @@ class PersonalizationServer(object):
             except socket.error as e:
                 if self.running:
                     self.logger.info("Socket error: " + str(e))
+                else:
+                    self.logger.info("Socket closed!")
                 break
         self.logger.info("Server running on " + str(self.host) + ":" + str(self.port))
 
