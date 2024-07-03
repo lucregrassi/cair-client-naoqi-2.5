@@ -1,53 +1,66 @@
-# personalization_data.py
+import socket
+import threading
+import json
 import time
-import sys
-from flask import Flask, request, jsonify
-from threading import Thread
 
 
 class PersonalizationServer(object):
-    def __init__(self, logger, scheduled_interventions=None):
-        super(PersonalizationServer, self).__init__()    
-        if scheduled_interventions is None:
-            scheduled_interventions = []
-        self.scheduled_interventions = scheduled_interventions
-        self.app = Flask(__name__)
-        self._setup_routes()
+    def __init__(self, logger, host="0.0.0.0", port=5000):
+        super(PersonalizationServer, self).__init__()
         self.logger = logger
-
-    def _setup_routes(self):
-        @self.app.route('/CAIR_personalization_server', methods=['POST'])
-        def receive_personalization_data():
-            data = request.json
-            if not data:
-                return jsonify({"error": "No data provided"}), 400
-            try:
-                self.logger.info("Personalization server: received data!")
-                self.scheduled_interventions = data.get("scheduled_interventions", [])
-                self.logger.info(str(time.time()))
-                #self.logger.info(str(self.scheduled_interventions[0]["timestamp"]))
-                return jsonify({"message": "Data received successfully"}), 200
-            except Exception as e:
-                self.logger.info("Personalization server: error processing data " + str(e))
-                return jsonify({"error": str(e)}), 500
-                
-        @self.app.route('/CAIR_personalization_server/stop', methods=['POST'])
-        def stop_server(): 
-            self.logger.info("Personalization server: STOPPING")  
-            sys.exit(1)
-
-    def run_flask_server(self):
-        try:
-            self.app.run("0.0.0.0", port=5000)
-            self.logger.info("Personalization server: starting...")
-        except socket.error:
-            self.logger.info("Personalization server error: address already in use!")
-            
+        self.host = host
+        self.port = port
+        self.scheduled_interventions = []
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind((self.host, self.port))
+        self.server_socket.listen(5)
+        self.server_thread = None
+        self.running = False
+        self.lock = threading.Lock()
 
     def start_server_in_thread(self):
-        thread = Thread(target=self.run_flask_server)
-        thread.daemon = True
-        thread.start()
+        self.running = True
+        self.server_thread = threading.Thread(target=self.run_server)
+        self.server_thread.daemon = True
+        self.server_thread.start()
+
+    def run_server(self):
+        self.logger.info("Server running on " + str(self.host) + ":" + str(self.port))
+        while self.running:
+            try:
+                client_socket, addr = self.server_socket.accept()
+                with client_socket:
+                    data = client_socket.recv(1024)
+                    if not data:
+                        return
+                    try:
+                        request = json.loads(data.decode('utf-8'))
+                        if "scheduled_interventions" in request:
+                            with self.lock:
+                                self.logger.info("Received data: " + json.dumps(request))
+                                self.scheduled_interventions = request["scheduled_interventions"]
+                                # Process the received data
+                                response = {"message": "Data received successfully"}
+                                client_socket.sendall(json.dumps(response).encode('utf-8'))
+                        else:
+                            response = {"error": "Invalid data format"}
+                            self.scheduled_interventions = []
+                            client_socket.sendall(json.dumps(response).encode('utf-8'))
+                    except ValueError:
+                        response = {"error": "Invalid JSON"}
+                        self.scheduled_interventions = []
+                        client_socket.sendall(json.dumps(response).encode('utf-8'))
+            except socket.error as e:
+                if self.running:
+                    self.logger.info("Socket error: " + str(e))
+                break
+        self.logger.info("Server running on " + str(self.host) + ":" + str(self.port))
+
+    def stop_server(self):
+        self.running = False
+        self.server_socket.close()
+        if self.server_thread:
+            self.server_thread.join()
 
     # This method checks for interventions that are due based on their timestamp.
     # Interventions can be either fixed or periodic:
@@ -59,7 +72,7 @@ class PersonalizationServer(object):
     # If an intervention's counter reaches the length of its topics or actions, it resets to allow cyclic execution.
     def get_due_intervention(self):
         current_time = time.time()        
-        self.logger.info("Personalization server: " + str(current_time))
+        self.logger.info("Personalization server current time: " + str(current_time))
         
         # Separate fixed and periodic interventions that are due based on their timestamp
         fixed_interventions = [i for i in self.scheduled_interventions

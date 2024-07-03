@@ -32,7 +32,7 @@ from cair_libraries.personalization_server import PersonalizationServer
 from cair_libraries.dialogue_statistics import DialogueStatistics
 from cair_libraries.dialogue_state import DialogueState
 from cair_libraries.dialogue_turn import DialogueTurn
-from cair_libraries.client_softbank_utils import ClientSoftBankUtils
+from cair_libraries.client_softbank_utils import ClientUtils
 from cair_libraries.client_softbank_action_manager import ActionManager
 from requests.exceptions import ConnectionError
 
@@ -96,7 +96,7 @@ class MyClass(GeneratedClass):
 
          # Instances of the classes in the libs folder
         self.plans = ActionManager(self.logger)
-        self.utils = ClientSoftBankUtils(self.logger)
+        self.utils = ClientUtils(self.logger)
         self.personalization_server = PersonalizationServer(self.logger)
 
         self.speech_reco_event = "Audio/RecognizedWords"
@@ -649,6 +649,6 @@ class MyClass(GeneratedClass):
             pass
         self.onUnload()
         self.onStopped()
-        requests.post("http://localhost:5000/CAIR_personalization_server/stop", verify=False)
+        self.personalization_server.stop_server()
         self.logger.info("Exiting application...")
         sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

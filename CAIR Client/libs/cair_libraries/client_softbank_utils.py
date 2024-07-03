@@ -9,20 +9,20 @@ Affiliation: RICE, DIBRIS, University of Genoa, Italy
 
 This file contains the class ClientSoftBankUtils containing crucial methods used by the CAIR server
 """
-from cair_libraries.dialogue_statistics import DialogueStatistics
-from cair_libraries.speaker_info import SpeakerInfo
-import requests
+import qi
 import json
 import time
 import socket
 import string
-import qi
+from cair_libraries.dialogue_statistics import DialogueStatistics
+from cair_libraries.speaker_info import SpeakerInfo
+import requests
 from naoqi import ALProxy
 
 
-class ClientSoftBankUtils(object):
+class ClientUtils(object):
     def __init__(self, logger):
-        super(ClientSoftBankUtils, self).__init__()
+        super(ClientUtils, self).__init__()
         self.logger = logger
         self.memory = ALProxy("ALMemory")
         self.server_port = self.memory.getData("CAIR/server_port")
@@ -120,7 +120,7 @@ class ClientSoftBankUtils(object):
             self.animated_speech.say(self.voice_speed + "I'm waiting for the server...", self.configuration)
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
-                resp = requests.post("http://" + self.server_ip + ":" + self.port + "/CAIR_hub/start", json=json_language,
+                resp = requests.post("http://" + self.server_ip + ":" + self.server_port + "/CAIR_hub/start", json=json_language,
                                      verify=False)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)

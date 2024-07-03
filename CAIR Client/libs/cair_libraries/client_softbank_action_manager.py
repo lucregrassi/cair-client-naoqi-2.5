@@ -1,6 +1,5 @@
 import qi
 from naoqi import ALProxy
-import threading
 import time
 import re
 
@@ -10,6 +9,7 @@ class ActionManager(object):
         super(ActionManager, self).__init__()
         self.memory = ALProxy("ALMemory")
         self.server_ip = self.memory.getData("CAIR/server_ip")
+        self.voice_speed = self.memory.getData("CAIR/voice_speed")
         self.behavior_manager = ALProxy("ALBehaviorManager")
         self.animated_speech = ALProxy("ALAnimatedSpeech")
         self.configuration = {"bodyLanguageMode": "contextual"}
@@ -19,20 +19,6 @@ class ActionManager(object):
             self.tablet_service = ALProxy("ALTabletService")
         except:
             self.tablet = False
-
-    # This thread function allows the robot to talk while it is performing the action for the corresponding greeting
-    def greeting_thread(self, greeting):
-        self.logger.info(greeting)
-        if greeting == 1:
-            time.sleep(2.5)
-            self.tts.say("Hello")
-        elif greeting == 2:
-            time.sleep(3)
-            self.tts.say("Namastay")
-        elif greeting == 3:
-            time.sleep(3)
-            self.tts.say("Konnichiwa")
-        self.tts.setLanguage("English")
 
     def perform_action(self, item):
         action = re.findall("action=(\w+)", item)[0]
@@ -45,8 +31,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("utility/volume")
                 while self.behavior_manager.isBehaviorRunning("utility/volume"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "voicespeed":
             if self.behavior_manager.isBehaviorInstalled("utility/voice_speed"):
@@ -57,54 +41,36 @@ class ActionManager(object):
                 while self.behavior_manager.isBehaviorRunning("utility/voice_speed"):
                     time.sleep(0.1)
                 self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "hello" or action == "attention":
             if self.behavior_manager.isBehaviorInstalled("greetings/hello"):
-                x = threading.Thread(target=self.greeting_thread, args=(1,))
-                x.start()
                 self.behavior_manager.runBehavior("greetings/hello")
                 while self.behavior_manager.isBehaviorRunning("greetings/hello"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "namaste":
             if self.behavior_manager.isBehaviorInstalled("greetings/namaste"):
-                x = threading.Thread(target=self.greeting_thread, args=(2,))
-                x.start()
                 self.behavior_manager.runBehavior("greetings/namaste")
                 while self.behavior_manager.isBehaviorRunning("greetings/namaste"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "konnichiwa":
             if self.behavior_manager.isBehaviorInstalled("greetings/konnichiwa"):
-                x = threading.Thread(target=self.greeting_thread, args=(3,))
-                x.start()
                 self.behavior_manager.runBehavior("greetings/konnichiwa")
                 while self.behavior_manager.isBehaviorRunning("greetings/konnichiwa"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "time":
             if self.behavior_manager.isBehaviorInstalled("timetools/time"):
                 self.behavior_manager.runBehavior("timetools/time")
                 while self.behavior_manager.isBehaviorRunning("timetools/time"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "date":
             if self.behavior_manager.isBehaviorInstalled("timetools/date"):
                 self.behavior_manager.runBehavior("timetools/date")
                 while self.behavior_manager.isBehaviorRunning("timetools/date"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "weather":
             if self.behavior_manager.isBehaviorInstalled("weatherforecast/weather"):
@@ -114,8 +80,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("weatherforecast/weather")
                 while self.behavior_manager.isBehaviorRunning("weatherforecast/weather"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "playsong":
             if self.behavior_manager.isBehaviorInstalled("musicplayer/play-video"):
@@ -126,8 +90,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("musicplayer/play-video")
                 while self.behavior_manager.isBehaviorRunning("musicplayer/play-video"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "playkaraoke":
             if self.behavior_manager.isBehaviorInstalled("karaokeplayer/play-karaoke"):
@@ -137,8 +99,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("karaokeplayer/play-karaoke")
                 while self.behavior_manager.isBehaviorRunning("karaokeplayer/play-karaoke"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "wikisearch":
             if self.behavior_manager.isBehaviorInstalled("wordtools/wikisearch"):
@@ -148,8 +108,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("wordtools/wikisearch")
                 while self.behavior_manager.isBehaviorRunning("wordtools/wikisearch"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "translate":
             if self.behavior_manager.isBehaviorInstalled("wordtools/translator"):
@@ -162,8 +120,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("wordtools/translator")
                 while self.behavior_manager.isBehaviorRunning("wordtools/translator"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "dictionary":
             if self.behavior_manager.isBehaviorInstalled("wordtools/dictionary"):
@@ -173,8 +129,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("wordtools/dictionary")
                 while self.behavior_manager.isBehaviorRunning("wordtools/dictionary"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "move":
             if self.behavior_manager.isBehaviorInstalled("movement/move"):
@@ -184,8 +138,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("movement/move")
                 while self.behavior_manager.isBehaviorRunning("movement/move"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "go":
             if self.behavior_manager.isBehaviorInstalled("movement/move"):
@@ -195,8 +147,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("movement/go")
                 while self.behavior_manager.isBehaviorRunning("movement/go"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "learnplace":
             if self.behavior_manager.isBehaviorInstalled("movement/learn_place"):
@@ -206,8 +156,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("movement/learn_place")
                 while self.behavior_manager.isBehaviorRunning("movement/learn_place"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "setposition":
             if self.behavior_manager.isBehaviorInstalled("movement/set_position"):
@@ -217,8 +165,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("movement/set_position")
                 while self.behavior_manager.isBehaviorRunning("movement/set_position"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "goto":
             if self.behavior_manager.isBehaviorInstalled("movement/go_to"):
@@ -228,8 +174,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("movement/go_to")
                 while self.behavior_manager.isBehaviorRunning("movement/go_to"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "rest":
             # Check if the docking station was in the map
@@ -240,8 +184,6 @@ class ActionManager(object):
                         self.behavior_manager.runBehavior("movement/rest")
                         while self.behavior_manager.isBehaviorRunning("movement/rest"):
                             time.sleep(0.1)
-                    else:
-                        self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
                 self.memory.removeData("CAIR/go_to_outcome")
 
         elif action == "wakeup":
@@ -251,48 +193,36 @@ class ActionManager(object):
                     self.behavior_manager.runBehavior("movement/wakeup")
                     while self.behavior_manager.isBehaviorRunning("movement/wakeup"):
                         time.sleep(0.1)
-                else:
-                    self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "forgetmap":
             if self.behavior_manager.isBehaviorInstalled("movement/forget_map"):
                 self.behavior_manager.runBehavior("movement/forget_map")
                 while self.behavior_manager.isBehaviorRunning("movement/forget_map"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "hug":
             if self.behavior_manager.isBehaviorInstalled("affectivecommunication/hug"):
                 self.behavior_manager.runBehavior("affectivecommunication/hug")
                 while self.behavior_manager.isBehaviorRunning("affectivecommunication/hug"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "handshake":
             if self.behavior_manager.isBehaviorInstalled("affectivecommunication/handshake"):
                 self.behavior_manager.runBehavior("affectivecommunication/handshake")
                 while self.behavior_manager.isBehaviorRunning("affectivecommunication/handshake"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "privacy":
             if self.behavior_manager.isBehaviorInstalled("provideprivacy/privacy"):
                 self.behavior_manager.runBehavior("provideprivacy/privacy")
                 while self.behavior_manager.isBehaviorRunning("provideprivacy/privacy"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "followme":
             if self.behavior_manager.isBehaviorInstalled("follow-me/."):
                 self.behavior_manager.runBehavior("follow-me/.")
                 while self.behavior_manager.isBehaviorRunning("follow-me/."):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "playmovie":
             if self.behavior_manager.isBehaviorInstalled("movieplayer/play-movie"):
@@ -302,8 +232,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("movieplayer/play-movie")
                 while self.behavior_manager.isBehaviorRunning("movieplayer/play-movie"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "showinstructions":
             if self.behavior_manager.isBehaviorInstalled("videoinstructions/show-instructions"):
@@ -313,8 +241,6 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("videoinstructions/show-instructions")
                 while self.behavior_manager.isBehaviorRunning("videoinstructions/show-instructions"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
 
         elif action == "showexercise":
             if self.behavior_manager.isBehaviorInstalled("videoexercises/play-exercise"):
@@ -324,5 +250,3 @@ class ActionManager(object):
                 self.behavior_manager.runBehavior("videoexercises/play-exercise")
                 while self.behavior_manager.isBehaviorRunning("videoexercises/play-exercise"):
                     time.sleep(0.1)
-            else:
-                self.animated_speech.say(self.voice_speed + self.not_installed_behavior, self.configuration)
