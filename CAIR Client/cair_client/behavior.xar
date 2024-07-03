@@ -132,7 +132,7 @@ class MyClass(GeneratedClass):
             self.tablet = False
 
         self.audio_device = ALProxy("ALAudioDevice")
-        self.audio_device.setOutputVolume(35)
+        self.audio_device.setOutputVolume(50)
 
         self.photoCaptureProxy = ALProxy("ALPhotoCapture", "127.0.0.1", 9559)
         self.photoCaptureProxy.setResolution(2)
@@ -653,11 +653,11 @@ class MyClass(GeneratedClass):
         except:
             self.logger.info("No transformation to delete in memory.")
 
-        # Stop the personalization server
-        self.personalization_server.stop_server()
-
         # Signal that the behavior has stopped
         self.onStopped()
+
+        # Stop the personalization server
+        self.personalization_server.stop_server()
 
         # Exit the application
         self.logger.info("Exiting the application...")
