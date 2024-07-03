@@ -63,6 +63,7 @@ class PersonalizationServer(object):
         self.server_socket.close()
         if self.server_thread:
             self.server_thread.join()
+        sys.exit(0)
 
     # This method checks for interventions that are due based on their timestamp.
     # Interventions can be either fixed or periodic:

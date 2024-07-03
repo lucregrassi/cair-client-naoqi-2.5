@@ -78,7 +78,6 @@ class MyClass(GeneratedClass):
         self.audio_device = ALProxy("ALAudioDevice")
         self.behavior_manager = ALProxy("ALBehaviorManager")
         self.speech_reco.setAudioExpression(False)
-        self.logger.info("Setting voice speed")
         try:
             self.voice_speed = "\\RSPD=90\\"
             self.memory.insertData("CAIR/voice_speed", 90)
@@ -97,6 +96,7 @@ class MyClass(GeneratedClass):
          # Instances of the classes in the libs folder
         self.plans = ActionManager(self.logger)
         self.utils = ClientUtils(self.logger)
+        self.logger.info("Creating instance of personalization server...")
         self.personalization_server = PersonalizationServer(self.logger)
 
         self.speech_reco_event = "Audio/RecognizedWords"
@@ -332,6 +332,13 @@ class MyClass(GeneratedClass):
         global language
         ongoing_conversation = True
 
+        # With Pepper robot, preload the images to be set on the tablet during the conversation
+        if self.tablet:
+            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
+                                             "/apps/" + app_name + "/img/QR_code.png")
+            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
+                                             "/apps/" + app_name + "/img/QR_code.png")
+
         self.logger.info("Starting personalization server in thread")
         self.personalization_server.start_server_in_thread()
 
@@ -350,13 +357,6 @@ class MyClass(GeneratedClass):
 
         # Wake the robot up if not already up
         self.motion.wakeUp()
-
-        # With Pepper robot, preload the images to be set on the tablet during the conversation
-        if self.tablet:
-            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
-                                             "/apps/" + app_name + "/img/QR_code.png")
-            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
-                                             "/apps/" + app_name + "/img/QR_code.png")
 
         # If dense captioning should be used, start the thread to update visual information
         if self.dense_cap:
