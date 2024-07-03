@@ -28,32 +28,11 @@ import re
 import signal
 from naoqi import ALProxy
 from datetime import datetime
-
-import cair_libraries.personalization_server
-reload(cair_libraries.personalization_server)
 from cair_libraries.personalization_server import PersonalizationServer
-
-import cair_libraries.dialogue_statistics
-reload(cair_libraries.dialogue_statistics)
-
-import cair_libraries.dialogue_statistics
-reload(cair_libraries.dialogue_statistics)
 from cair_libraries.dialogue_statistics import DialogueStatistics
-
-import cair_libraries.dialogue_state
-reload(cair_libraries.dialogue_state)
 from cair_libraries.dialogue_state import DialogueState
-
-import cair_libraries.dialogue_turn
-reload(cair_libraries.dialogue_turn)
 from cair_libraries.dialogue_turn import DialogueTurn
-
-import cair_libraries.client_softbank_utils
-reload(cair_libraries.client_softbank_utils)
 from cair_libraries.client_softbank_utils import ClientSoftBankUtils
-
-import cair_libraries.client_softbank_action_manager
-reload(cair_libraries.client_softbank_action_manager)
 from cair_libraries.client_softbank_action_manager import ActionManager
 from requests.exceptions import ConnectionError
 
@@ -672,4 +651,4 @@ class MyClass(GeneratedClass):
         self.onStopped()
         requests.post("http://localhost:5000/CAIR_personalization_server/stop", verify=False)
         self.logger.info("Exiting application...")
-        sys.exit(1)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
+        sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
