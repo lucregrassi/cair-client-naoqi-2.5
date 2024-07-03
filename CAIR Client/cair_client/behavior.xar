@@ -28,12 +28,12 @@ import re
 import signal
 from naoqi import ALProxy
 from datetime import datetime
-from cair_libraries.personalization_server import PersonalizationServer
-from cair_libraries.dialogue_statistics import DialogueStatistics
-from cair_libraries.dialogue_state import DialogueState
 from cair_libraries.dialogue_turn import DialogueTurn
+from cair_libraries.dialogue_state import DialogueState
 from cair_libraries.client_softbank_utils import ClientUtils
+from cair_libraries.dialogue_statistics import DialogueStatistics
 from cair_libraries.client_softbank_action_manager import ActionManager
+from cair_libraries.client_softbank_personalization_server import PersonalizationServer
 from requests.exceptions import ConnectionError
 
 dense_cap = False
