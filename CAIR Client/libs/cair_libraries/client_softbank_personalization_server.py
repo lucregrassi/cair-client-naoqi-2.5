@@ -32,33 +32,40 @@ class PersonalizationServer(object):
             try:
                 client_socket, addr = self.server_socket.accept()
                 with client_socket:
-                    data = client_socket.recv(1024)
-                    if not data:
-                        return
                     try:
-                        request = json.loads(data.decode('utf-8'))
-                        if "scheduled_interventions" in request:
-                            with self.lock:
-                                self.logger.info("Received data: " + json.dumps(request))
-                                self.scheduled_interventions = request["scheduled_interventions"]
-                                # Process the received data
-                                response = {"message": "Data received successfully"}
+                        data = client_socket.recv(1024)
+                        if not data:
+                            return
+                        try:
+                            request = json.loads(data.decode('utf-8'))
+                            if "scheduled_interventions" in request:
+                                with self.lock:
+                                    self.logger.info("Received data: " + json.dumps(request))
+                                    self.scheduled_interventions = request["scheduled_interventions"]
+                                    # Process the received data
+                                    response = {"message": "Data received successfully"}
+                                    client_socket.sendall(json.dumps(response).encode('utf-8'))
+                            else:
+                                response = {"error": "Invalid data format"}
+                                self.scheduled_interventions = []
                                 client_socket.sendall(json.dumps(response).encode('utf-8'))
-                        else:
-                            response = {"error": "Invalid data format"}
+                        except ValueError:
+                            response = {"error": "Invalid JSON"}
                             self.scheduled_interventions = []
                             client_socket.sendall(json.dumps(response).encode('utf-8'))
-                    except ValueError:
-                        response = {"error": "Invalid JSON"}
-                        self.scheduled_interventions = []
-                        client_socket.sendall(json.dumps(response).encode('utf-8'))
+                    except socket.error as e:
+                        if self.running:
+                            self.logger.info("Socket error: " + str(e))
+                        else:
+                            self.logger.info("Socket closed!")
+                        break
             except socket.error as e:
                 if self.running:
                     self.logger.info("Socket error: " + str(e))
                 else:
                     self.logger.info("Socket closed!")
                 break
-        self.logger.info("Server running on " + str(self.host) + ":" + str(self.port))
+        self.logger.info("Server stopped")
 
     def stop_server(self):
         self.running = False
