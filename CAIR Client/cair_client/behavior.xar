@@ -78,6 +78,7 @@ class MyClass(GeneratedClass):
         self.audio_device = ALProxy("ALAudioDevice")
         self.behavior_manager = ALProxy("ALBehaviorManager")
         self.speech_reco.setAudioExpression(False)
+        self.logger.info("Setting voice speed")
         try:
             self.voice_speed = "\\RSPD=90\\"
             self.memory.insertData("CAIR/voice_speed", 90)
@@ -96,7 +97,6 @@ class MyClass(GeneratedClass):
          # Instances of the classes in the libs folder
         self.plans = ActionManager(self.logger)
         self.utils = ClientUtils(self.logger)
-        self.logger.info("Creating instance of personalization server...")
         self.personalization_server = PersonalizationServer(self.logger)
 
         self.speech_reco_event = "Audio/RecognizedWords"
@@ -337,7 +337,7 @@ class MyClass(GeneratedClass):
             self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
                                              "/apps/" + app_name + "/img/QR_code.png")
             self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
-                                             "/apps/" + app_name + "/img/QR_code.png")
+                                          "/apps/" + app_name + "/img/QR_code.png")
 
         self.logger.info("Starting personalization server in thread")
         self.personalization_server.start_server_in_thread()
@@ -630,25 +630,35 @@ class MyClass(GeneratedClass):
                         self.logger.info("REPEAT CONTINUATION: " + str(repeat_continuation))
                         self.animated_speech.say(self.voice_speed + str(repeat_continuation), self.configuration)
 
-
-    def onUnload(self):
-        pass
-
     def onInput_onStop(self):
+        self.logger.info("Stopping application...")
+
+        # Stop the main loop
+        self.isAlive = False
+
+        # Hide the tablet image if the tablet is available
         if self.tablet:
             self.tablet_service.hideImage()
-        self.isAlive = False
+
+        # Set the robot to interactive mode
         self.al.setState("interactive")
+
+        # Reset autonomous abilities
         self.utils.setAutonomousAbilities(True, True, True, True, True)
-        # If present, delete the transformation - if the robot moves outside CAIR it is no more valid
+
+        # Remove any transformation data in memory
         try:
             self.memory.removeData("CAIR/transformation_matrix")
             self.memory.removeData("CAIR/theta")
         except:
             self.logger.info("No transformation to delete in memory.")
-            pass
-        self.onUnload()
-        self.onStopped()
+
+        # Stop the personalization server
         self.personalization_server.stop_server()
-        self.logger.info("Exiting application...")
+
+        # Signal that the behavior has stopped
+        self.onStopped()
+
+        # Exit the application
+        self.logger.info("Exiting the application...")
         sys.exit(0)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
