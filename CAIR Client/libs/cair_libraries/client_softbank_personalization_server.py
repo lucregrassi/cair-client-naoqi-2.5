@@ -30,8 +30,13 @@ class PersonalizationServer(object):
         self.logger.info("Server running on " + str(self.host) + ":" + str(self.port))
         while self.running:
             try:
-                self.logger.info("Waiting on accept for a new connection")
-                client_socket, addr = self.server_socket.accept()
+                self.logger.info("Waiting for a new connection...")
+                self.server_socket.settimeout(10.0)
+                try:
+                    client_socket, addr = self.server_socket.accept()
+                except socket.timeout:
+                    self.logger.info("Socket timed out while accepting new connection")
+                    continue
                 self.logger.info("Accepted connection on address: " + str(addr))
                 try:
                     data = client_socket.recv(1024)
@@ -76,11 +81,9 @@ class PersonalizationServer(object):
         self.server_socket.close()
         self.logger.info("Socket server closed")
         if self.server_thread:
-            self.logger.info("Joining server thread")
+            self.logger.info("Waiting for server thread to end...")
             self.server_thread.join()
-            self.logger.info("Server thread joined")
-            
-        self.logger.info("exiting...")
+            self.logger.info("Server thread joined!")
 
     # This method checks for interventions that are due based on their timestamp.
     # Interventions can be either fixed or periodic:

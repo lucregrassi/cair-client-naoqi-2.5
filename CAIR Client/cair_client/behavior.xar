@@ -39,13 +39,13 @@ from requests.exceptions import ConnectionError
 dense_cap = False
 log_data = False
 
-lab_server = "130.251.13.111"
+lab_server = "130.251.13.192"
 
 # Set the location of the server
 server_ip = lab_server
 
 # Location of the external microphone
-microphone_ip = "130.251.13.111"
+microphone_ip = "130.251.13.105"
 audio_recorder_ip = microphone_ip
 registration_ip = microphone_ip
 log_service_ip = microphone_ip
@@ -387,7 +387,11 @@ class MyClass(GeneratedClass):
                 # Tell the audio recorder that the client is ready to receive the user reply
                 self.microphone_socket.send(self.dialogue_state.sentence_type.encode("utf-8"))
                 # The first string received can be an ack that the user has finished talking (after 2s) or a timeout
-                received_str = self.microphone_socket.recv(1024).decode('utf-8')
+                try:
+                    received_str = self.microphone_socket.recv(1024).decode('utf-8')
+                except socket.error as e:
+                    self.logger.info("Socket error: " + str(e))
+                    self.onInput_onStop()
                 # If the received string is empty it means that the connection is broken
                 self.check_socket_connection(received_str)
                 # If the received string is timeout it means that the user remained in silence for some time
@@ -528,7 +532,6 @@ class MyClass(GeneratedClass):
                 if self.connection_lost:
                     self.logger.info("Connection with Hub lost")
                     self.onInput_onStop()
-                    sys.exit(1)
 
                 # If there is a plan sentence, it means that something has been matched by the Plan manager service
                 if self.plan_sentence:
@@ -640,12 +643,6 @@ class MyClass(GeneratedClass):
         if self.tablet:
             self.tablet_service.hideImage()
 
-        # Set the robot to interactive mode
-        self.al.setState("interactive")
-
-        # Reset autonomous abilities
-        self.utils.setAutonomousAbilities(True, True, True, True, True)
-
         # Remove any transformation data in memory
         try:
             self.memory.removeData("CAIR/transformation_matrix")
@@ -658,6 +655,12 @@ class MyClass(GeneratedClass):
 
         # Stop the personalization server
         self.personalization_server.stop_server()
+
+        # Set the robot to interactive mode
+        self.al.setState("interactive")
+
+        # Reset autonomous abilities
+        self.utils.setAutonomousAbilities(True, True, True, True, True)
 
         # Exit the application
         self.logger.info("Exiting the application...")
