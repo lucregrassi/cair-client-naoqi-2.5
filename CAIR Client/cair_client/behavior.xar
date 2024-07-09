@@ -40,12 +40,14 @@ dense_cap = False
 log_data = False
 
 lab_server = "130.251.13.192"
+local_server = "130.251.13.122"
 
 # Set the location of the server
-server_ip = lab_server
+server_ip = local_server
 
 # Location of the external microphone
-microphone_ip = "130.251.13.105"
+# Raspberry 130.251.13.117 in the lab
+microphone_ip = "130.251.13.117"
 audio_recorder_ip = microphone_ip
 registration_ip = microphone_ip
 log_service_ip = microphone_ip
@@ -300,7 +302,7 @@ class MyClass(GeneratedClass):
             error = hub_response.json().get("error", "")
             if error != "":
                 self.logger.info(error)
-                sys.exit(1)
+                self.onInput_onStop()
             # Overwrite the array containing the states of the profiles with those contained in the Hub response
             # The speakers info are not sent to the Hub.
             self.dialogue_state = DialogueState(d=hub_response.json()['dialogue_state'])
@@ -593,8 +595,8 @@ class MyClass(GeneratedClass):
                 if req2_thread.is_alive():
                     req2_thread.join()
                 if self.connection_lost:
-                    self.logger.info("Connection with Hub lost")
-                    sys.exit(1)
+                    self.logger.info("Connection with Hub lost!")
+                    self.onInput_onStop()
 
                 if self.dialogue_sentence[1][1] != "":
                     dialogue_sentence2 = self.dialogue_sentence[1:]

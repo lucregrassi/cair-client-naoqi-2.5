@@ -25,7 +25,7 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         today = date.today()
-        if self.language == "it":
+        if self.language == "it-IT":
             d1 = today.strftime("%d/%m/%Y")
             to_say = "Oggi è il " + str(d1)
         else:

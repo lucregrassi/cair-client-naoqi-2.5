@@ -24,12 +24,17 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        if language == "it":
-            to_say = "Sono le " + str(datetime.datetime.now().hour) + " e " + str(datetime.datetime.now().minute) + " minuti."
-        else:
-            to_say = "It's " + str(datetime.datetime.now().hour) + " e " + str(datetime.datetime.now().minute)
-        self.animated_speech.say(self.voice_speed + to_say, self.configuration)
-        self.onStopped()
+        try:
+            now = datetime.datetime.now()
+            adjusted_time = now + datetime.timedelta(hours=2)
+            if self.language == "it-IT":
+                to_say = "Sono le " + str(adjusted_time.hour) + " e " + str(adjusted_time.minute) + " minuti."
+            else:
+                to_say = "It's " + str(adjusted_time.hour) + ":" + str(adjusted_time.minute)
+            self.animated_speech.say(self.voice_speed + to_say, self.configuration)
+            self.onStopped()
+        except:
+            pass
 
     def onInput_onStop(self):
         self.onUnload()
