@@ -5,7 +5,7 @@ Authors:     Lucrezia Grassi (concept, design and code writing),
 Email:       lucrezia.grassi@edu.unige.it
 Affiliation: RICE, DIBRIS, University of Genoa, Italy
 
-This file contains the class ClientUtils containing crucial methods used by the CAIR server
+This file contains the class Utils containing crucial methods used by the CAIR server
 """
 from cair_libraries.dialogue_statistics import DialogueStatistics
 from cair_libraries.speaker_info import SpeakerInfo

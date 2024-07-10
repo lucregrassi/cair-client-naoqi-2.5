@@ -4,10 +4,8 @@ import json
 import time
 
 
-class PersonalizationServer(object):
-    def __init__(self, logger, host="0.0.0.0", port=5000):
-        super(PersonalizationServer, self).__init__()
-        self.logger = logger
+class PersonalizationServer:
+    def __init__(self, host="0.0.0.0", port=5000):
         self.host = host
         self.port = port
         self.scheduled_interventions = []
@@ -27,28 +25,28 @@ class PersonalizationServer(object):
         self.server_thread.start()
 
     def run_server(self):
-        self.logger.info("Server running on " + str(self.host) + ":" + str(self.port))
+        print("Server running on " + str(self.host) + ":" + str(self.port))
         while self.running:
             try:
-                self.logger.info("Waiting for a new connection...")
+                print("Waiting for a new connection...")
                 self.server_socket.settimeout(10.0)
                 try:
                     client_socket, addr = self.server_socket.accept()
                 except socket.timeout:
-                    self.logger.info("Socket timed out while accepting new connection")
+                    print("Socket timed out while accepting new connection")
                     continue
-                self.logger.info("Accepted connection on address: " + str(addr))
+                print("Accepted connection on address: " + str(addr))
                 try:
                     data = client_socket.recv(1024)
                     if not data:
-                        self.logger.info("No data received, returning.")
+                        print("No data received, returning.")
                         client_socket.close()
                         return
                     try:
                         request = json.loads(data.decode('utf-8'))
                         if "scheduled_interventions" in request:
                             with self.lock:
-                                self.logger.info("Received data: " + json.dumps(request))
+                                print("Received data: " + json.dumps(request))
                                 # Save received data
                                 self.scheduled_interventions = request["scheduled_interventions"]
                                 response = {"message": "Data received successfully"}
@@ -64,26 +62,26 @@ class PersonalizationServer(object):
                     client_socket.close()
                 except socket.error as e:
                     if self.running:
-                        self.logger.info("Socket error: " + str(e))
+                        print("Socket error: " + str(e))
                     else:
-                        self.logger.info("Socket closed!")
+                        print("Socket closed!")
                     break
             except socket.error as e:
                 if self.running:
-                    self.logger.info("Socket error: " + str(e))
+                    print("Socket error: " + str(e))
                 else:
-                    self.logger.info("Socket closed!")
+                    print("Socket closed!")
                 break
-        self.logger.info("Server stopped")
+        print("Server stopped")
 
     def stop_server(self):
         self.running = False
         self.server_socket.close()
-        self.logger.info("Socket server closed")
+        print("Socket server closed")
         if self.server_thread:
-            self.logger.info("Waiting for server thread to end...")
+            print("Waiting for server thread to end...")
             self.server_thread.join()
-            self.logger.info("Server thread joined!")
+            print("Server thread joined!")
 
     # This method checks for interventions that are due based on their timestamp.
     # Interventions can be either fixed or periodic:
@@ -94,9 +92,9 @@ class PersonalizationServer(object):
     # The method keeps track of which topic/action has been chosen the last time using a counter.
     # If an intervention's counter reaches the length of its topics or actions, it resets to allow cyclic execution.
     def get_due_intervention(self):
-        current_time = time.time()        
-        self.logger.info("Personalization server current time: " + str(current_time))
-        
+        current_time = time.time()
+        print("Personalization server current time: " + str(current_time))
+
         # Separate fixed and periodic interventions that are due based on their timestamp
         fixed_interventions = [i for i in self.scheduled_interventions
                                if i['type'] == 'fixed' and i['timestamp'] <= current_time]
@@ -113,7 +111,7 @@ class PersonalizationServer(object):
         elif periodic_interventions:
             due_intervention = periodic_interventions[0]
         else:
-            self.logger.info("Server: no due interventions")
+            print("Server: no due interventions")
             return None  # No due interventions
 
         # Increment the counter to keep track of execution times or initialize it if not present
@@ -142,3 +140,11 @@ class PersonalizationServer(object):
                 intervention["timestamp"] = intervention["timestamp"] + intervention["period"]
                 break
         return result
+
+
+if __name__ == '__main__':
+    server = PersonalizationServer()
+    server.start_server_in_thread()
+    time.sleep(10)
+    print("Stopping server...")
+    server.stop_server()
