@@ -41,13 +41,14 @@ log_data = False
 
 lab_server = "130.251.13.192"
 local_server = "130.251.13.122"
+raspberry = "200.200.200.103"
 
 # Set the location of the server
-server_ip = local_server
+server_ip = lab_server
 
 # Location of the external microphone
 # Raspberry 130.251.13.117 in the lab
-microphone_ip = "130.251.13.117"
+microphone_ip = raspberry
 audio_recorder_ip = microphone_ip
 registration_ip = microphone_ip
 log_service_ip = microphone_ip
@@ -124,6 +125,8 @@ class MyClass(GeneratedClass):
 
         self.nuance_vectors_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
                                         "nuance_vectors.json"
+        self.intervention_log_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/" \
+                                        "intervention_log.json"
         self.trigger_sentences_folder = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/trigger_sentences"
 
         self.logger.info("Trying to connect to ALTabletService...")
@@ -168,7 +171,8 @@ class MyClass(GeneratedClass):
         self.log_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.log_data = log_data
 
-        self.due_intervention = {"type": None, "exclusive": False}
+        self.due_intervention = {"type": None, "exclusive": False, "timestamp": None}
+        self.past_due_interventions = []
 
     def send_log_data(self, to_log):
         if self.log_data:
@@ -290,6 +294,10 @@ class MyClass(GeneratedClass):
             self.dialogue_statistics = DialogueStatistics(d=json.load(f))
 
         self.dialogue_state.prev_dialogue_sentence = [["s", self.previous_sentence]]
+
+        if os.path.exists(self.intervention_log_file_path):
+            with open(self.intervention_log_file_path) as f:
+                self.past_due_interventions = json.load(f)["past_due_interventions"]
 
     def hub_request(self, data):
         encoded_data = json.dumps(data).encode('utf-8')
@@ -421,6 +429,13 @@ class MyClass(GeneratedClass):
                         self.logger.info("The XML is not complete.")
                         xml_string = xml_string + self.microphone_socket.recv(1024).decode('utf-8')
             else:
+                # Log the information regarding to the intervention
+                self.due_intervention["timestamp"] = time.time() - self.due_intervention["timestamp"]
+                self.past_due_interventions.append(self.due_intervention.copy())
+                with open(self.intervention_log_file_path, 'w') as intervention_log_file:
+                    json.dump({"past_due_interventions": self.past_due_interventions}, intervention_log_file, ensure_ascii=False, indent=4)
+                    intervention_log_file.write('\n')
+
                 # If there is a due intervention, create the xml string with the sentence of the intervention
                 xml_string = ('<response><profile_id value="' + self.dialogue_statistics.mapping_index_speaker[int(0)] +
                               '">' + self.due_intervention["sentence"] + '<language>' + language +

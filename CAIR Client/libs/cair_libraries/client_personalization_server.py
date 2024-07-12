@@ -136,6 +136,8 @@ class PersonalizationServer:
         # Update the counter in the original scheduled_interventions list
         for intervention in self.scheduled_interventions:
             if intervention == due_intervention:
+                # Store the intervention timestamp in the result
+                result["timestamp"] = intervention["timestamp"]
                 intervention["counter"] = counter
                 intervention["timestamp"] = intervention["timestamp"] + intervention["period"]
                 break
