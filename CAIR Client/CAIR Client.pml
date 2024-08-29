@@ -33,7 +33,6 @@
         <File name="QR_code" src="html/img/QR_code.png" />
         <File name="client_softbank_personalization_server" src="libs/cair_libraries/client_softbank_personalization_server.py" />
         <File name="client_personalization_server" src="libs/cair_libraries/client_personalization_server.py" />
-        <File name="personalization_server" src="libs/cair_libraries/personalization_server.py" />
         <File name="REQUESTED" src="libs/Flask-1.1.2.dist-info/REQUESTED" />
         <File name="__init__" src="libs/click/__init__.py" />
         <File name="__init__" src="libs/click/__init__.pyc" />
