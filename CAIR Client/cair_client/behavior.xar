@@ -303,11 +303,11 @@ class MyClass(GeneratedClass):
         encoded_data = json.dumps(data).encode('utf-8')
         compressed_data = zlib.compress(encoded_data)
         start_time = time.time()
-        hub_response = requests.get(BASE_CAIR_hub, data=compressed_data, verify=False)
+        hub_response = requests.post(BASE_CAIR_hub, data=compressed_data, verify=False)
         end_time = time.time()
         # If the Hub cannot contact the dialogue service, the response will be empty
         if hub_response:
-            error = hub_response.json().get("error", "")
+            error = hub_response.json().post("error", "")
             if error != "":
                 self.logger.info(error)
                 self.onInput_onStop()
