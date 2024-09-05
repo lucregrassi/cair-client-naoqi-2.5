@@ -81,8 +81,8 @@ class ClientUtils:
     def acquire_initial_state(self, language):
         json_language = {"language": language}
         # Try to contact the server and retry until the dialogue state is received
-        resp = requests.get("http://" + self.server_ip + ":" + self.port + "/CAIR_hub/start", json=json_language,
-                            verify=False)
+        resp = requests.post("http://" + self.server_ip + ":" + self.port + "/CAIR_hub/start", json=json_language,
+                             verify=False)
         print(resp)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
