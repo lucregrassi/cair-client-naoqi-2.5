@@ -17,13 +17,14 @@ import string
 
 
 class ClientUtils:
-    def __init__(self, port, server_ip, registration_ip):
+    def __init__(self, port, server_ip, registration_ip, certificate):
         self.server_ip = server_ip
         self.registration_ip = registration_ip
         self.port = port
         self.dialogue_state_file_path = "session_data/dialogue_state.json"
         self.speakers_info_file_path = "session_data/speakers_info.json"
         self.dialogue_statistics_file_path = "session_data/dialogue_statistics.json"
+        self.certificate = certificate
 
     def process_sentence(self, sentence, speakers_info):
         sentence = self.replace_schwa(sentence, speakers_info)
@@ -82,7 +83,7 @@ class ClientUtils:
         json_language = {"language": language}
         # Try to contact the server and retry until the dialogue state is received
         resp = requests.post("http://" + self.server_ip + ":" + self.port + "/CAIR_hub/start", json=json_language,
-                             verify=False)
+                             verify=self.certificate)
         print(resp)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
@@ -93,7 +94,7 @@ class ClientUtils:
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
                 resp = requests.post("http://" + self.server_ip + ":" + self.port + "/CAIR_hub/start", json=json_language,
-                                     verify=False)
+                                     verify=self.certificate)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)
         # Store the dialogue state in the corresponding file

@@ -24,7 +24,6 @@
         <File name="SpeakerInfo" src="libs/cair_libraries/speaker_info.py" />
         <File name="Utils" src="libs/cair_libraries/server_utils.py" />
         <File name="__init__" src="libs/cair_libraries/__init__.py" />
-        <File name="" src="libs/cair_libraries/.gitignore" />
         <File name="trigger_sentences_cn-CN" src="trigger_sentences/trigger_sentences_cn-CN.txt" />
         <File name="trigger_sentences_en-US" src="trigger_sentences/trigger_sentences_en-US.txt" />
         <File name="trigger_sentences_es-ES" src="trigger_sentences/trigger_sentences_es-ES.txt" />
@@ -245,6 +244,8 @@
         <File name="user_agent" src="libs/werkzeug/wrappers/user_agent.pyc" />
         <File name="wsgi" src="libs/werkzeug/wsgi.py" />
         <File name="wsgi" src="libs/werkzeug/wsgi.pyc" />
+        <File name="" src=".gitignore" />
+        <File name="cert" src="certs/cert.pem" />
     </Resources>
     <Topics />
     <IgnoredPaths />
