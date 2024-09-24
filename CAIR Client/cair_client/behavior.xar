@@ -35,16 +35,23 @@ from cair_libraries.dialogue_statistics import DialogueStatistics
 from cair_libraries.client_softbank_action_manager import ActionManager
 from cair_libraries.client_softbank_personalization_server import PersonalizationServer
 from requests.exceptions import ConnectionError
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv('/data/home/nao/.local/share/PackageManager/apps/cair_client/.env')
+
+# Access environment variables
+openai_api_key = os.getenv('OPENAI_API_KEY')
 
 dense_cap = False
 log_data = False
 
 lab_server = "130.251.13.192"
-local_server = "130.251.13.111"
+local_server = "130.251.13.117"
 raspberry = "130.251.13.124"
 
 # Set the location of the server
-server_ip = local_server
+server_ip = lab_server
 
 # Location of the external microphone
 # Raspberry 130.251.13.124 in the lab
@@ -258,7 +265,7 @@ class MyClass(GeneratedClass):
             self.logger.info("First user!")
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
-            welcome_sentence_str = self.utils.acquire_initial_state(language)
+            welcome_sentence_str = self.utils.acquire_initial_state(language, openai_api_key)
             # Retrieve starting nuance vectors
             with open(self.nuance_vectors_file_path) as f:
                 self.nuance_vectors = json.load(f)
@@ -310,7 +317,7 @@ class MyClass(GeneratedClass):
         end_time = time.time()
         # If the Hub cannot contact the dialogue service, the response will be empty
         if hub_response:
-            error = hub_response.json().post("error", "")
+            error = hub_response.json().get("error", "")
             if error != "":
                 self.logger.info(error)
                 self.onInput_onStop()
@@ -528,7 +535,9 @@ class MyClass(GeneratedClass):
 
                 # Compose the payload of the message to be sent to the server
                 data = {"req_type": "reply",
-                        "client_sentence": xml_string, "language": language,
+                        "openai_api_key": openai_api_key,
+                        "client_sentence": xml_string,
+                        "language": language,
                         "due_intervention": self.due_intervention,
                         "dialogue_state": self.dialogue_state.to_dict(),
                         "dialogue_statistics": self.dialogue_statistics.to_dict(),
@@ -544,6 +553,8 @@ class MyClass(GeneratedClass):
                 # Create the thread for the first request
                 req1_thread = threading.Thread(target=self.hub_request, args=(data,))
                 req1_thread.start()
+                self.logger.info("Request 1 thread started")
+
                 # Wait for filler sentence thread only if there is no intervention to do
                 if self.due_intervention["type"] is None:
                     filler_sentence_thread.join()
@@ -573,6 +584,7 @@ class MyClass(GeneratedClass):
                         else:
                             item = item.encode('utf-8')
                             self.plans.perform_action(item)
+                # If the action has changed the voice speed
                 self.voice_speed = "\\RSPD=" + str(self.memory.getData("CAIR/voice_speed")) + "\\"
 
                 # Make a copy of the dialogue sentence before it is modified by the second request

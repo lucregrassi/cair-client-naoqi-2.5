@@ -246,6 +246,24 @@
         <File name="wsgi" src="libs/werkzeug/wsgi.pyc" />
         <File name="" src=".gitignore" />
         <File name="server" src="certs/server.crt" />
+        <File name="__init__" src="libs/dotenv/__init__.py" />
+        <File name="__init__" src="libs/dotenv/__init__.pyc" />
+        <File name="cli" src="libs/dotenv/cli.py" />
+        <File name="cli" src="libs/dotenv/cli.pyc" />
+        <File name="compat" src="libs/dotenv/compat.py" />
+        <File name="compat" src="libs/dotenv/compat.pyc" />
+        <File name="ipython" src="libs/dotenv/ipython.py" />
+        <File name="ipython" src="libs/dotenv/ipython.pyc" />
+        <File name="main" src="libs/dotenv/main.py" />
+        <File name="main" src="libs/dotenv/main.pyc" />
+        <File name="parser" src="libs/dotenv/parser.py" />
+        <File name="parser" src="libs/dotenv/parser.pyc" />
+        <File name="py" src="libs/dotenv/py.typed" />
+        <File name="variables" src="libs/dotenv/variables.py" />
+        <File name="variables" src="libs/dotenv/variables.pyc" />
+        <File name="version" src="libs/dotenv/version.py" />
+        <File name="version" src="libs/dotenv/version.pyc" />
+        <File name="" src=".env" />
     </Resources>
     <Topics />
     <IgnoredPaths />
