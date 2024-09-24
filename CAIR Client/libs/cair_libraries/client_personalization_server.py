@@ -5,7 +5,7 @@ import time
 
 
 class PersonalizationServer:
-    def __init__(self, host="0.0.0.0", port=5000):
+    def __init__(self, host="0.0.0.0", port=8000):
         self.host = host
         self.port = port
         self.scheduled_interventions = []

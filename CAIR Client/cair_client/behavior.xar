@@ -40,15 +40,15 @@ dense_cap = False
 log_data = False
 
 lab_server = "130.251.13.192"
-local_server = "130.251.13.146"
+local_server = "130.251.13.111"
 raspberry = "130.251.13.124"
 
 # Set the location of the server
 server_ip = local_server
 
 # Location of the external microphone
-# Raspberry 130.251.13.117 in the lab
-microphone_ip = raspberry
+# Raspberry 130.251.13.124 in the lab
+microphone_ip = local_server
 audio_recorder_ip = microphone_ip
 registration_ip = microphone_ip
 log_service_ip = microphone_ip
@@ -98,7 +98,7 @@ class MyClass(GeneratedClass):
         self.memory.insertData("CAIR/app_name", app_name)
 
         # Instances of the classes in the libs folder
-        self.certificate = "data/home/nao/.local/share/PackageManager/apps/" + app_name + "/certs/cert.pem"
+        self.certificate = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/certs/server.crt"
         self.plans = ActionManager(self.logger)
         self.utils = ClientUtils(self.logger, self.certificate)
         self.personalization_server = PersonalizationServer(self.logger)
@@ -203,11 +203,13 @@ class MyClass(GeneratedClass):
 
             # Create a dictionary with the encoded image
             data = {"frame": img_encoded}
+            # Serialize the data to JSON format
+            json_data = json.dumps(data)
             # Send the image to the server using a POST request
             try:
                 # Log the time needed to perform the request and get the response
                 request_start_time = time.time()
-                response = requests.post(img_url, data=data, headers={"Content-Type":"application/json"})
+                response = requests.post(img_url, data=json_data, headers={"Content-Type":"application/json"})
                 self.dense_cap_result = response.json()["result"]
                 request_end_time = time.time()
                 to_log = "v#timestamp:" + date_time_str + "\n" \

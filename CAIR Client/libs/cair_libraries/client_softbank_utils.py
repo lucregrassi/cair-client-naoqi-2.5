@@ -39,6 +39,7 @@ class ClientUtils(object):
         self.dialogue_statistics_file_path = "/data/home/nao/.local/share/PackageManager/apps/" + self.app_name + \
                                              "/dialogue_statistics.json"
         self.certificate = certificate
+        self.BASE_CAIR_hub_start = "https://" + self.server_ip + ":" + self.server_port + "/CAIR_hub/start"
 
         try:
             # self.voice_speed = "\\RSPD=100\\"
@@ -107,11 +108,11 @@ class ClientUtils(object):
 
     # This method performs a GET request to the cloud to get the initial sentence and the dialogue state that will be used
     # for all the speakers. Then, it initializes the speakers stats and speakers info data for the unknown speaker
-    def acquire_initial_state(self, language):
-        json_language = {"language": language}
+    def acquire_initial_state(self, language, openai_api_key):
+        json_data = json.dumps({"language": language, "openai_api_key": openai_api_key})
         # Try to contact the server and retry until the dialogue state is received
-        resp = requests.post("http://" + self.server_ip + ":" + self.server_port + "/CAIR_hub/start", data=json_language,
-                             headers={'Content-Type': 'application/json'}, verify=self.certificate)
+        resp = requests.post(self.BASE_CAIR_hub_start, data=json_data, headers={'Content-Type': 'application/json'},
+                             verify=self.certificate)
         print(resp)
         first_dialogue_sentence = resp.json()["first_sentence"]
         dialogue_state = resp.json()['dialogue_state']
@@ -121,8 +122,9 @@ class ClientUtils(object):
             self.animated_speech.say(self.voice_speed + "I'm waiting for the server...", self.configuration)
             # Keep on trying to perform requests to the server until it is reachable.
             while not dialogue_state:
-                resp = requests.post("http://" + self.server_ip + ":" + self.server_port + "/CAIR_hub/start", data=json_language,
-                                     headers={'Content-Type': 'application/json'}, verify=self.certificate)
+                resp = requests.post(self.BASE_CAIR_hub_start, data=json_data,
+                                     headers={'Content-Type': 'application/json'},
+                                     verify=self.certificate)
                 dialogue_state = resp.json()['dialogue_state']
                 time.sleep(1)
         # Store the dialogue state in the corresponding file

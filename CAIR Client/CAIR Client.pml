@@ -245,7 +245,7 @@
         <File name="wsgi" src="libs/werkzeug/wsgi.py" />
         <File name="wsgi" src="libs/werkzeug/wsgi.pyc" />
         <File name="" src=".gitignore" />
-        <File name="cert" src="certs/cert.pem" />
+        <File name="server" src="certs/server.crt" />
     </Resources>
     <Topics />
     <IgnoredPaths />
