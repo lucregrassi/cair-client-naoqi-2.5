@@ -105,7 +105,7 @@ class MyClass(GeneratedClass):
         self.memory.insertData("CAIR/app_name", app_name)
 
         # Instances of the classes in the libs folder
-        self.certificate = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/certs/server_" + str(server_ip.replace(".", "_")) + ".crt"
+        self.certificate = "/data/home/nao/.local/share/PackageManager/apps/" + app_name + "/certs/server_" + server_ip.replace(".", "_") + ".crt"
         self.plans = ActionManager(self.logger)
         self.utils = ClientUtils(self.logger, self.certificate)
         self.personalization_server = PersonalizationServer(self.logger)
