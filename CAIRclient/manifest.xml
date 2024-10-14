@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package version="0.0.0" uuid="cair_client">
+ <names>
+  <name lang="en_US">CAIR Client</name>
+ </names>
+ <supportedLanguages>
+  <language>en_US</language>
+  <language>it_IT</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+  <language>it_IT</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path="cair_client">
+   <nature>interactive</nature>
+   <triggerSentences>
+    <sentence lang="en_US">Let's talk</sentence>
+    <sentence lang="en_US">Connect to CAIR</sentence>
+    <sentence lang="it_IT">Parliamo</sentence>
+    <sentence lang="it_IT">Connettiti a CAIR</sentence>
+   </triggerSentences>
+   <loadingResponses>
+    <sentence lang="en_US">Sure, let's talk!</sentence>
+    <sentence lang="it_IT">Certo, dammi solo un attimo!</sentence>
+    <sentence lang="it_IT">Non vedo l'ora di parlare con te!</sentence>
+   </loadingResponses>
+   <permissions/>
+  </behaviorContent>
+ </contents>
+</package>

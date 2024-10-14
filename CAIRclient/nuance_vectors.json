@@ -1,0 +1,19 @@
+{
+    "flags": {
+        "diversity": [0, 0, 0, 1],
+        "time": [0, 0, 0, 1],
+        "place": [0, 0, 0, 1],
+        "tone": [0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "positive_speech_act": [0, 0, 0, 1],
+        "contextual_speech_act": [0, 0, 0, 0, 1]
+    },
+    "values": {
+        "diversity": ["any", "good mental health", "no physical problems"],
+        "time": ["morning", "summer", "July"],
+        "place": ["maritime station", "Genoa", "Italy"],
+        "tone": ["humorous", "kind", "dramatic", "controversial", "aggressive", "teasing", "alarmist",
+                 "worried", "neutral"],
+        "positive_speech_act": ["assertive", "commissive", "expressive"],
+        "contextual_speech_act": ["assertive", "commissive", "expressive", "declarative"]
+    }
+}
