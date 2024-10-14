@@ -9,8 +9,8 @@
     },
     "values": {
         "diversity": ["any", "good mental health", "no physical problems"],
-        "time": ["morning", "summer", "July"],
-        "place": ["maritime station", "Genoa", "Italy"],
+        "time": ["morning", "autumn", "October"],
+        "place": ["Museo dei Campionissimi", "Novi Ligure", "Italy"],
         "tone": ["humorous", "kind", "dramatic", "controversial", "aggressive", "teasing", "alarmist",
                  "worried", "neutral"],
         "positive_speech_act": ["assertive", "commissive", "expressive"],

@@ -264,6 +264,73 @@
         <File name="version" src="libs/dotenv/version.py" />
         <File name="version" src="libs/dotenv/version.pyc" />
         <File name="" src=".env" />
+        <File name="RICE_arborio" src="html/img/RICE_arborio.png" />
+        <File name="RICE_baldo" src="html/img/RICE_baldo.png" />
+        <File name="RICE_basmati" src="html/img/RICE_basmati.png" />
+        <File name="RICE_carnaroli" src="html/img/RICE_carnaroli.png" />
+        <File name="RICE_jasmine" src="html/img/RICE_jasmine.png" />
+        <File name="RICE_ofada" src="html/img/RICE_ofada.png" />
+        <File name="RICE_venere" src="html/img/RICE_venere.png" />
+        <File name="master" src="libs/cairlib/.git/logs/refs/heads/master" />
+        <File name="v4" src="libs/cairlib/.git/logs/refs/heads/v4.0" />
+        <File name="HEAD" src="libs/cairlib/.git/logs/refs/remotes/origin/HEAD" />
+        <File name="master" src="libs/cairlib/.git/logs/refs/remotes/origin/master" />
+        <File name="v3" src="libs/cairlib/.git/logs/refs/remotes/origin/v3.0" />
+        <File name="v4" src="libs/cairlib/.git/logs/refs/remotes/origin/v4.0" />
+        <File name="6de686384a5e3abe44096098276d393877a2c2" src="libs/cairlib/.git/objects/42/6de686384a5e3abe44096098276d393877a2c2" />
+        <File name="1b89aeeda0de1c87f3cb28ddb64039dc9b6883" src="libs/cairlib/.git/objects/95/1b89aeeda0de1c87f3cb28ddb64039dc9b6883" />
+        <File name="378ad99d4d1453cb89d27e9ff6883ce378ff79" src="libs/cairlib/.git/objects/95/378ad99d4d1453cb89d27e9ff6883ce378ff79" />
+        <File name="3c5612c21c82e839ba40d16c6b26771c1046b6" src="libs/cairlib/.git/objects/95/3c5612c21c82e839ba40d16c6b26771c1046b6" />
+        <File name="8d86984ba4f6e92b7675e3ce9771838f05e748" src="libs/cairlib/.git/objects/95/8d86984ba4f6e92b7675e3ce9771838f05e748" />
+        <File name="d8011740a98e23a86f49d80a2357eb652c7562" src="libs/cairlib/.git/objects/95/d8011740a98e23a86f49d80a2357eb652c7562" />
+        <File name="3a203cab4dc1a1eeb215578766610dbee30dde" src="libs/cairlib/.git/objects/ab/3a203cab4dc1a1eeb215578766610dbee30dde" />
+        <File name="cea446d4ba4a7d6b0bfc0b8d1b59be88949816" src="libs/cairlib/.git/objects/ab/cea446d4ba4a7d6b0bfc0b8d1b59be88949816" />
+        <File name="cff5d6df401b36d055ff63bbd67690d1ef7290" src="libs/cairlib/.git/objects/ab/cff5d6df401b36d055ff63bbd67690d1ef7290" />
+        <File name="498de28b6083a405a38698453d8df4a8c421cc" src="libs/cairlib/.git/objects/b8/498de28b6083a405a38698453d8df4a8c421cc" />
+        <File name="b74fcf8163944f854a44ff683c29cfedab1056" src="libs/cairlib/.git/objects/b8/b74fcf8163944f854a44ff683c29cfedab1056" />
+        <File name="c51ac655f357e3d75f8c324f93b0c2a2b5f320" src="libs/cairlib/.git/objects/b8/c51ac655f357e3d75f8c324f93b0c2a2b5f320" />
+        <File name="98056571693c92ff9e80b10e9d735f8becec50" src="libs/cairlib/.git/objects/ba/98056571693c92ff9e80b10e9d735f8becec50" />
+        <File name="689e3bf1f601351a54619ffa886ecee7fccf63" src="libs/cairlib/.git/objects/c5/689e3bf1f601351a54619ffa886ecee7fccf63" />
+        <File name="c16c66f9555e7f445466f239c165a81c22c2b7" src="libs/cairlib/.git/objects/c5/c16c66f9555e7f445466f239c165a81c22c2b7" />
+        <File name="3646f7ace8dc5f3adc0c6e8c758dbb9fb1713a" src="libs/cairlib/.git/objects/c6/3646f7ace8dc5f3adc0c6e8c758dbb9fb1713a" />
+        <File name="f2d780c420e7f995ebb446b97ccaa01450e8fe" src="libs/cairlib/.git/objects/c6/f2d780c420e7f995ebb446b97ccaa01450e8fe" />
+        <File name="9ea7b2fdacd0d684cf47566a3b6925ffa97926" src="libs/cairlib/.git/objects/c8/9ea7b2fdacd0d684cf47566a3b6925ffa97926" />
+        <File name="23a5049970ac60343185ba50665f4eb37dc0bd" src="libs/cairlib/.git/objects/cb/23a5049970ac60343185ba50665f4eb37dc0bd" />
+        <File name="75512e35d14990ba1a396ba5d6265333e8e1b3" src="libs/cairlib/.git/objects/cb/75512e35d14990ba1a396ba5d6265333e8e1b3" />
+        <File name="82edfd34e35d0e5892d219b184d0a565f59451" src="libs/cairlib/.git/objects/cb/82edfd34e35d0e5892d219b184d0a565f59451" />
+        <File name="973ff20dcf11f30d14e5f1bfba294ba8609b0a" src="libs/cairlib/.git/objects/d0/973ff20dcf11f30d14e5f1bfba294ba8609b0a" />
+        <File name="3886a58dec1e8e28744ed17cd3987604b9085d" src="libs/cairlib/.git/objects/d3/3886a58dec1e8e28744ed17cd3987604b9085d" />
+        <File name="55bbd002aa35156b6f65fcd6b7ad186a87f69c" src="libs/cairlib/.git/objects/d3/55bbd002aa35156b6f65fcd6b7ad186a87f69c" />
+        <File name="160e130bf07116d373409683b3243e4c56d21c" src="libs/cairlib/.git/objects/d9/160e130bf07116d373409683b3243e4c56d21c" />
+        <File name="7a35df37d2d65de9de4c344256469f501ea883" src="libs/cairlib/.git/objects/d9/7a35df37d2d65de9de4c344256469f501ea883" />
+        <File name="23fed4c374322d55e3feadfa160888172938f0" src="libs/cairlib/.git/objects/dc/23fed4c374322d55e3feadfa160888172938f0" />
+        <File name="ecc910054e99f552ae04110fc10165cec66e56" src="libs/cairlib/.git/objects/dc/ecc910054e99f552ae04110fc10165cec66e56" />
+        <File name="0a4c6fd049dcaad9a65a94e2f46501ec6b811d" src="libs/cairlib/.git/objects/e0/0a4c6fd049dcaad9a65a94e2f46501ec6b811d" />
+        <File name="d482da90ad6da899a4be14a8e8af595fde099e" src="libs/cairlib/.git/objects/e0/d482da90ad6da899a4be14a8e8af595fde099e" />
+        <File name="8c3bdb26a68fdf007c9704c290a6d81cafc2fc" src="libs/cairlib/.git/objects/e5/8c3bdb26a68fdf007c9704c290a6d81cafc2fc" />
+        <File name="a958c0f665049a81cda17d491ae30ca88cf30b" src="libs/cairlib/.git/objects/e5/a958c0f665049a81cda17d491ae30ca88cf30b" />
+        <File name="7995e5b32d9fbbd5e8eb6475ff3d999bee27f3" src="libs/cairlib/.git/objects/e6/7995e5b32d9fbbd5e8eb6475ff3d999bee27f3" />
+        <File name="8fb37981d9ba9bb6b2e0fc3add14dba9afdae9" src="libs/cairlib/.git/objects/e6/8fb37981d9ba9bb6b2e0fc3add14dba9afdae9" />
+        <File name="412a2381e96e03359014b97c14ce328dc62778" src="libs/cairlib/.git/objects/e9/412a2381e96e03359014b97c14ce328dc62778" />
+        <File name="b6132de83c57a29436b303868f316b0ecb1187" src="libs/cairlib/.git/objects/e9/b6132de83c57a29436b303868f316b0ecb1187" />
+        <File name="3b2a0567c6e603806a5b0d98c6ac6a710e2d9f" src="libs/cairlib/.git/objects/ec/3b2a0567c6e603806a5b0d98c6ac6a710e2d9f" />
+        <File name="7855ae1694ec75e43c090d92921c20cd145276" src="libs/cairlib/.git/objects/ec/7855ae1694ec75e43c090d92921c20cd145276" />
+        <File name="914fcd14777b1cbab0cbde5dca8b5a8cffcc42" src="libs/cairlib/.git/objects/f7/914fcd14777b1cbab0cbde5dca8b5a8cffcc42" />
+        <File name="a81bfec996160c86378eb1066da6ab2d1dd261" src="libs/cairlib/.git/objects/f7/a81bfec996160c86378eb1066da6ab2d1dd261" />
+        <File name="180c1e682aad1726bc9ff463d6eb0d82edec11" src="libs/cairlib/.git/objects/fa/180c1e682aad1726bc9ff463d6eb0d82edec11" />
+        <File name="7bcaf90467caac50c5af4f9542a83cdfff74d8" src="libs/cairlib/.git/objects/fa/7bcaf90467caac50c5af4f9542a83cdfff74d8" />
+        <File name="cc2305bd4eb34b59df71d78588651943a41dc0" src="libs/cairlib/.git/objects/fa/cc2305bd4eb34b59df71d78588651943a41dc0" />
+        <File name="589eac869174f3bf14be62b7155413ec6fbba4" src="libs/cairlib/.git/objects/ff/589eac869174f3bf14be62b7155413ec6fbba4" />
+        <File name="b071f5ff13c41d15678c5e8517dd811a3b2ff1" src="libs/cairlib/.git/objects/ff/b071f5ff13c41d15678c5e8517dd811a3b2ff1" />
+        <File name="pack-4c787ee7705a6a6d7ee49b47d4bcb22c27d05092" src="libs/cairlib/.git/objects/pack/pack-4c787ee7705a6a6d7ee49b47d4bcb22c27d05092.idx" />
+        <File name="pack-4c787ee7705a6a6d7ee49b47d4bcb22c27d05092" src="libs/cairlib/.git/objects/pack/pack-4c787ee7705a6a6d7ee49b47d4bcb22c27d05092.pack" />
+        <File name="master" src="libs/cairlib/.git/refs/heads/master" />
+        <File name="v4" src="libs/cairlib/.git/refs/heads/v4.0" />
+        <File name="HEAD" src="libs/cairlib/.git/refs/remotes/origin/HEAD" />
+        <File name="master" src="libs/cairlib/.git/refs/remotes/origin/master" />
+        <File name="v3" src="libs/cairlib/.git/refs/remotes/origin/v3.0" />
+        <File name="v4" src="libs/cairlib/.git/refs/remotes/origin/v4.0" />
+        <File name="server_130_251_13_192" src="certs/server_130_251_13_192.crt" />
     </Resources>
     <Topics />
     <IgnoredPaths />

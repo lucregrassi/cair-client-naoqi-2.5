@@ -5,7 +5,7 @@ import time
 
 
 class PersonalizationServer(object):
-    def __init__(self, logger, host="0.0.0.0", port=5000):
+    def __init__(self, logger, host="0.0.0.0", port=8000):
         super(PersonalizationServer, self).__init__()
         self.logger = logger
         self.host = host
