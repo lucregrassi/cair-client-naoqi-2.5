@@ -264,6 +264,13 @@
         <File name="version" src="libs/dotenv/version.pyc" />
         <File name="" src=".env" />
         <File name="server_130_251_13_192" src="certificates/server_130_251_13_192.crt" />
+        <File name="RICE_arborio" src="html/img/RICE_arborio.png" />
+        <File name="RICE_baldo" src="html/img/RICE_baldo.png" />
+        <File name="RICE_basmati" src="html/img/RICE_basmati.png" />
+        <File name="RICE_carnaroli" src="html/img/RICE_carnaroli.png" />
+        <File name="RICE_jasmine" src="html/img/RICE_jasmine.png" />
+        <File name="RICE_ofada" src="html/img/RICE_ofada.png" />
+        <File name="RICE_venere" src="html/img/RICE_venere.png" />
     </Resources>
     <Topics />
     <IgnoredPaths />

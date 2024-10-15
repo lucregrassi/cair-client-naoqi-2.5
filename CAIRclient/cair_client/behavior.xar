@@ -42,6 +42,7 @@ load_dotenv('/data/home/nao/.local/share/PackageManager/apps/cair_client/.env')
 
 # Access environment variables
 openai_api_key = os.getenv('OPENAI_API_KEY')
+robot_name = "baldo"
 
 dense_cap = False
 log_data = False
@@ -68,7 +69,7 @@ SILENCE_THRESHOLD = 300
 server_port = "12345"
 img_port = "12348"
 
-BASE_CAIR_hub = "http://" + server_ip + ":" + server_port + "/CAIR_hub"
+BASE_CAIR_hub = "https://" + server_ip + ":" + server_port + "/CAIR_hub"
 img_url = "http://" + server_ip + ":" + img_port + "/CAIR_dense_captioning"
 
 # If dense captioning is set to false the dense_cap_result will be sent empty to the server and the
@@ -265,7 +266,11 @@ class MyClass(GeneratedClass):
             self.logger.info("First user!")
             # This function creates the speakers_info and the speakers_sequence_stats files and initializes them
             # with the info of a generic user
-            welcome_sentence_str = self.utils.acquire_initial_state(language, openai_api_key)
+            try:
+                welcome_sentence_str = self.utils.acquire_initial_state(language, openai_api_key)
+            except Exception as e:
+                self.logger.info("Something went wrong during the acquisition of the initial state: " + str(e))
+
             # Retrieve starting nuance vectors
             with open(self.nuance_vectors_file_path) as f:
                 self.nuance_vectors = json.load(f)
@@ -313,7 +318,12 @@ class MyClass(GeneratedClass):
         encoded_data = json.dumps(data).encode('utf-8')
         compressed_data = zlib.compress(encoded_data)
         start_time = time.time()
-        hub_response = requests.post(BASE_CAIR_hub, data=compressed_data, verify=self.certificate)
+        try:
+            hub_response = requests.post(BASE_CAIR_hub, data=compressed_data, verify=self.certificate)
+        except Exception as e:
+            self.logger.info("Something went wrong during hub request: " + str(e))
+            self.onInput_onStop()
+
         end_time = time.time()
         # If the Hub cannot contact the dialogue service, the response will be empty
         if hub_response:
@@ -354,10 +364,10 @@ class MyClass(GeneratedClass):
 
         # With Pepper robot, preload the images to be set on the tablet during the conversation
         if self.tablet:
-            self.tablet_service.preLoadImage("http://" + self.tablet_service.robotIp() +
-                                             "/apps/" + app_name + "/img/QR_code.png")
-            self.tablet_service.showImage("http://" + self.tablet_service.robotIp() +
-                                          "/apps/" + app_name + "/img/QR_code.png")
+            img_path = "http://" + self.tablet_service.robotIp() + "/apps/" + app_name + "/img/RICE_" + robot_name + ".png"
+            self.logger.info("Setting tablet image from path: " + img_path)
+            self.tablet_service.preLoadImage(img_path)
+            self.tablet_service.showImage(img_path)
 
         self.logger.info("Starting personalization server in thread")
         self.personalization_server.start_server_in_thread()
@@ -366,14 +376,16 @@ class MyClass(GeneratedClass):
         self.initialize_user_session()
         self.load_conversation_state()
 
+
         prev_turn_last_speaker = ""
         prev_speaker_topic = ""
 
         try:
             if self.al.getState() != "interactive":
                 self.al.setState("interactive")
-        except:
-            pass
+        except Exception as e:
+            self.logger.info("Failed to set robot state to interactive: " + str(e))
+            self.onInput_onStop()
 
         # Wake the robot up if not already up
         self.motion.wakeUp()
@@ -478,8 +490,8 @@ class MyClass(GeneratedClass):
 
             # Initialize and start the thread that says something to fill the void while waiting
             filler_sentence_thread = threading.Thread(None, self.say_filler_sentence, args=())
-            if self.due_intervention["type"] is None:
-                filler_sentence_thread.start()
+            #if self.due_intervention["type"] is None:
+            #    filler_sentence_thread.start()
 
             sentence = sentence.replace(".", "")
             # Reset repeat to false, otherwise it will always repeat the previous sentence
@@ -556,8 +568,8 @@ class MyClass(GeneratedClass):
                 self.logger.info("Request 1 thread started")
 
                 # Wait for filler sentence thread only if there is no intervention to do
-                if self.due_intervention["type"] is None:
-                    filler_sentence_thread.join()
+                #if self.due_intervention["type"] is None:
+                #    filler_sentence_thread.join()
                 # Wait for the thread to finish
                 req1_thread.join()
                 if self.connection_lost:

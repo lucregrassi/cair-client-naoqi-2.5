@@ -9,8 +9,8 @@
     },
     "values": {
         "diversity": ["any", "good mental health", "no physical problems"],
-        "time": ["morning", "summer", "July"],
-        "place": ["maritime station", "Genoa", "Italy"],
+        "time": ["afternoon", "October", "almost Halloween"],
+        "place": ["robotics lab", "Genoa", "Italy"],
         "tone": ["humorous", "kind", "dramatic", "controversial", "aggressive", "teasing", "alarmist",
                  "worried", "neutral"],
         "positive_speech_act": ["assertive", "commissive", "expressive"],
