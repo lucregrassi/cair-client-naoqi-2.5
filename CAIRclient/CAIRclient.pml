@@ -245,7 +245,6 @@
         <File name="wsgi" src="libs/werkzeug/wsgi.py" />
         <File name="wsgi" src="libs/werkzeug/wsgi.pyc" />
         <File name="" src=".gitignore" />
-	<File name="" src=".env" />
         <File name="__init__" src="libs/dotenv/__init__.py" />
         <File name="__init__" src="libs/dotenv/__init__.pyc" />
         <File name="cli" src="libs/dotenv/cli.py" />
@@ -264,6 +263,7 @@
         <File name="version" src="libs/dotenv/version.py" />
         <File name="version" src="libs/dotenv/version.pyc" />
         <File name="" src=".env" />
+        <File name="server_130_251_13_192" src="certificates/server_130_251_13_192.crt" />
     </Resources>
     <Topics />
     <IgnoredPaths />

@@ -68,7 +68,7 @@ SILENCE_THRESHOLD = 300
 server_port = "12345"
 img_port = "12348"
 
-BASE_CAIR_hub = "http://" + server_ip + ":" + server_port + "/CAIR_hub"
+BASE_CAIR_hub = "https://" + server_ip + ":" + server_port + "/CAIR_hub"
 img_url = "http://" + server_ip + ":" + img_port + "/CAIR_dense_captioning"
 
 # If dense captioning is set to false the dense_cap_result will be sent empty to the server and the
